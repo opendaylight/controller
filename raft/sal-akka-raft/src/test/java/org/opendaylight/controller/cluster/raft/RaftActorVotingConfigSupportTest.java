@@ -14,10 +14,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.assertNoneMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.assertNoneMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.clearMessages;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.expectFirstMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.expectMatching;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 
 import com.google.common.base.Stopwatch;
@@ -104,7 +104,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             actorFactory.generateActorId(FOLLOWER_ID));
 
     private TestActorRef<MockNewFollowerRaftActor> newFollowerRaftActor;
-    private ActorRef newFollowerCollectorActor;
+    private MessageCollector newFollowerCollector;
     private RaftActorContext newFollowerActorContext;
 
     private final TestKit testKit = new TestKit(getSystem());
@@ -113,10 +113,9 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     private void setupNewFollower() {
         DefaultConfigParamsImpl configParams = newFollowerConfigParams();
 
-        newFollowerCollectorActor = actorFactory.createActor(MessageCollectorActor.props(),
-                actorFactory.generateActorId(NEW_SERVER_ID + "Collector"));
+        newFollowerCollector = MessageCollector.ofPrefix(actorFactory, NEW_SERVER_ID + "Collector");
         newFollowerRaftActor = actorFactory.createTestActor(MockNewFollowerRaftActor.props(stateDir(),
-                configParams, newFollowerCollectorActor).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                configParams, newFollowerCollector.actor()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(NEW_SERVER_ID));
 
         final var raftActor = newFollowerRaftActor.underlyingActor();

@@ -115,11 +115,11 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
 
     static class TestRaftActor extends MockRaftActor {
         private final ConcurrentHashMap<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
-        private final ActorRef collectorActor;
+        private final MessageCollector collector;
 
         TestRaftActor(final Path stateDir, final Builder builder) {
             super(stateDir, builder);
-            collectorActor = builder.collectorActor;
+            collector = builder.collector;
         }
 
         void startDropMessages(final Class<?> msgClass) {
@@ -161,7 +161,7 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
                     } finally {
                         if (!(message instanceof SendHeartBeat)) {
                             try {
-                                collectorActor.tell(message, ActorRef.noSender());
+                                collector.actor().tell(message, ActorRef.noSender());
                             } catch (Exception e) {
                                 throw new AssertionError(e);
                             }
@@ -176,8 +176,8 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
             return new MockSnapshotState(List.copyOf(getState()));
         }
 
-        ActorRef collectorActor() {
-            return collectorActor;
+        MessageCollector collector() {
+            return collector;
         }
 
         static Builder newBuilder() {
@@ -185,14 +185,14 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
         }
 
         static final class Builder extends AbstractBuilder<Builder, TestRaftActor> {
-            private ActorRef collectorActor;
+            private MessageCollector collector;
 
             private Builder() {
                 super(TestRaftActor.class);
             }
 
-            public Builder collectorActor(final ActorRef newCollectorActor) {
-                collectorActor = newCollectorActor;
+            public Builder collector(final MessageCollector newCollector) {
+                collector = newCollector;
                 return this;
             }
         }
@@ -208,19 +208,19 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
     protected String leaderId = factory.generateActorId("leader");
     protected DefaultConfigParamsImpl leaderConfigParams;
     protected TestActorRef<TestRaftActor> leaderActor;
-    protected ActorRef leaderCollectorActor;
+    protected MessageCollector leaderCollector;
     protected RaftActorContext leaderContext;
     protected RaftActorBehavior leader;
 
     protected String follower1Id = factory.generateActorId("follower");
     protected TestActorRef<TestRaftActor> follower1Actor;
-    protected ActorRef follower1CollectorActor;
+    protected MessageCollector follower1Collector;
     protected RaftActorBehavior follower1;
     protected RaftActorContext follower1Context;
 
     protected String follower2Id = factory.generateActorId("follower");
     protected TestActorRef<TestRaftActor> follower2Actor;
-    protected ActorRef follower2CollectorActor;
+    protected MessageCollector follower2Collector;
     protected RaftActorBehavior follower2;
     protected RaftActorContext follower2Context;
 
