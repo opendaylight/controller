@@ -489,7 +489,7 @@ public class Shard extends RaftActor {
             final ABIVersion selectedVersion = selectVersion(message);
             final LeaderFrontendState frontend;
             if (existing == null) {
-                frontend = new LeaderFrontendState.Enabled(memberId(), clientId, store);
+                frontend = new LeaderFrontendState(memberId(), clientId, store);
                 knownFrontends.put(clientId.getFrontendId(), frontend);
                 LOG.debug("{}: created state {} for client {}", memberId(), frontend, clientId);
             } else {
