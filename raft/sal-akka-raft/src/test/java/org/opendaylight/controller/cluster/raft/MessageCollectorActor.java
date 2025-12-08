@@ -92,11 +92,13 @@ public class MessageCollectorActor extends UntypedAbstractActor {
         return null;
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count) {
         return expectMatching(actor, clazz, count, msg -> true);
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count,
             final Predicate<T> matcher) {

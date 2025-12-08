@@ -14,6 +14,7 @@ import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceSuccess;
@@ -151,6 +152,7 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
 
     abstract void retire();
 
+    @NonNullByDefault
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
             firstReplaySequence = sequence;
@@ -159,7 +161,7 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         expectedSequence++;
     }
 
-    final <T extends TransactionSuccess<?>> T recordSuccess(final long sequence, final T success) {
+    final <T extends TransactionSuccess<?>> @NonNull T recordSuccess(final long sequence, final @NonNull T success) {
         recordResponse(sequence, success);
         return success;
     }
@@ -168,12 +170,14 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         return history.readTime() - startTime;
     }
 
+    @NonNullByDefault
     final void recordAndSendSuccess(final RequestEnvelope envelope, final long startTime,
             final TransactionSuccess<?> success) {
         recordResponse(success.getSequence(), success);
         envelope.sendSuccess(success, executionTime(startTime));
     }
 
+    @NonNullByDefault
     final void recordAndSendFailure(final RequestEnvelope envelope, final long startTime,
             final RuntimeRequestException failure) {
         recordResponse(envelope.getMessage().getSequence(), failure);
