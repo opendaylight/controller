@@ -126,7 +126,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         MockCommand payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
+        var applyStates = leaderCollector.expectMatching(ApplyState.class, 2);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload0.toString(), currentTerm, 0, payload0);
         verifyApplyState(applyStates.get(1), leaderCollectorActor, payload1.toString(), currentTerm, 1, payload1);
 
@@ -136,8 +136,8 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         verifyApplyState(applyStates.get(1), null, null, currentTerm, 1, payload1);
 
         // Ensure there's at least 1 more heartbeat.
-        MessageCollectorActor.clearMessages(leaderCollectorActor);
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, AppendEntriesReply.class);
+        leaderCollector.clearMessages();
+        leaderCollector.expectFirstMatching(AppendEntriesReply.class);
 
         // The leader should not have performed fake snapshots to trim the log because the entries have not
         // been replicated to follower 2.

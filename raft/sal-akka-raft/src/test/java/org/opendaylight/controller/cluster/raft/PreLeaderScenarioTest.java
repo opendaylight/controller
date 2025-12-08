@@ -8,9 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
@@ -31,7 +28,7 @@ import org.opendaylight.raft.api.RaftRole;
  * @author Thomas Pantelis
  */
 class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
-    private ActorRef follower1NotifierActor;
+    private MessageCollector follower1Notifier;
     private DefaultConfigParamsImpl followerConfigParams;
 
     @Test
@@ -47,7 +44,7 @@ class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         // Send a payload and verify AppendEntries is received in follower1.
         MockCommand payload0 = sendPayloadData(leaderActor, "zero");
 
-        AppendEntries appendEntries = expectFirstMatching(follower1CollectorActor, AppendEntries.class);
+        AppendEntries appendEntries = follower1Collector.expectFirstMatching(AppendEntries.class);
         assertEquals("AppendEntries - # entries", 1, appendEntries.getEntries().size());
         verifyReplicatedLogEntry(appendEntries.getEntries().get(0), currentTerm, 0, payload0);
 
@@ -65,14 +62,14 @@ class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Follower 2 journal log size", 0, follower2Context.getReplicatedLog().size());
 
         follower2Actor.underlyingActor().stopDropMessages(AppendEntries.class);
-        clearMessages(follower1NotifierActor);
+        follower1Notifier.clearMessages();
 
         // Force follower1 to start an election. It should win since it's journal is more up-to-date than
         // follower2's journal.
         follower1Actor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         // Verify the expected raft state changes. It should go to PreLeader since it has an uncommitted entry.
-        List<RoleChanged> roleChange = expectMatching(follower1NotifierActor, RoleChanged.class, 3);
+        List<RoleChanged> roleChange = follower1Notifier.expectMatching(RoleChanged.class, 3);
         assertEquals("Role change 1", RaftRole.Candidate, roleChange.get(0).newRole());
         assertEquals("Role change 2", RaftRole.PreLeader, roleChange.get(1).newRole());
         assertEquals("Role change 3", RaftRole.Leader, roleChange.get(2).newRole());
@@ -90,8 +87,8 @@ class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         verifyReplicatedLogEntry(follower1log.lookup(1), currentTerm, 1, NoopPayload.INSTANCE);
 
         // Both entries should be applied to the state.
-        expectMatching(follower1CollectorActor, ApplyState.class, 2);
-        expectMatching(follower2CollectorActor, ApplyState.class, 2);
+        follower1Collector.expectMatching(ApplyState.class, 2);
+        follower2Collector.expectMatching(ApplyState.class, 2);
 
         assertEquals("Follower 1 last applied index", 1, follower1log.getLastApplied());
 
@@ -128,15 +125,14 @@ class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
-                factory.generateActorId(follower1Id + "-notifier"));
+        follower1Notifier = MessageCollector.of(factory, follower1Id + "-notifier");
 
         followerConfigParams = newFollowerConfigParams();
         followerConfigParams.setHeartBeatInterval(Duration.ofMillis(100));
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
-                .config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
+                .config(followerConfigParams).roleChangeNotifier(follower1Notifier.actor()));
 
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);
@@ -149,19 +145,19 @@ class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         leaderConfigParams.setHeartBeatInterval(Duration.ofDays(1));
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
 
-        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
-        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
-        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1Collector = follower1Actor.underlyingActor().collector();
+        follower2Collector = follower2Actor.underlyingActor().collector();
+        leaderCollector = leaderActor.underlyingActor().collector();
 
         leaderActor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
         waitUntilLeader(leaderActor);
 
-        expectMatching(leaderCollectorActor, AppendEntriesReply.class, 2);
-        expectFirstMatching(follower1CollectorActor, AppendEntries.class);
+        leaderCollector.expectMatching(AppendEntriesReply.class, 2);
+        follower1Collector.expectFirstMatching(AppendEntries.class);
 
-        clearMessages(leaderCollectorActor);
-        clearMessages(follower1CollectorActor);
-        clearMessages(follower2CollectorActor);
+        leaderCollector.clearMessages();
+        follower1Collector.clearMessages();
+        follower2Collector.clearMessages();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
         currentTerm = leaderContext.currentTerm();

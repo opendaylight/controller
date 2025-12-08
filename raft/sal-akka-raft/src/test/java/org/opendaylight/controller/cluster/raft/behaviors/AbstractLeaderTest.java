@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
@@ -39,8 +38,8 @@ abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaft
 
         TestActorRef<ForwardMessageToBehaviorActor> leaderActor =
                 actorFactory.createTestActor(ForwardMessageToBehaviorActor.props(), leaderActorId);
-        final ActorRef follower1Actor = actorFactory.createActor(MessageCollectorActor.props(), follower1ActorId);
-        final ActorRef follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
+        final var follower1Actor = actorFactory.createActor(MessageCollectorActor.props(), follower1ActorId);
+        final var follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
 
         final var leaderActorContext = new MockRaftActorContext(leaderActorId, stateDir, getSystem(), leaderActor);
 

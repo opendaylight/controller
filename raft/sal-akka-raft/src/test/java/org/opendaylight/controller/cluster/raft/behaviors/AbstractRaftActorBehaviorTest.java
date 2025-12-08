@@ -29,6 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -52,8 +53,8 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
     final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
-    private final ActorRef behaviorActor = actorFactory.createActor(MessageCollectorActor.props(),
-        actorFactory.generateActorId("behavior"));
+    private final MessageCollector behaviorActor =
+        MessageCollector.of(getSystem(), actorFactory.generateActorId("behavior"));
 
     @TempDir
     Path stateDir;
@@ -106,11 +107,11 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
 
         behavior = createBehavior(context);
 
-        assertSame(behavior, behavior.handleMessage(behaviorActor, appendEntries));
+        assertSame(behavior, behavior.handleMessage(behaviorActor.actor(), appendEntries));
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
+        AppendEntriesReply reply = behaviorActor.expectFirstMatching(AppendEntriesReply.class);
 
         assertFalse(reply.isSuccess());
         assertEquals(5, reply.getPayloadVersion());
@@ -263,14 +264,14 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
     }
 
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
-            final ActorRef actorRef, final RaftRPC rpc) {
+            final MessageCollector collector, final RaftRPC rpc) {
 
         Payload payload = new MockCommand("");
         setLastLogEntry(actorContext, 1, 0, payload);
         actorContext.setTermInfo(new TermInfo(1, "test"));
 
         final var origBehavior = createBehavior(actorContext);
-        final var raftBehavior = assertInstanceOf(Follower.class, origBehavior.handleMessage(actorRef, rpc));
+        final var raftBehavior = assertInstanceOf(Follower.class, origBehavior.handleMessage(collector.actor(), rpc));
 
         assertEquals(rpc.getTerm(), actorContext.currentTerm());
 
