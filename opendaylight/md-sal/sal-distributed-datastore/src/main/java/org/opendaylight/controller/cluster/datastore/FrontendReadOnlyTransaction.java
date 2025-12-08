@@ -32,15 +32,10 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
 
     private final ReadOnlyShardDataTreeTransaction openTransaction;
 
-    private FrontendReadOnlyTransaction(final AbstractFrontendHistory history,
+    FrontendReadOnlyTransaction(final AbstractFrontendHistory history,
             final ReadOnlyShardDataTreeTransaction transaction) {
         super(history, transaction.getIdentifier());
         openTransaction = requireNonNull(transaction);
-    }
-
-    static FrontendReadOnlyTransaction create(final AbstractFrontendHistory history,
-            final ReadOnlyShardDataTreeTransaction transaction) {
-        return new FrontendReadOnlyTransaction(history, transaction);
     }
 
     // Sequence has already been checked

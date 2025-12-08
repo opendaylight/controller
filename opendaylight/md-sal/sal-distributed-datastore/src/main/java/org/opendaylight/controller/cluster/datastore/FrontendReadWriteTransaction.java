@@ -178,12 +178,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         state = new Sealed(mod);
     }
 
-    static FrontendReadWriteTransaction createOpen(final AbstractFrontendHistory history,
+    static @NonNull FrontendReadWriteTransaction createOpen(final AbstractFrontendHistory history,
             final ReadWriteShardDataTreeTransaction transaction) {
         return new FrontendReadWriteTransaction(history, transaction.getIdentifier(), transaction);
     }
 
-    static FrontendReadWriteTransaction createReady(final AbstractFrontendHistory history,
+    static @NonNull FrontendReadWriteTransaction createReady(final AbstractFrontendHistory history,
             final TransactionIdentifier id, final DataTreeModification mod) {
         return new FrontendReadWriteTransaction(history, id, mod);
     }

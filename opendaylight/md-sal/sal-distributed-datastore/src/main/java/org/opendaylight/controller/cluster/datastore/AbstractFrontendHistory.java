@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -43,16 +45,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract class for providing logical tracking of frontend local histories. This class is specialized for
  * standalone transactions and chained transactions.
- *
- * @author Robert Varga
  */
 abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
-    private final MutableUnsignedLongSet purgedTransactions;
-    private final String persistenceId;
-    private final ShardDataTree tree;
+    private final @NonNull MutableUnsignedLongSet purgedTransactions;
+    private final @NonNull LocalHistoryIdentifier identifier;
+    private final @NonNull TransactionParent parent;
+    private final @NonNull String persistenceId;
 
     /**
      * Transactions closed by the previous leader. Boolean indicates whether the transaction was committed (true) or
@@ -60,12 +61,19 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
      */
     private Map<UnsignedLong, Boolean> closedTransactions;
 
-    AbstractFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
+    AbstractFrontendHistory(final String persistenceId, final LocalHistoryIdentifier identifier,
+            final TransactionParent parent, final Map<UnsignedLong, Boolean> closedTransactions,
+            final MutableUnsignedLongSet purgedTransactions) {
         this.persistenceId = requireNonNull(persistenceId);
-        this.tree = requireNonNull(tree);
+        this.identifier = requireNonNull(identifier);
+        this.parent = requireNonNull(parent);
         this.closedTransactions = requireNonNull(closedTransactions);
         this.purgedTransactions = requireNonNull(purgedTransactions);
+    }
+
+    @Override
+    public final LocalHistoryIdentifier getIdentifier() {
+        return identifier;
     }
 
     final String persistenceId() {
@@ -73,7 +81,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     final long readTime() {
-        return tree.readTime();
+        return parent.dataTree.readTime();
     }
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
@@ -136,7 +144,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         // to an ImmutableMap, which does not allow remove().
         final UnsignedLong ul = UnsignedLong.fromLongBits(txidBits);
         if (closedTransactions.containsKey(ul)) {
-            tree.purgeTransaction(id, () -> {
+            parent.dataTree.purgeTransaction(id, () -> {
                 closedTransactions.remove(ul);
                 if (closedTransactions.isEmpty()) {
                     closedTransactions = ImmutableMap.of();
@@ -159,7 +167,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             return new TransactionPurgeResponse(id, request.getSequence());
         }
 
-        tree.purgeTransaction(id, () -> {
+        parent.dataTree.purgeTransaction(id, () -> {
             purgedTransactions.add(txidBits);
             transactions.remove(id);
             LOG.debug("{}: finished purging transaction {}", persistenceId, id);
@@ -199,7 +207,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             .immutableCopy();
         LOG.debug("{}: history {} skipping transactions {}", persistenceId, getIdentifier(), transactionIds.ranges());
 
-        tree.skipTransactions(getIdentifier(), transactionIds, () -> {
+        parent.dataTree.skipTransactions(getIdentifier(), transactionIds, () -> {
             purgedTransactions.addAll(transactionIds);
             envelope.sendSuccess(new TransactionPurgeResponse(first, request.getSequence()), readTime() - now);
         });
@@ -208,50 +216,52 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     final void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: closing history {}", persistenceId, getIdentifier());
-        tree.closeTransactionChain(getIdentifier(),
+        parent.dataTree.closeTransactionChain(getIdentifier(),
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
 
     final void purge(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: purging history {}", persistenceId, getIdentifier());
-        tree.purgeTransactionChain(getIdentifier(),
+        parent.dataTree.purgeTransactionChain(getIdentifier(),
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
 
     final void retire() {
         transactions.values().forEach(FrontendTransaction::retire);
-        tree.removeTransactionChain(getIdentifier());
+        parent.dataTree.removeTransactionChain(getIdentifier());
     }
 
+    @NonNullByDefault
     private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id) {
         return switch (request) {
             case CommitLocalTransactionRequest req -> {
                 LOG.debug("{}: allocating new ready transaction {}", persistenceId, id);
-                tree.getStats().incrementReadWriteTransactionCount();
-                yield createReadyTransaction(id, req.getModification());
+                parent.dataTree.getStats().incrementReadWriteTransactionCount();
+                yield FrontendReadWriteTransaction.createReady(this, id, req.getModification());
             }
             case AbstractReadTransactionRequest<?> req when req.isSnapshotOnly() -> {
                 LOG.debug("{}: allocating new open snapshot {}", persistenceId, id);
-                tree.getStats().incrementReadOnlyTransactionCount();
-                yield createOpenSnapshot(id);
+                parent.dataTree.getStats().incrementReadOnlyTransactionCount();
+                yield new FrontendReadOnlyTransaction(this, parent.newReadOnlyTransaction(id));
             }
             default -> {
                 LOG.debug("{}: allocating new open transaction {}", persistenceId, id);
-                tree.getStats().incrementReadWriteTransactionCount();
-                yield createOpenTransaction(id);
+                parent.dataTree.getStats().incrementReadWriteTransactionCount();
+                yield FrontendReadWriteTransaction.createOpen(this, parent.newReadWriteTransaction(id));
             }
         };
     }
 
-    abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id);
+    @NonNullByDefault
+    final CommitCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
+            final Exception failure) {
+        return parent.createFailedCohort(id, mod, failure);
+    }
 
-    abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id);
-
-    abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod);
-
-    abstract CommitCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod, Exception failure);
-
-    abstract CommitCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
+    @NonNullByDefault
+    final CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
+        return parent.createReadyCohort(id, mod);
+    }
 
     @Override
     public final String toString() {

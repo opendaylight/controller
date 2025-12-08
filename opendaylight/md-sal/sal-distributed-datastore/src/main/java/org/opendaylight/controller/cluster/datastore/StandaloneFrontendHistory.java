@@ -14,24 +14,18 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
  * Standalone transaction specialization of {@link AbstractFrontendHistory}. There can be multiple open transactions
  * and they are submitted in any order.
  */
 final class StandaloneFrontendHistory extends AbstractFrontendHistory {
-    private final @NonNull LocalHistoryIdentifier identifier;
-    private final @NonNull SimpleTransactionParent parent;
-
     private StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
-        super(persistenceId, tree, closedTransactions, purgedTransactions);
-        parent = tree.unorderedParent();
-        identifier = identifierForClient(clientId);
+        super(persistenceId, identifierForClient(clientId), tree.unorderedParent(), closedTransactions,
+            purgedTransactions);
     }
 
     static @NonNull LocalHistoryIdentifier identifierForClient(final ClientIdentifier clientId) {
@@ -49,36 +43,5 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
             final MutableUnsignedLongSet purgedTransactions) {
         return new StandaloneFrontendHistory(persistenceId, clientId, tree, new HashMap<>(closedTransactions),
             purgedTransactions.mutableCopy());
-    }
-
-    @Override
-    public LocalHistoryIdentifier getIdentifier() {
-        return identifier;
-    }
-
-    @Override
-    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
-        return FrontendReadOnlyTransaction.create(this, parent.newReadOnlyTransaction(id));
-    }
-
-    @Override
-    FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
-        return FrontendReadWriteTransaction.createOpen(this, parent.newReadWriteTransaction(id));
-    }
-
-    @Override
-    FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod) {
-        return FrontendReadWriteTransaction.createReady(this, id, mod);
-    }
-
-    @Override
-    CommitCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
-            final Exception failure) {
-        return parent.createFailedCohort(id, mod, failure);
-    }
-
-    @Override
-    CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
-        return parent.createReadyCohort(id, mod);
     }
 }

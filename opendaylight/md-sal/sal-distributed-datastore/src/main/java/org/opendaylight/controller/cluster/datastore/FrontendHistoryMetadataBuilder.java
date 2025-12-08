@@ -88,7 +88,7 @@ final class FrontendHistoryMetadataBuilder implements Identifiable<LocalHistoryI
                 shard.getDataStore(), closedTransactions, purgedTransactions);
         }
 
-        return LocalFrontendHistory.recreate(shard.memberId(), shard.getDataStore(),
+        return LocalFrontendHistory.recreate(shard.memberId(),
             shard.getDataStore().recreateChainedParent(identifier, closed), closedTransactions, purgedTransactions);
     }
 }
