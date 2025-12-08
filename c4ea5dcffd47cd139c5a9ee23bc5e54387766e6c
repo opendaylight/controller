@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "306c4ae5_f7b1860d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-12-08T21:00:01Z",
+      "side": 1,
+      "message": "this is being reworked in https://git.opendaylight.org/gerrit/c/controller/+/119722",
+      "revId": "c4ea5dcffd47cd139c5a9ee23bc5e54387766e6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
