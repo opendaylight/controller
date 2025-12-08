@@ -24,6 +24,7 @@ import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -92,11 +93,13 @@ public class MessageCollectorActor extends UntypedAbstractActor {
         return null;
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count) {
         return expectMatching(actor, clazz, count, msg -> true);
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count,
             final Predicate<T> matcher) {
