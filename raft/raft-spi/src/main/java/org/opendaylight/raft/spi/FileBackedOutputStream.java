@@ -138,7 +138,7 @@ public class FileBackedOutputStream extends OutputStream {
     // For un-synchronized access to count/buffer
     @NonNullByDefault
     private static final class MemoryStream extends ByteArrayOutputStream {
-        public void transferTo(final OutputStream out) throws IOException {
+        void transferTo(final OutputStream out) throws IOException {
             out.write(buf, 0, count);
             out.flush();
         }
