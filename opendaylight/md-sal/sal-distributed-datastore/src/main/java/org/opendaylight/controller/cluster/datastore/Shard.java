@@ -339,7 +339,7 @@ public class Shard extends RaftActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void handleRequestEnvelope(final RequestEnvelope envelope) {
+    private void handleRequestEnvelope(final @NonNull RequestEnvelope envelope) {
         final long now = ticker().read();
         try {
             final RequestSuccess<?, ?> success = handleRequest(envelope, now);
@@ -499,7 +499,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
+    private @Nullable RequestSuccess<?, ?> handleRequest(final @NonNull RequestEnvelope envelope, final long now)
             throws RequestException {
         // We are not the leader, hence we want to fail-fast.
         if (!isLeader() || paused || !isLeaderActive()) {
