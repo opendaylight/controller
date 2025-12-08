@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -45,8 +47,11 @@ abstract class TransactionParent {
         final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
 
-        final var cohort = new SimpleCommitCohort(transaction, failure);
+        final var cohort = new CommitCohort(transaction, failure);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
+
+    abstract @NonNull FutureCallback<UnsignedLong> wrapCommitCallback(
+        @NonNull ReadWriteShardDataTreeTransaction transaction, @NonNull FutureCallback<UnsignedLong> callback);
 }

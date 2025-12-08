@@ -11,6 +11,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -80,7 +82,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    ChainedCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    CommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding",
                 transaction);
 
@@ -91,7 +93,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
+    CommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
@@ -101,11 +103,11 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @NonNullByDefault
-    private ChainedCommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
+    private CommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
             final CompositeDataTreeCohort userCohorts) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new ChainedCommitCohort(transaction, userCohorts);
+        final var cohort = new CommitCohort(transaction, userCohorts);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -123,10 +125,25 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
         return previousTx.getSnapshot();
     }
 
-    void clearTransaction(final ReadWriteShardDataTreeTransaction transaction) {
-        if (transaction.equals(previousTx)) {
-            previousTx = null;
-        }
+    @Override
+    FutureCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
+            final FutureCallback<UnsignedLong> callback) {
+        return new FutureCallback<>() {
+            @Override
+            public void onSuccess(final UnsignedLong result) {
+                if (transaction.equals(previousTx)) {
+                    previousTx = null;
+                }
+                LOG.debug("Committed transaction {}", transaction);
+                callback.onSuccess(result);
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                LOG.error("Transaction {} commit failed, cannot recover", transaction, failure);
+                callback.onFailure(failure);
+            }
+        };
     }
 
     @Override
