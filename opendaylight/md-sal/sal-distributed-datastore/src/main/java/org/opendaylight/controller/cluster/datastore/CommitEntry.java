@@ -32,7 +32,7 @@ final class CommitEntry {
     /**
      * A ready transaction, which is pending a {@code canCommit} phase start.
      */
-    record Ready(CompositeDataTreeCohort userCohorts) implements Stage {
+    record Ready(UserCohorts userCohorts) implements Stage {
         Ready {
             requireNonNull(userCohorts);
         }
@@ -45,7 +45,7 @@ final class CommitEntry {
     /**
      * A transaction pending a {@code canCommit} phase result.
      */
-    record CanCommitPending(CompositeDataTreeCohort userCohorts, FutureCallback<Empty> callback) implements Stage {
+    record CanCommitPending(UserCohorts userCohorts, FutureCallback<Empty> callback) implements Stage {
         CanCommitPending {
             requireNonNull(userCohorts);
             requireNonNull(callback);
@@ -59,7 +59,7 @@ final class CommitEntry {
     /**
      * A transaction that has completed {@canCommit} successfully and is pending {@code preCommit} phase start.
      */
-    record CanCommitComplete(CompositeDataTreeCohort userCohorts, DataTreeTip tip) implements Stage {
+    record CanCommitComplete(UserCohorts userCohorts, DataTreeTip tip) implements Stage {
         CanCommitComplete {
             requireNonNull(userCohorts);
             requireNonNull(tip);
@@ -78,7 +78,7 @@ final class CommitEntry {
      * A transaction pending a {@preCommit} phase result.
      */
     record PreCommitPending(
-            CompositeDataTreeCohort userCohorts,
+            UserCohorts userCohorts,
             DataTreeTip tip,
             FutureCallback<DataTreeCandidate> callback) implements Stage {
         PreCommitPending {
