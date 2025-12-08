@@ -45,7 +45,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private DataTreeModification mockModification;
     @Mock
-    private CompositeDataTreeCohort mockUserCohorts;
+    private UserCohorts mockUserCohorts;
     @Mock
     private FutureCallback<DataTreeCandidate> mockPreCallback;
     @Mock

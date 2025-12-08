@@ -10,18 +10,15 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
-import org.apache.pekko.util.Timeout;
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
@@ -40,11 +37,10 @@ import org.slf4j.LoggerFactory;
  * Registry of user commit cohorts, which is responsible for handling registration and calculation
  * of affected cohorts based on {@link DataTreeCandidate}. This class is NOT thread-safe.
  */
-class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
-
+final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActorRegistry.class);
 
-    private final Map<ActorRef, Node<ActorRef>> cohortToNode = new HashMap<>();
+    private final HashMap<ActorRef, Node<ActorRef>> cohortToNode = new HashMap<>();
 
     List<ActorRef> getCohortActors() {
         return List.copyOf(cohortToNode.keySet());
@@ -124,10 +120,10 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
     }
 
-    private static class CanCommitMessageBuilder {
-        private final Multimap<ActorRef, DOMDataTreeCandidate> actorToCandidates = ArrayListMultimap.create();
-        private final TransactionIdentifier txId;
-        private final DataTreeCandidate candidate;
+    private static final class CanCommitMessageBuilder {
+        private final ArrayListMultimap<ActorRef, DOMDataTreeCandidate> actorToCandidates = ArrayListMultimap.create();
+        private final @NonNull TransactionIdentifier txId;
+        private final @NonNull DataTreeCandidate candidate;
         private final EffectiveModelContext schema;
 
         CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate,
@@ -203,11 +199,5 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
             return messages;
         }
-    }
-
-    @NonNullByDefault
-    CompositeDataTreeCohort createCohort(final EffectiveModelContext schemaContext, final TransactionIdentifier txId,
-            final Executor callbackExecutor, final Timeout commitStepTimeout) {
-        return new CompositeDataTreeCohort(this, txId, schemaContext, callbackExecutor, commitStepTimeout);
     }
 }
