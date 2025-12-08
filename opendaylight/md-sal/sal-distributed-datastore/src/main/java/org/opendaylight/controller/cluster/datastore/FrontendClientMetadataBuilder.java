@@ -107,8 +107,8 @@ final class FrontendClientMetadataBuilder {
             singleHistory = singleHistoryMeta.toLeaderState(shard);
         }
 
-        return new LeaderFrontendState.Enabled(shard.memberId(), clientId, shard.getDataStore(),
-            purgedHistories.mutableCopy(), singleHistory, histories);
+        return new LeaderFrontendState(shard.memberId(), clientId, shard.getDataStore(), purgedHistories.mutableCopy(),
+            singleHistory, histories);
     }
 
     void onHistoryCreated(final LocalHistoryIdentifier historyId) {
