@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,19 +19,19 @@ import org.slf4j.LoggerFactory;
 final class ChainedCommitCohort extends CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedCommitCohort.class);
 
-    private final ReadWriteShardDataTreeTransaction transaction;
-    private final ChainedTransactionParent parent;
+    private final @NonNull ReadWriteShardDataTreeTransaction transaction;
 
     @NonNullByDefault
-    ChainedCommitCohort(final ShardDataTree dataTree, final ChainedTransactionParent parent,
-            final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
+    ChainedCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
+            final CompositeDataTreeCohort userCohorts) {
         super(dataTree, transaction, userCohorts);
         this.transaction = requireNonNull(transaction);
-        this.parent = requireNonNull(parent);
     }
 
     @Override
     public void commit(final FutureCallback<UnsignedLong> callback) {
+        final var parent = (ChainedTransactionParent) transaction.getParent();
+
         super.commit(new FutureCallback<>() {
             @Override
             public void onSuccess(final UnsignedLong result) {

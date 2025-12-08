@@ -115,7 +115,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
             final CompositeDataTreeCohort userCohorts) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts);
+        final var cohort = new ChainedCommitCohort(dataTree, transaction, userCohorts);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -133,14 +133,14 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
         return previousTx.getSnapshot();
     }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this).add("id", chainId).toString();
-    }
-
     void clearTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         if (transaction.equals(previousTx)) {
             previousTx = null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("id", chainId).toString();
     }
 }
