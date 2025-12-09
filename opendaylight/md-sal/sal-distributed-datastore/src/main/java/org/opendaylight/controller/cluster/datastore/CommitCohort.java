@@ -101,10 +101,6 @@ final class CommitCohort {
 
     // FIXME: Should return rebased DataTreeCandidateTip
     void canCommit(final FutureCallback<Empty> newCallback) {
-        if (state == State.CAN_COMMIT_PENDING) {
-            return;
-        }
-
         checkState(State.READY);
         callback = requireNonNull(newCallback);
         state = State.CAN_COMMIT_PENDING;
