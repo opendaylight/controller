@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class CommitCohort {
+
     public enum State {
         READY,
         CAN_COMMIT_PENDING,
@@ -35,6 +36,127 @@ final class CommitCohort {
         ABORTED,
         COMMITTED,
         FAILED,
+    }
+
+    @NonNullByDefault
+    sealed interface Stage {
+
+        State state();
+    }
+
+    @NonNullByDefault
+    record Ready(UserCohorts userCohorts) implements Stage {
+        Ready {
+            requireNonNull(userCohorts);
+        }
+
+        @Override
+        public State state() {
+            return State.READY;
+        }
+    }
+
+    @NonNullByDefault
+    record CanCommitPending(UserCohorts userCohorts, FutureCallback<Empty> callback) implements Stage {
+        CanCommitPending {
+            requireNonNull(userCohorts);
+            requireNonNull(callback);
+        }
+
+        @Override
+        public State state() {
+            return State.CAN_COMMIT_PENDING;
+        }
+    }
+
+    @NonNullByDefault
+    record CanCommitComplete(UserCohorts userCohorts) implements Stage {
+        CanCommitComplete {
+            requireNonNull(userCohorts);
+        }
+
+        @Override
+        public State state() {
+            return State.CAN_COMMIT_COMPLETE;
+        }
+    }
+
+    @NonNullByDefault
+    record PreCommitPending(UserCohorts userCohorts, FutureCallback<DataTreeCandidate> callback) implements Stage {
+        PreCommitPending {
+            requireNonNull(userCohorts);
+            requireNonNull(callback);
+        }
+
+        @Override
+        public State state() {
+            return State.PRE_COMMIT_PENDING;
+        }
+    }
+
+    @NonNullByDefault
+    record PreCommitComplete(UserCohorts userCohorts) implements Stage {
+        PreCommitComplete {
+            requireNonNull(userCohorts);
+        }
+
+        @Override
+        public State state() {
+            return State.PRE_COMMIT_COMPLETE;
+        }
+    }
+
+    @NonNullByDefault
+    record CommitPending(UserCohorts userCohorts, FutureCallback<UnsignedLong> callback) implements Stage {
+        CommitPending {
+            requireNonNull(userCohorts);
+            requireNonNull(callback);
+        }
+
+        @Override
+        public State state() {
+            return State.COMMIT_PENDING;
+        }
+    }
+
+    @NonNullByDefault
+    static final class Aborted implements Stage {
+        static final Aborted INSTANCE = new Aborted();
+
+        private Aborted() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public State state() {
+            return State.ABORTED;
+        }
+    }
+
+    @NonNullByDefault
+    static final class Committed implements Stage {
+        static final Committed INSTANCE = new Committed();
+
+        private Committed() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public State state() {
+            return State.COMMITTED;
+        }
+    }
+
+    @NonNullByDefault
+    record Failed(Exception cause) implements Stage {
+        Failed {
+            requireNonNull(cause);
+        }
+
+        @Override
+        public State state() {
+            return State.FAILED;
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
