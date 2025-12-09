@@ -722,12 +722,12 @@ public class ShardDataTree {
         return takeSnapshot().readNode(path);
     }
 
-    final DataTreeSnapshot takeSnapshot() {
+    final @NonNull DataTreeSnapshot takeSnapshot() {
         return dataTree.takeSnapshot();
     }
 
     @VisibleForTesting
-    final DataTreeModification newModification() {
+    final @NonNull DataTreeModification newModification() {
         return takeSnapshot().newModification();
     }
 
