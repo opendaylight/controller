@@ -687,19 +687,35 @@ public class ShardDataTree {
         return pendingTransactions.size() + pendingCommits.size() + pendingFinishCommits.size();
     }
 
-    final void enqueueReadyTransaction(final @NonNull CommitCohort cohort) {
-        cohort.setLastAccess(readTime());
-        pendingTransactions.add(cohort);
-    }
-
     @NonNullByDefault
-    final UserCohorts finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    final CommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final var snapshot = transaction.getSnapshot();
         final var txId = transaction.getIdentifier();
         LOG.debug("{}: readying transaction {}", logContext, txId);
         snapshot.ready();
         LOG.debug("{}: transaction {} ready", logContext, txId);
-        return newUserCohorts(txId);
+
+        return enqueueReadyTransaction(transaction);
+    }
+
+    @NonNullByDefault
+    final CommitCohort enqueueReadyTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+        final var cohort = new CommitCohort(transaction, newUserCohorts(transaction.getIdentifier()));
+        enqueueCohort(cohort);
+        return cohort;
+    }
+
+    @NonNullByDefault
+    final CommitCohort enqueueFailedTransaction(final ReadWriteShardDataTreeTransaction transaction,
+            final Exception failure) {
+        final var cohort = new CommitCohort(transaction, failure);
+        enqueueCohort(cohort);
+        return cohort;
+    }
+
+    private void enqueueCohort(final @NonNull CommitCohort cohort) {
+        cohort.setLastAccess(readTime());
+        pendingTransactions.add(cohort);
     }
 
     @NonNullByDefault

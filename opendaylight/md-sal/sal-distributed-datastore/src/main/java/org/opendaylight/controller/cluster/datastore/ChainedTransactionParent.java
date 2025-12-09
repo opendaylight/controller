@@ -81,9 +81,9 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
                 transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next transaction in chain
-        final var userCohorts = dataTree.finishTransaction(transaction);
-        openTransaction = null;
-        return createReadyCohort(transaction, userCohorts);
+        final var cohort = dataTree.finishTransaction(transaction);
+        recordTransaction(transaction);
+        return cohort;
     }
 
     @Override
@@ -91,19 +91,16 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
-        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
-        transaction.close();
-        return createReadyCohort(transaction, dataTree.newUserCohorts(txId));
+        final var transaction = ReadWriteShardDataTreeTransaction.closedOf(this, txId, mod);
+        final var cohort = dataTree.enqueueReadyTransaction(transaction);
+        recordTransaction(transaction);
+        return cohort;
     }
 
     @NonNullByDefault
-    private CommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
-            final UserCohorts userCohorts) {
+    private void recordTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new CommitCohort(transaction, userCohorts);
-        dataTree.enqueueReadyTransaction(cohort);
-        return cohort;
     }
 
     private DataTreeSnapshot getSnapshot() {

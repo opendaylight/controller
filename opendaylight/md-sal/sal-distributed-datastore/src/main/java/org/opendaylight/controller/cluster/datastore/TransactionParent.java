@@ -48,12 +48,7 @@ abstract class TransactionParent {
     @NonNullByDefault
     final CommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
-        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
-        transaction.close();
-
-        final var cohort = new CommitCohort(transaction, failure);
-        dataTree.enqueueReadyTransaction(cohort);
-        return cohort;
+        return dataTree.enqueueFailedTransaction(ReadWriteShardDataTreeTransaction.closedOf(this, txId, mod), failure);
     }
 
     abstract @NonNull FutureCallback<UnsignedLong> wrapCommitCallback(
