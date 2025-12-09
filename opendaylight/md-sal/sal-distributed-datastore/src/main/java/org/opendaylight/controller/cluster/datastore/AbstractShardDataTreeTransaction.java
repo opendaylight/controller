@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
@@ -29,8 +30,8 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
 
     private boolean closed;
 
-    AbstractShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id,
-        final T snapshot) {
+    @NonNullByDefault
+    AbstractShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id, final T snapshot) {
         this.parent = requireNonNull(parent);
         this.snapshot = requireNonNull(snapshot);
         this.id = requireNonNull(id);

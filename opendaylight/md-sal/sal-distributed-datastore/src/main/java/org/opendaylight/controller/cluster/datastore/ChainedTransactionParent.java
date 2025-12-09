@@ -91,9 +91,8 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
-        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
-        transaction.close();
-        return createReadyCohort(transaction, dataTree.newUserCohorts(txId));
+        return createReadyCohort(ReadWriteShardDataTreeTransaction.closedOf(this, txId, mod),
+            dataTree.newUserCohorts(txId));
     }
 
     @NonNullByDefault

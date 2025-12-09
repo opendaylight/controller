@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
 final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
+    @NonNullByDefault
     ReadOnlyShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id,
             final DataTreeSnapshot snapshot) {
         super(parent, id, snapshot);

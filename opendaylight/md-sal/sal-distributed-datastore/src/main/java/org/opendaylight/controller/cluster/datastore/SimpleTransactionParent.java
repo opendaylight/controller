@@ -43,10 +43,8 @@ final class SimpleTransactionParent extends TransactionParent {
 
     @Override
     CommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
-        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
-        transaction.close();
-
-        final var cohort = new CommitCohort(transaction, dataTree.newUserCohorts(txId));
+        final var cohort = new CommitCohort(ReadWriteShardDataTreeTransaction.closedOf(this, txId, mod),
+            dataTree.newUserCohorts(txId));
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
