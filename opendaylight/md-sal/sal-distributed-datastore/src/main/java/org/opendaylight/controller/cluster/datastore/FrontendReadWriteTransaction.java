@@ -526,10 +526,21 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new CoordinatedCanCommitCallback(this, envelope, now));
+                canCommit(ready.readyCohort, new CoordinatedCanCommitCallback(this, envelope, now));
             }
             default -> throw new IllegalStateException("Attempted to canCommit in stage " + ready.stage);
         }
+    }
+
+    @NonNullByDefault
+    private static void canCommit(final CommitCohort cohort, final FutureCallback<Empty> callback) {
+        final var failure = cohort.switchState(CommitCohort.State.READY, CommitCohort.State.CAN_COMMIT_PENDING);
+        if (failure != null) {
+            callback.onFailure(failure);
+            return;
+        }
+
+        cohort.canCommit(callback);
     }
 
     private void successfulCanCommit(final RequestEnvelope envelope, final long startTime) {
@@ -555,7 +566,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new DirectCanCommitCallback(this, envelope, now));
+                canCommit(ready.readyCohort, new DirectCanCommitCallback(this, envelope, now));
             }
             default ->
                 LOG.debug("{}: Transaction {} in state {}, not initiating direct commit for {}", persistenceId(),

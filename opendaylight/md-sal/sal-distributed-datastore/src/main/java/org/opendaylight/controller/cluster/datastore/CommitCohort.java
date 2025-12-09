@@ -15,6 +15,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -95,8 +96,21 @@ final class CommitCohort {
         return transaction.getSnapshot();
     }
 
-    private @NonNull ShardDataTree dataTree() {
+    @NonNull ShardDataTree dataTree() {
         return transaction.getParent().dataTree;
+    }
+
+    @Nullable Exception switchState(final State fromState, final State toState) {
+        final var nextState = requireNonNull(toState);
+        checkState(requireNonNull(fromState));
+        if (nextFailure == null) {
+            state = nextState;
+            return null;
+        }
+
+        state = State.FAILED;
+        dataTree().getStats().incrementFailedTransactionsCount();
+        return nextFailure;
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
