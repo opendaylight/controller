@@ -50,10 +50,7 @@ abstract class TransactionParent {
             final Exception failure) {
         final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
-
-        final var cohort = new CommitCohort(transaction, failure);
-        dataTree.enqueueReadyTransaction(cohort);
-        return cohort;
+        return dataTree.enqueueFailedTransaction(transaction, failure);
     }
 
     abstract @NonNull FutureCallback<UnsignedLong> wrapCommitCallback(
