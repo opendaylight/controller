@@ -14,9 +14,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -25,6 +23,7 @@ import org.apache.pekko.dispatch.OnComplete;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
@@ -36,12 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener> extends AbstractObjectRegistration<L> {
-    private abstract static class State {
-
+    private abstract static sealed class State {
+        // Marker
     }
 
     private static final class ResolveShards extends State {
-        final Map<String, Object> localShards = new HashMap<>();
+        final HashMap<String, Object> localShards = new HashMap<>();
         final int shardCount;
 
         ResolveShards(final int shardCount) {
@@ -50,8 +49,8 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
     }
 
     private static final class Subscribed extends State {
-        final List<ActorSelection> subscriptions;
-        final ActorRef dtclActor;
+        final @NonNull ArrayList<ActorSelection> subscriptions;
+        final @NonNull ActorRef dtclActor;
 
         Subscribed(final ActorRef dtclActor, final int shardCount) {
             this.dtclActor = requireNonNull(dtclActor);
@@ -59,8 +58,13 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
+    @NonNullByDefault
     private static final class Terminated extends State {
+        static final Terminated INSTANCE = new Terminated();
 
+        private Terminated() {
+            // Hidden on purpose
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(RootDataTreeChangeListenerProxy.class);
@@ -76,7 +80,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         this.actorUtils = requireNonNull(actorUtils);
         state = new ResolveShards(shardNames.size());
 
-        for (String shardName : shardNames) {
+        for (var shardName : shardNames) {
             actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<ActorRef>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef success) {
@@ -88,15 +92,15 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
     @Override
     protected synchronized void removeRegistration() {
-        if (state instanceof Terminated) {
-            // Trivial case: we have already terminated on a failure, so this is a no-op
-        } else if (state instanceof ResolveShards) {
-            // Simple case: just mark the fact we were closed, terminating when resolution finishes
-            state = new Terminated();
-        } else if (state instanceof Subscribed subscribed) {
-            terminate(subscribed);
-        } else {
-            throw new IllegalStateException("Unhandled close in state " + state);
+        switch (state) {
+            case Terminated terminated -> {
+                // Trivial case: we have already terminated on a failure, so this is a no-op
+            }
+            case ResolveShards resolvePaths -> {
+                // Simple case: just mark the fact we were closed, terminating when resolution finishes
+                state = Terminated.INSTANCE;
+            }
+            case Subscribed subscribed -> terminate(subscribed);
         }
     }
 
@@ -128,35 +132,34 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
     @Holding("this")
     private void reportFailure(final Map<String, Object> localShards) {
-        for (Entry<String, Object> entry : Maps.filterValues(localShards, Throwable.class::isInstance).entrySet()) {
-            final Throwable cause = (Throwable) entry.getValue();
+        for (var entry : Maps.filterValues(localShards, Throwable.class::isInstance).entrySet()) {
+            final var cause = (Throwable) entry.getValue();
             LOG.error("{}: Failed to find local shard {}, cannot register {} at root", logContext(), entry.getKey(),
                 getInstance(), cause);
         }
-        state = new Terminated();
+        state = Terminated.INSTANCE;
     }
 
     @Holding("this")
     private void subscribeToShards(final Map<String, Object> localShards) {
         // Safety check before we start doing anything
-        for (Entry<String, Object> entry : localShards.entrySet()) {
-            final Object obj = entry.getValue();
+        for (var entry : localShards.entrySet()) {
+            final var obj = entry.getValue();
             verify(obj instanceof ActorRef, "Unhandled response %s for shard %s", obj, entry.getKey());
         }
 
         // Instantiate the DTCL actor and update state
-        final ActorRef dtclActor = actorUtils.getActorSystem().actorOf(
+        final var dtclActor = actorUtils.getActorSystem().actorOf(
             RootDataTreeChangeListenerActor.props(getInstance(), localShards.size())
               .withDispatcher(actorUtils.getNotificationDispatcherPath()));
         state = new Subscribed(dtclActor, localShards.size());
 
         // Subscribe to all shards
-        final RegisterDataTreeChangeListener regMessage = new RegisterDataTreeChangeListener(
-            YangInstanceIdentifier.of(), dtclActor, true);
-        for (Entry<String, Object> entry : localShards.entrySet()) {
+        final var regMessage = new RegisterDataTreeChangeListener(YangInstanceIdentifier.of(), dtclActor, true);
+        for (var entry : localShards.entrySet()) {
             // Do not retain references to localShards
-            final String shardName = entry.getKey();
-            final ActorRef shard = (ActorRef) entry.getValue();
+            final var shardName = entry.getKey();
+            final var shard = (ActorRef) entry.getValue();
 
             actorUtils.executeOperationAsync(shard, regMessage,
                 actorUtils.getDatastoreContext().getShardInitializationTimeout()).onComplete(new OnComplete<>() {
@@ -185,7 +188,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
     @Holding("this")
     private void onSuccessfulSubscription(final Subscribed current, final String shardName,
             final RegisterDataTreeNotificationListenerReply reply) {
-        final ActorSelection regActor = actorUtils.actorSelection(reply.getListenerRegistrationPath());
+        final var regActor = actorUtils.actorSelection(reply.getListenerRegistrationPath());
         LOG.debug("{}: Shard {} subscribed at {}", logContext(), shardName, regActor);
         current.subscriptions.add(regActor);
     }
@@ -195,23 +198,23 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         // Terminate the listener
         current.dtclActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         // Terminate all subscriptions
-        for (ActorSelection regActor : current.subscriptions) {
+        for (var regActor : current.subscriptions) {
             regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
         }
-        state = new Terminated();
+        state = Terminated.INSTANCE;
     }
 
     // This method should not modify internal state
     private void terminateSubscription(final String shardName, final Throwable failure, final Object result) {
-        if (failure == null) {
-            final ActorSelection regActor = actorUtils.actorSelection(
-                ((RegisterDataTreeNotificationListenerReply) result).getListenerRegistrationPath());
-            LOG.debug("{}: Shard {} registered late, terminating subscription at {}", logContext(), shardName,
-                regActor);
-            regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
-        } else {
+        if (failure != null) {
             LOG.debug("{}: Shard {} reported late failure", logContext(), shardName, failure);
+            return;
         }
+
+        final var regActor = actorUtils.actorSelection(
+            ((RegisterDataTreeNotificationListenerReply) result).getListenerRegistrationPath());
+        LOG.debug("{}: Shard {} registered late, terminating subscription at {}", logContext(), shardName, regActor);
+        regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
     }
 
     private String logContext() {
