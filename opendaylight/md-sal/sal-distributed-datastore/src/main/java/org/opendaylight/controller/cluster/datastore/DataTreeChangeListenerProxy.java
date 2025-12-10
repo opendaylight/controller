@@ -52,11 +52,11 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
         this.actorUtils = requireNonNull(actorUtils);
         this.registeredPath = requireNonNull(registeredPath);
         this.clustered = clustered;
-        dataChangeListenerActor = actorUtils.getActorSystem().actorOf(
-                DataTreeChangeListenerActor.props(getInstance(), registeredPath)
-                    .withDispatcher(actorUtils.getNotificationDispatcherPath()));
+        dataChangeListenerActor = actorUtils.getActorSystem()
+            .actorOf(DataTreeChangeListenerActor.props(getInstance(), registeredPath)
+                .withDispatcher(actorUtils.getNotificationDispatcherPath()));
         LOG.debug("{}: Created actor {} for DTCL {}", actorUtils.getDatastoreContext().getLogicalStoreType(),
-                dataChangeListenerActor, listener);
+            dataChangeListenerActor, listener);
     }
 
     static @NonNull DataTreeChangeListenerProxy of(final ActorUtils actorUtils,
@@ -75,14 +75,17 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
             actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shard) {
+                    if (failure == null) {
+                        ret.doRegistration(shard);
+                        return;
+                    }
+
                     if (failure instanceof LocalShardNotFoundException) {
                         LOG.debug("{}: No local shard found for {} - DataTreeChangeListener {} at path {} cannot be "
                             + "registered", ret.logContext(), shardName, listener, registeredPath);
-                    } else if (failure != null) {
+                    } else {
                         LOG.error("{}: Failed to find local shard {} - DataTreeChangeListener {} at path {} cannot be "
                             + "registered", ret.logContext(), shardName, listener, registeredPath, failure);
-                    } else {
-                        ret.doRegistration(shard);
                     }
                 }
             }, actorUtils.getClientDispatcher());
