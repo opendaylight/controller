@@ -234,21 +234,22 @@ class UserCohorts {
 
         LOG.debug("{}: processResponses - successful: {}, failed: {}", txId, successful, failed);
 
-        if (!failed.isEmpty()) {
-            changeStateFrom(currentState, State.FAILED);
-            final var it = failed.iterator();
-            final var firstEx = it.next().cause();
-            while (it.hasNext()) {
-                firstEx.addSuppressed(it.next().cause());
-            }
-
-            successfulFromPrevious = List.of();
-            resultFuture.completeExceptionally(firstEx);
-        } else {
+        if (failed.isEmpty()) {
             successfulFromPrevious = successful;
             changeStateFrom(currentState, afterState);
             resultFuture.complete(Empty.value());
+            return;
         }
+
+        changeStateFrom(currentState, State.FAILED);
+        final var it = failed.iterator();
+        final var firstEx = it.next().cause();
+        while (it.hasNext()) {
+            firstEx.addSuppressed(it.next().cause());
+        }
+
+        successfulFromPrevious = List.of();
+        resultFuture.completeExceptionally(firstEx);
     }
 
     void changeStateFrom(final State expected, final State followup) {
