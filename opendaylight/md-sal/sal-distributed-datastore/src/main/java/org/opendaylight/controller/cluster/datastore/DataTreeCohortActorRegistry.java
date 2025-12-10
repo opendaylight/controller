@@ -10,11 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ArrayListMultimap;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
@@ -81,15 +80,14 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
-    void process(final ActorRef sender, final CohortRegistryCommand message) {
-        if (message instanceof RegisterCohort) {
-            registerCohort(sender, (RegisterCohort) message);
-        } else if (message instanceof RemoveCohort) {
-            removeCommitCohort(sender, (RemoveCohort) message);
+    void process(final ActorRef sender, final @NonNull CohortRegistryCommand message) {
+        switch (message) {
+            case RegisterCohort register -> registerCohort(sender, register);
+            case RemoveCohort remove -> removeCommitCohort(sender, remove);
         }
     }
 
-    abstract static class CohortRegistryCommand {
+    abstract static sealed class CohortRegistryCommand {
         private final ActorRef cohort;
 
         CohortRegistryCommand(final ActorRef cohort) {
@@ -101,7 +99,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
-    static class RegisterCohort extends CohortRegistryCommand {
+    static final class RegisterCohort extends CohortRegistryCommand {
         private final DOMDataTreeIdentifier path;
 
         RegisterCohort(final DOMDataTreeIdentifier path, final ActorRef cohort) {
@@ -114,7 +112,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
-    static class RemoveCohort extends CohortRegistryCommand {
+    static final class RemoveCohort extends CohortRegistryCommand {
         RemoveCohort(final ActorRef cohort) {
             super(cohort);
         }
@@ -191,13 +189,9 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
             final var toLookup = candidate.getRootPath().getPathArguments();
             lookupAndCreateCanCommits(toLookup, 0, rootNode);
 
-            final Map<ActorRef, Collection<DOMDataTreeCandidate>> mapView = actorToCandidates.asMap();
-            final List<DataTreeCohortActor.CanCommit> messages = new ArrayList<>(mapView.size());
-            for (Map.Entry<ActorRef, Collection<DOMDataTreeCandidate>> entry: mapView.entrySet()) {
-                messages.add(new DataTreeCohortActor.CanCommit(txId, entry.getValue(), schema, entry.getKey()));
-            }
-
-            return messages;
+            return actorToCandidates.asMap().entrySet().stream()
+                .map(entry -> new DataTreeCohortActor.CanCommit(txId, entry.getValue(), schema, entry.getKey()))
+                .collect(Collectors.toUnmodifiableList());
         }
     }
 }
