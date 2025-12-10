@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -14,7 +16,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
@@ -42,8 +43,8 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     private final Map<TransactionIdentifier, CohortBehaviour<?, ?>> currentStateMap = new HashMap<>();
 
     private DataTreeCohortActor(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
-        this.cohort = Objects.requireNonNull(cohort);
-        this.registeredPath = Objects.requireNonNull(registeredPath);
+        this.cohort = requireNonNull(cohort);
+        this.registeredPath = requireNonNull(registeredPath);
     }
 
     @Override
@@ -54,16 +55,14 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(final Object message) {
-        if (!(message instanceof CommitProtocolCommand)) {
+        if (!(message instanceof CommitProtocolCommand<?> command)) {
             unknownMessage(message);
             return;
         }
 
-        CommitProtocolCommand<?> command = (CommitProtocolCommand<?>)message;
-        CohortBehaviour<?, ?> currentState = currentStateMap.computeIfAbsent(command.getTxId(), key -> idleState);
-
+        final var currentState = currentStateMap.computeIfAbsent(command.getTxId(), key -> idleState);
         LOG.debug("handleReceive for cohort {} - currentState: {}, message: {}", cohort.getClass().getName(),
-                currentState, message);
+            currentState, message);
 
         currentState.handle(command);
     }
@@ -73,16 +72,15 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
      *
      * @param <R> Reply message type
      */
-    abstract static class CommitProtocolCommand<R extends CommitReply> {
-
+    abstract static sealed class CommitProtocolCommand<R extends CommitReply> {
         private final TransactionIdentifier txId;
+
+        CommitProtocolCommand(final TransactionIdentifier txId) {
+            this.txId = requireNonNull(txId);
+        }
 
         final TransactionIdentifier getTxId() {
             return txId;
-        }
-
-        protected CommitProtocolCommand(final TransactionIdentifier txId) {
-            this.txId = Objects.requireNonNull(txId);
         }
 
         @Override
@@ -92,7 +90,6 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     static final class CanCommit extends CommitProtocolCommand<Success> {
-
         private final Collection<DOMDataTreeCandidate> candidates;
         private final ActorRef cohort;
         private final EffectiveModelContext schema;
@@ -100,9 +97,9 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         CanCommit(final TransactionIdentifier txId, final Collection<DOMDataTreeCandidate> candidates,
                 final EffectiveModelContext schema, final ActorRef cohort) {
             super(txId);
-            this.cohort = Objects.requireNonNull(cohort);
-            this.candidates = Objects.requireNonNull(candidates);
-            this.schema = Objects.requireNonNull(schema);
+            this.cohort = requireNonNull(cohort);
+            this.candidates = requireNonNull(candidates);
+            this.schema = requireNonNull(schema);
         }
 
         Collection<DOMDataTreeCandidate> getCandidates() {
@@ -124,13 +121,12 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     abstract static class CommitReply {
-
         private final ActorRef cohortRef;
         private final TransactionIdentifier txId;
 
         protected CommitReply(final ActorRef cohortRef, final TransactionIdentifier txId) {
-            this.cohortRef = Objects.requireNonNull(cohortRef);
-            this.txId = Objects.requireNonNull(txId);
+            this.cohortRef = requireNonNull(cohortRef);
+            this.txId = requireNonNull(txId);
         }
 
         ActorRef getCohort() {
@@ -148,28 +144,24 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     static final class Success extends CommitReply {
-
         Success(final ActorRef cohortRef, final TransactionIdentifier txId) {
             super(cohortRef, txId);
         }
     }
 
     static final class PreCommit extends CommitProtocolCommand<Success> {
-
         PreCommit(final TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Abort extends CommitProtocolCommand<Success> {
-
         Abort(final TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Commit extends CommitProtocolCommand<Success> {
-
         Commit(final TransactionIdentifier txId) {
             super(txId);
         }
@@ -179,7 +171,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         private final Class<M> handledMessageType;
 
         CohortBehaviour(final Class<M> handledMessageType) {
-            this.handledMessageType = Objects.requireNonNull(handledMessageType);
+            this.handledMessageType = requireNonNull(handledMessageType);
         }
 
         void handle(final CommitProtocolCommand<?> command) {
@@ -226,7 +218,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         private void onAbort(final TransactionIdentifier txId) {
             currentStateMap.remove(txId);
             final ActorRef sender = getSender();
-            Futures.addCallback(abort(), new FutureCallback<Object>() {
+            Futures.addCallback(abort(), new FutureCallback<>() {
                 @Override
                 public void onSuccess(final Object noop) {
                     sender.tell(new Success(self(), txId), self());
@@ -280,8 +272,8 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
         CohortStateWithStep(final Class<M> handledMessageType, final TransactionIdentifier txId, final S step) {
             super(handledMessageType);
-            this.txId = Objects.requireNonNull(txId);
-            this.step = Objects.requireNonNull(step);
+            this.txId = requireNonNull(txId);
+            this.step = requireNonNull(step);
         }
 
         final S getStep() {
@@ -300,7 +292,6 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     private class PostCanCommit extends CohortStateWithStep<PreCommit, PostCanCommitStep, PostPreCommitStep> {
-
         PostCanCommit(final TransactionIdentifier txId, final PostCanCommitStep nextStep) {
             super(PreCommit.class, txId, nextStep);
         }
@@ -319,7 +310,6 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     private class PostPreCommit extends CohortStateWithStep<Commit, PostPreCommitStep, NoopThreePhaseCommitStep> {
-
         PostPreCommit(final TransactionIdentifier txId, final PostPreCommitStep step) {
             super(Commit.class, txId, step);
         }
