@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>controller-artifacts</artifactId>
-    <version>11.0.3</version>
+    <version>11.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <dependencyManagement>

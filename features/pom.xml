@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-aggregator</artifactId>
-    <version>11.0.3</version>
+    <version>11.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
