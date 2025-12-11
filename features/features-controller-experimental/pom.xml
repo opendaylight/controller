@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-controller-experimental</artifactId>
-    <version>11.0.3-SNAPSHOT</version>
+    <version>11.0.3</version>
     <packaging>feature</packaging>
     <name>OpenDaylight :: Controller :: Experimental Features</name>
     <description>Controller Experimental Features</description>

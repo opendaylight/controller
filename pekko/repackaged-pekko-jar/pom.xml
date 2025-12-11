@@ -19,7 +19,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>repackaged-pekko-jar</artifactId>
     <packaging>jar</packaging>
-    <version>11.0.3-SNAPSHOT</version>
+    <version>11.0.3</version>
     <name>${project.artifactId}</name>
 
     <properties>
@@ -33,7 +33,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>bnd-parent</artifactId>
-                <version>11.0.3-SNAPSHOT</version>
+                <version>11.0.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
