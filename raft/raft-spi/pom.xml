@@ -45,7 +45,11 @@
             <artifactId>org.eclipse.jdt.annotation</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.lz4</groupId>
+            <groupId>org.kohsuke.metainf-services</groupId>
+            <artifactId>metainf-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>at.yawk.lz4</groupId>
             <artifactId>lz4-java</artifactId>
         </dependency>
         <dependency>
