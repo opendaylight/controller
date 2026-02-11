@@ -16,6 +16,23 @@
       "message": "10.0.x has not yet introduced odl-lz4 as independent feature",
       "revId": "4d4811fd46bc2081391eb42e3ee82c6b58b7f6de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f182fb5_916d3a45",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-02-11T12:43:33Z",
+      "side": 1,
+      "message": "recheck",
+      "revId": "4d4811fd46bc2081391eb42e3ee82c6b58b7f6de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
