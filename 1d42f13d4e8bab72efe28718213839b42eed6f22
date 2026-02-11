@@ -16,6 +16,24 @@
       "message": "this should be already ready with version 1.10.2",
       "revId": "1d42f13d4e8bab72efe28718213839b42eed6f22",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1a9c1da_cf6bef66",
+        "filename": "features/odl-lz4/src/main/feature/template.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-02-11T08:52:23Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "b4605a37_260a552f",
+      "revId": "1d42f13d4e8bab72efe28718213839b42eed6f22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
