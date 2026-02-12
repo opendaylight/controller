@@ -5,7 +5,7 @@
     <parent>
         <artifactId>mdsal-parent</artifactId>
         <groupId>org.opendaylight.controller</groupId>
-        <version>10.0.15-SNAPSHOT</version>
+        <version>10.0.15</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
