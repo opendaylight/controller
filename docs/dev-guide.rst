@@ -1364,4 +1364,3 @@ Something practical
 ::
 
     Status: 200 OK
-
