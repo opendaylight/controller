@@ -96,10 +96,26 @@ jobs:
       # yamllint enable rule:line-length
       ENV_VARS: ${{ toJSON(vars) }}
 
+  pre-commit-linting:
+    needs: prepare
+    # yamllint disable-line rule:line-length
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-repo-linting.yaml@main
+    with:
+      GERRIT_BRANCH: ${{ inputs.GERRIT_BRANCH }}
+      GERRIT_CHANGE_ID: ${{ inputs.GERRIT_CHANGE_ID }}
+      GERRIT_CHANGE_NUMBER: ${{ inputs.GERRIT_CHANGE_NUMBER }}
+      GERRIT_CHANGE_URL: ${{ inputs.GERRIT_CHANGE_URL }}
+      GERRIT_EVENT_TYPE: ${{ inputs.GERRIT_EVENT_TYPE }}
+      GERRIT_PATCHSET_NUMBER: ${{ inputs.GERRIT_PATCHSET_NUMBER }}
+      GERRIT_PATCHSET_REVISION: ${{ inputs.GERRIT_PATCHSET_REVISION }}
+      GERRIT_PROJECT: ${{ inputs.GERRIT_PROJECT }}
+      GERRIT_REFSPEC: ${{ inputs.GERRIT_REFSPEC }}
+      PRE_COMMIT_VERSION: "4.1.0"
+
   vote:
     if: ${{ always() }}
     # yamllint enable rule:line-length
-    needs: [prepare, maven-verify]
+    needs: [prepare, maven-verify, pre-commit-linting]
     runs-on: ubuntu-latest
     steps:
       - name: Get conclusion
