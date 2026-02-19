@@ -6,27 +6,27 @@ name: call-github2gerrit-reusable-workflow
 
 # yamllint disable-line rule:truthy
 on:
-    workflow_dispatch:
-    pull_request_target:
-        types: [opened, reopened, edited, synchronize]
-        branches:
-            - master
+  workflow_dispatch:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+    branches:
+      - master
 
 concurrency:
-    # yamllint disable-line rule:line-length
-    group: ${{ github.workflow }}-${{ github.run_id }}
-    cancel-in-progress: true
+  # yamllint disable-line rule:line-length
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-    call-in-g2g-workflow:
-        permissions:
-            contents: read
-            pull-requests: write
-        uses: lfit/github2gerrit/.github/workflows/github2gerrit.yaml@main
-        with:
-            GERRIT_KNOWN_HOSTS: ${{ vars.GERRIT_KNOWN_HOSTS }}
-            GERRIT_SSH_USER_G2G: ${{ vars.GERRIT_SSH_USER_G2G }}
-            GERRIT_SSH_USER_G2G_EMAIL: ${{ vars.GERRIT_SSH_USER_G2G_EMAIL }}
-            ORGANIZATION: ${{ vars.ORGANIZATION }}
-        secrets:
-            GERRIT_SSH_PRIVKEY_G2G: ${{ secrets.GERRIT_SSH_PRIVKEY_G2G }}
+  call-in-g2g-workflow:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: lfit/github2gerrit/.github/workflows/github2gerrit.yaml@main
+    with:
+      GERRIT_KNOWN_HOSTS: ${{ vars.GERRIT_KNOWN_HOSTS }}
+      GERRIT_SSH_USER_G2G: ${{ vars.GERRIT_SSH_USER_G2G }}
+      GERRIT_SSH_USER_G2G_EMAIL: ${{ vars.GERRIT_SSH_USER_G2G_EMAIL }}
+      ORGANIZATION: ${{ vars.ORGANIZATION }}
+    secrets:
+      GERRIT_SSH_PRIVKEY_G2G: ${{ secrets.GERRIT_SSH_PRIVKEY_G2G }}
