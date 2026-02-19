@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: EPL-1.0
+##############################################################################
+# Copyright (c) 2024 The Linux Foundation and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+##############################################################################
+
+---
+name: CLM Dependency Scan
+
+# yamllint disable-line rule:truthy
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0" # Run weekly on Sunday at midnight UTC
+
+permissions:
+  contents: read
+
+jobs:
+  clm-scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        # yamllint disable-line rule:line-length
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        # yamllint disable-line rule:line-length
+        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Setup Maven
+        # yamllint disable-line rule:line-length
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+        with:
+          maven-version: "3.9.5"
+
+      - name: Dependency Tree
+        run: mvn dependency:tree
+
+      - name: CLM Scan
+        env:
+          CLM_PASSWORD: ${{ secrets.CLM_PASSWORD }}
+          CLM_USER: ${{ secrets.CLM_USER }}
+        run: |
+          if [[ -z "${CLM_PASSWORD}" || -z "${CLM_USER}" ]]; then
+            echo "CLM credentials not configured, skipping scan"
+            exit 0
+          fi
+          mvn clean install -DskipTests \
+            -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
