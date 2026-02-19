@@ -48,4 +48,3 @@ public abstract class ShardDataTreeSnapshot {
     @Override
     public abstract String toString();
 }
-

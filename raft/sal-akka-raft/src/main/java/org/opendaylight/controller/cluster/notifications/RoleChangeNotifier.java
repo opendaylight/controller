@@ -105,4 +105,3 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
         registeredListeners.clear();
     }
 }
-

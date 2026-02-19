@@ -105,4 +105,3 @@ final class IS implements Externalizable {
         return (flags & bit) != 0;
     }
 }
-

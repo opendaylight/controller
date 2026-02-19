@@ -64,4 +64,3 @@ public final class OSGiActorSystemProvider implements ActorSystemProvider {
         return delegate.registerActorSystemProviderListener(listener);
     }
 }
-

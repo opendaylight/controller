@@ -327,7 +327,7 @@ state and recovery strategies taken.
      will replay the Shard message.
 
   Messaging between a Local History Actor and its associated Shard is expected
-  to be reliable. This is guaranteed by the parent/child relationship, where 
+  to be reliable. This is guaranteed by the parent/child relationship, where
   Shard is the parent. If a Shard fails, all of its children will be restarted,
   losing all state. If an LHA fails, Shard will be notified with Akka DeathWatch
   pattern.
@@ -338,5 +338,3 @@ state and recovery strategies taken.
   LocalHistory, e.g. single transactions instatiated via
   DOMDataBroker.newXXXTransaction()). These actors instantiated for each transaction
   separately and get terminated once the transaction is completed, successfully or not.
-
-
