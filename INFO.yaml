@@ -1,68 +1,68 @@
 ---
-project: 'controller'
-project_creation_date: '2015-01-08'
-project_category: ''
-lifecycle_state: 'Incubation'
+project: "controller"
+project_creation_date: "2015-01-08"
+project_category: ""
+lifecycle_state: "Incubation"
 project_lead: &odl_controller_ptl
-    name: 'Robert Varga'
-    email: 'nite@hq.sk'
-    company: 'hq'
-    id: 'rovarga'
-    timezone: 'Unknown/Unknown'
+  name: "Robert Varga"
+  email: "nite@hq.sk"
+  company: "hq"
+  id: "rovarga"
+  timezone: "Unknown/Unknown"
 primary_contact: *odl_controller_ptl
 issue_tracking:
-    type: 'jira'
-    url: 'https://jira.opendaylight.org/projects/'
-    key: 'controller'
+  type: "jira"
+  url: "https://jira.opendaylight.org/projects/"
+  key: "controller"
 mailing_list:
-    type: 'groups.io'
-    url: 'kernel-dev@lists.opendaylight.org'
-    tag: '[]'
+  type: "groups.io"
+  url: "kernel-dev@lists.opendaylight.org"
+  tag: "[]"
 realtime_discussion:
-    type: 'irc'
-    server: 'freenode.net'
-    channel: '#opendaylight'
+  type: "irc"
+  server: "freenode.net"
+  channel: "#opendaylight"
 meetings:
-    - type: 'gotomeeting+irc'
-      agenda: 'https://wiki.opendaylight.org'
-      url: ''
-      server: 'freenode.net'
-      channel: '#opendaylight'
-      repeats: ''
-      time: ''
+  - type: "gotomeeting+irc"
+    agenda: "https://wiki.opendaylight.org"
+    url: ""
+    server: "freenode.net"
+    channel: "#opendaylight"
+    repeats: ""
+    time: ""
 repositories:
-    - controller
+  - controller
 committers:
-    - <<: *odl_controller_ptl
-    - name: 'Stephen Kitt'
-      email: 'skitt@redhat.com'
-      company: 'Redhat'
-      id: 'skitt'
-      timezone: 'Unknown/Unknown'
-    - name: 'Tom Pantelis'
-      email: 'tompantelis@gmail.com'
-      company: ''
-      id: 'tpantelis'
-      timezone: 'Unknown/Unknown'
-    - name: 'Ed Warnicke'
-      email: 'hagbard@gmail.com'
-      company: ''
-      id: 'hagbard'
-      timezone: 'Unknown/Unknown'
-    - name: 'Michael Vorburger'
-      email: 'mike@vorburger.ch'
-      company: 'vorburger'
-      id: 'vorburger'
-      timezone: 'Unknown/Unknown'
-    - name: 'Anil Vishnoi'
-      email: 'avishnoi@redhat.com'
-      company: 'Redhat'
-      id: 'Avishnoi'
-      timezone: 'Unknown/Unknown'
+  - <<: *odl_controller_ptl
+  - name: "Stephen Kitt"
+    email: "skitt@redhat.com"
+    company: "Redhat"
+    id: "skitt"
+    timezone: "Unknown/Unknown"
+  - name: "Tom Pantelis"
+    email: "tompantelis@gmail.com"
+    company: ""
+    id: "tpantelis"
+    timezone: "Unknown/Unknown"
+  - name: "Ed Warnicke"
+    email: "hagbard@gmail.com"
+    company: ""
+    id: "hagbard"
+    timezone: "Unknown/Unknown"
+  - name: "Michael Vorburger"
+    email: "mike@vorburger.ch"
+    company: "vorburger"
+    id: "vorburger"
+    timezone: "Unknown/Unknown"
+  - name: "Anil Vishnoi"
+    email: "avishnoi@redhat.com"
+    company: "Redhat"
+    id: "Avishnoi"
+    timezone: "Unknown/Unknown"
 tsc:
-    # yamllint disable rule:line-length
-    approval: 'https://meetings.opendaylight.org/opendaylight-meeting/2015/tsc/opendaylight-meeting-tsc.2015-01-08-18.00.txt'
-    changes:
-        - type: ''
-          name: ''
-          link: ''
+  # yamllint disable rule:line-length
+  approval: "https://meetings.opendaylight.org/opendaylight-meeting/2015/tsc/opendaylight-meeting-tsc.2015-01-08-18.00.txt"
+  changes:
+    - type: ""
+      name: ""
+      link: ""
