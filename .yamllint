@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+# yamllint configuration for OpenDaylight projects
+
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: {}
+  document-start: disable
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']

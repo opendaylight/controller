@@ -38,3 +38,16 @@ META-INF
 .tox/
 docs/_build/
 
+
+# Pre-commit hooks
+.pre-commit-config.yaml~
+
+# Python
+__pycache__/
+*.py[cod]
+.tox/
+.pytest_cache/
+
+# Node.js
+node_modules/
+node_modules/
