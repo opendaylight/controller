@@ -10,13 +10,16 @@ package org.opendaylight.raft.journal;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 @NonNullByDefault
-abstract sealed class MappedFile<T extends ByteBuffer> permits NettyMappedFile, ArenaMappedFile {
+final class MappedFile {
     private static final VarHandle VH;
 
     static {
@@ -27,17 +30,23 @@ abstract sealed class MappedFile<T extends ByteBuffer> permits NettyMappedFile, 
         }
     }
 
-    private volatile T buffer;
+    private final Arena arena;
+    private final MemorySegment segment;
 
-    MappedFile(final T buffer) {
-        this.buffer = requireNonNull(buffer);
+    @SuppressFBWarnings(value = "", justification = "")
+    private volatile ByteBuffer buffer;
+
+    MappedFile(final Arena arena, final MemorySegment segment) {
+        this.arena = requireNonNull(arena);
+        this.segment = requireNonNull(segment);
+        buffer = segment.asByteBuffer();
     }
 
     /**
      * {@return the mapped {@link ByteBuffer}}
      */
-    final T buffer() {
-        return verifyNotNull((T) VH.get(this));
+    ByteBuffer buffer() {
+        return verifyNotNull((ByteBuffer) VH.get(this));
     }
 
     /**
@@ -45,26 +54,18 @@ abstract sealed class MappedFile<T extends ByteBuffer> permits NettyMappedFile, 
      *
      * @throws UncheckedIOExcpetion if an I/O error occurs
      */
-    final void sync() {
-        sync(buffer);
+    void sync() {
+        VH.getVolatile(this);
+        segment.force();
     }
-
-    abstract void sync(T buffer);
 
     /**
      * Unmap the this object.
      */
-    final void unmap() {
-        final var prev = (T) VH.getAndSet(this, null);
+    void unmap() {
+        final var prev = VH.getAndSet(this, null);
         if (prev != null) {
-            unmap(prev);
+            arena.close();
         }
     }
-
-    /**
-     * Unmap the now-unreachanable buffer. This method is guaranteed to be invoked at most once.
-     *
-     * @param buffer the buffer
-     */
-    abstract void unmap(T buffer);
 }

@@ -37,6 +37,7 @@
 
     <properties>
         <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
+        <maven.compiler.release>22</maven.compiler.release>
     </properties>
 
     <dependencies>
@@ -52,10 +53,6 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-buffer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jdt</groupId>

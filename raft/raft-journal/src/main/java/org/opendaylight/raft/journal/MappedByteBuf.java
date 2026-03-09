@@ -44,11 +44,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flushable {
     private final ByteBufAllocator alloc;
 
-    private MappedFile<?> mappedFile;
+    private MappedFile mappedFile;
     private ByteBuffer internalNio;
 
     @VisibleForTesting
-    MappedByteBuf(final ByteBufAllocator alloc, final MappedFile<?> mappedFile) {
+    MappedByteBuf(final ByteBufAllocator alloc, final MappedFile mappedFile) {
         super(mappedFile.buffer().limit());
         this.alloc = requireNonNull(alloc);
         this.mappedFile = requireNonNull(mappedFile);
