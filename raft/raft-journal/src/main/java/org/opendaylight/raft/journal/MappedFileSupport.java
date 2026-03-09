@@ -11,8 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import io.netty.util.internal.PlatformDependent;
 import java.io.IOException;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
@@ -28,47 +26,6 @@ final class MappedFileSupport {
     sealed interface Impl {
 
         MappedFile<?> map(FileChannel channel, MapMode mode, long offset, int size) throws IOException;
-    }
-
-    @NonNullByDefault
-    private record Java22() implements Impl {
-        @Override
-        public MappedFile22 map(final FileChannel channel, final MapMode mode, final long offset, final int size)
-                throws IOException {
-            final var arena = Arena.ofShared();
-            try {
-                return new MappedFile22(channel.map(mode, offset, size, arena), arena);
-            } catch (IOException e) {
-                arena.close();
-                throw e;
-            }
-        }
-    }
-
-
-    /**
-     * A {@link MappedFile} implementation for Java 22+, where we have {@link Arena} available.
-     */
-    @NonNullByDefault
-    static final class MappedFile22 extends MappedFile<ByteBuffer> {
-        private final MemorySegment segment;
-        private final Arena arena;
-
-        private MappedFile22(final MemorySegment segment, final Arena arena) {
-            super(segment.asByteBuffer());
-            this.segment = requireNonNull(segment);
-            this.arena = requireNonNull(arena);
-        }
-
-        @Override
-        void sync(final ByteBuffer buffer) {
-            segment.force();
-        }
-
-        @Override
-        void unmap(final ByteBuffer buffer) {
-            arena.close();
-        }
     }
 
     @NonNullByDefault
@@ -165,7 +122,7 @@ final class MappedFileSupport {
     }
 
     /**
-     * A {@link MappedFile} implementation using reflection where we have {@link Arena} available.
+     * A {@link MappedFile} implementation using reflection where we have {@code Arena} available.
      */
     @NonNullByDefault
     static final class ReflectMappedFile extends MappedFile<ByteBuffer> {
