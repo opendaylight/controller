@@ -1,1 +1,0 @@
-Import-Package: java.lang.foreign;resolution:=optional, *

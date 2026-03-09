@@ -42,7 +42,7 @@ class MappedByteBufTest {
         Files.write(file, bytes);
         raf = new RandomAccessFile(file.toFile(), "r");
         buf = new MappedByteBuf(UnpooledByteBufAllocator.DEFAULT,
-            FileMapper.map(raf.getChannel(), MapMode.READ_ONLY, 0, bytes.length));
+            MappedFile.of(raf.getChannel(), MapMode.READ_ONLY, 0, bytes.length));
     }
 
     @AfterEach

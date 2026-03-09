@@ -69,7 +69,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @NonNullByDefault
     static MappedByteBuf of(final SegmentFile file) throws IOException {
         return new MappedByteBuf(file.allocator(),
-            FileMapper.map(file.channel(), MapMode.READ_WRITE, 0, file.maxSize()));
+            MappedFile.of(file.channel(), MapMode.READ_WRITE, 0, file.maxSize()));
     }
 
     private @NonNull ByteBuffer byteBuffer() {

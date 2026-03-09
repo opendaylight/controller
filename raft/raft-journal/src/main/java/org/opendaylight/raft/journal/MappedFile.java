@@ -7,25 +7,42 @@
  */
 package org.opendaylight.raft.journal;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 @NonNullByDefault
-sealed interface MappedFile permits NettyMappedFile, ArenaMappedFile {
-    /**
-     * {@return the mapped {@link ByteBuffer}}
-     */
-    ByteBuffer buffer();
+record MappedFile(ByteBuffer buffer, Arena arena, MemorySegment segment) {
+    MappedFile {
+        requireNonNull(buffer);
+        requireNonNull(arena);
+        requireNonNull(segment);
+    }
 
-    /**
-     * Synchronize the mapping.
-     *
-     * @throws UncheckedIOExcpetion if an I/O error occurs
-     */
-    void sync();
+    static MappedFile of(final FileChannel channel, final MapMode mode, final long offset, final int size)
+            throws IOException {
+        final var arena = Arena.ofShared();
+        final MemorySegment segment;
+        try {
+            segment = channel.map(mode, offset, size, arena);
+        } catch (IOException e) {
+            arena.close();
+            throw e;
+        }
+        return new MappedFile(segment.asByteBuffer(), arena, segment);
+    }
 
-    /**
-     * Unmap the this object.
-     */
-    void unmap();
+    void sync() {
+        segment.force();
+    }
+
+    void unmap() {
+        arena.close();
+    }
 }
