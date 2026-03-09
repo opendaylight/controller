@@ -18,16 +18,18 @@ package org.opendaylight.raft.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.buffer.AbstractReferenceCountedByteBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.util.internal.PlatformDependent;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -36,27 +38,49 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A {@link ByteBuf} backed by a {@link MappedByteBuffer}.
  */
 final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flushable {
+    private static final VarHandle VH;
+
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(MappedByteBuf.class, "mappedFile", MappedFile.class);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private final ByteBufAllocator alloc;
 
-    private MappedByteBuffer byteBuffer;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
+    private volatile MappedFile mappedFile;
     private ByteBuffer internalNio;
 
     @VisibleForTesting
-    MappedByteBuf(final ByteBufAllocator alloc, final MappedByteBuffer byteBuffer) {
-        super(byteBuffer.limit());
+    MappedByteBuf(final ByteBufAllocator alloc, final MappedFile mappedFile) {
+        super(mappedFile.buffer().limit());
         this.alloc = requireNonNull(alloc);
-        this.byteBuffer = requireNonNull(byteBuffer);
+        this.mappedFile = requireNonNull(mappedFile);
     }
 
     @NonNullByDefault
     static MappedByteBuf of(final SegmentFile file) throws IOException {
-        return new MappedByteBuf(file.allocator(), file.channel().map(MapMode.READ_WRITE, 0, file.maxSize()));
+        return new MappedByteBuf(file.allocator(),
+            FileMapper.map(file.channel(), MapMode.READ_WRITE, 0, file.maxSize()));
+    }
+
+    private @NonNull ByteBuffer byteBuffer() {
+        return mappedFile().buffer();
+    }
+
+    // plain access
+    private MappedFile mappedFile() {
+        return (MappedFile) VH.get(this);
     }
 
     @Override
@@ -64,7 +88,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     public void flush() throws IOException {
         ensureAccessible();
         try {
-            byteBuffer.force();
+            mappedFile().sync();
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }
@@ -72,10 +96,9 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void deallocate() {
-        final var local = byteBuffer;
-        if (local != null) {
-            byteBuffer = null;
-            PlatformDependent.freeDirectBuffer(local);
+        final var prev = (MappedFile) VH.getAndSet(this, null);
+        if (prev != null) {
+            prev.unmap();
         }
     }
 
@@ -138,7 +161,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @Override
     public ByteBuf copy(final int index, final int length) {
         ensureAccessible();
-        return alloc.heapBuffer(length).writeBytes(byteBuffer.slice(index, length));
+        return alloc.heapBuffer(length).writeBytes(byteBuffer().slice(index, length));
     }
 
     @Override
@@ -154,7 +177,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @Override
     public ByteBuffer nioBuffer(final int index, final int length) {
         checkIndex(index, length);
-        return byteBuffer.slice(index, length);
+        return byteBuffer().slice(index, length);
     }
 
     @Override
@@ -166,7 +189,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     private ByteBuffer internalNio() {
         var local = internalNio;
         if (local == null) {
-            internalNio = local = byteBuffer.duplicate();
+            internalNio = local = byteBuffer().duplicate();
         }
         return local;
     }
@@ -184,7 +207,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected byte _getByte(final int index) {
-        return byteBuffer.get(index);
+        return byteBuffer().get(index);
     }
 
     @Override
@@ -195,12 +218,12 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected short _getShort(final int index) {
-        return byteBuffer.getShort(index);
+        return byteBuffer().getShort(index);
     }
 
     @Override
     protected short _getShortLE(final int index) {
-        return ByteBufUtil.swapShort(byteBuffer.getShort(index));
+        return ByteBufUtil.swapShort(byteBuffer().getShort(index));
     }
 
     @Override
@@ -227,12 +250,12 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected int _getInt(final int index) {
-        return byteBuffer.getInt(index);
+        return byteBuffer().getInt(index);
     }
 
     @Override
     protected int _getIntLE(final int index) {
-        return ByteBufUtil.swapInt(byteBuffer.getInt(index));
+        return ByteBufUtil.swapInt(byteBuffer().getInt(index));
     }
 
     @Override
@@ -243,12 +266,12 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected long _getLong(final int index) {
-        return byteBuffer.getLong(index);
+        return byteBuffer().getLong(index);
     }
 
     @Override
     protected long _getLongLE(final int index) {
-        return ByteBufUtil.swapLong(byteBuffer.getLong(index));
+        return ByteBufUtil.swapLong(byteBuffer().getLong(index));
     }
 
     @Override
@@ -260,7 +283,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void _setByte(final int index, final int value) {
-        byteBuffer.put(index, (byte) value);
+        byteBuffer().put(index, (byte) value);
     }
 
     @Override
@@ -272,12 +295,12 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void _setShort(final int index, final int value) {
-        byteBuffer.putShort(index, (short) value);
+        byteBuffer().putShort(index, (short) value);
     }
 
     @Override
     protected void _setShortLE(final int index, final int value) {
-        byteBuffer.putShort(index, ByteBufUtil.swapShort((short) value));
+        byteBuffer().putShort(index, ByteBufUtil.swapShort((short) value));
     }
 
     @Override
@@ -310,12 +333,12 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void _setInt(final int index, final int value) {
-        byteBuffer.putInt(index, value);
+        byteBuffer().putInt(index, value);
     }
 
     @Override
     protected void _setIntLE(final int index, final int value) {
-        byteBuffer.putInt(index, ByteBufUtil.swapInt(value));
+        byteBuffer().putInt(index, ByteBufUtil.swapInt(value));
     }
 
     @Override
@@ -327,19 +350,19 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void _setLong(final int index, final long value) {
-        byteBuffer.putLong(index, value);
+        byteBuffer().putLong(index, value);
     }
 
     @Override
     protected void _setLongLE(final int index, final long value) {
-        byteBuffer.putLong(index, ByteBufUtil.swapLong(value));
+        byteBuffer().putLong(index, ByteBufUtil.swapLong(value));
     }
 
     @Override
     public ByteBuf getBytes(final int index, final ByteBuf dst, final int dstIndex, final int length) {
         checkDstIndex(index, length, dstIndex, dst.capacity());
         if (dst.hasArray()) {
-            byteBuffer.get(index, dst.array(), dst.arrayOffset() + dstIndex, length);
+            byteBuffer().get(index, dst.array(), dst.arrayOffset() + dstIndex, length);
         } else {
             dst.setBytes(dstIndex, this, index, length);
         }
@@ -349,7 +372,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @Override
     public ByteBuf getBytes(final int index, final byte[] dst, final int dstIndex, final int length) {
         checkDstIndex(index, length, dstIndex, dst.length);
-        byteBuffer.get(index, dst, dstIndex, length);
+        byteBuffer().get(index, dst, dstIndex, length);
         return this;
     }
 
@@ -357,7 +380,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     public ByteBuf getBytes(final int index, final ByteBuffer dst) {
         final var remaining = dst.remaining();
         checkIndex(index, remaining);
-        dst.put(byteBuffer.slice(index, remaining));
+        dst.put(byteBuffer().slice(index, remaining));
         return this;
     }
 
@@ -388,14 +411,14 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @Override
     public ByteBuf setBytes(final int index, final byte[] src, final int srcIndex, final int length) {
         checkSrcIndex(index, length, srcIndex, src.length);
-        byteBuffer.put(index, src, srcIndex, length);
+        byteBuffer().put(index, src, srcIndex, length);
         return this;
     }
 
     @Override
     public ByteBuf setBytes(final int index, final ByteBuffer src) {
         ensureAccessible();
-        byteBuffer.put(index, src, src.position(), src.remaining());
+        byteBuffer().put(index, src, src.position(), src.remaining());
         return this;
     }
 
