@@ -9,12 +9,10 @@ package org.opendaylight.raft.journal;
 
 import static java.util.Objects.requireNonNull;
 
-import io.netty.util.internal.PlatformDependent;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -26,35 +24,6 @@ final class MappedFileSupport {
     sealed interface Impl {
 
         MappedFile<?> map(FileChannel channel, MapMode mode, long offset, int size) throws IOException;
-    }
-
-    @NonNullByDefault
-    private record Netty() implements Impl {
-        @Override
-        public NettyMappedFile map(final FileChannel channel, final MapMode mode, final long offset, final int size)
-                throws IOException {
-            return new NettyMappedFile(channel.map(mode, offset, size));
-        }
-    }
-
-    /**
-     * A {@link MappedFile} implementation for Java <22, where we operate on plain {@link ByteBuffer}.
-     */
-    @NonNullByDefault
-    static final class NettyMappedFile extends MappedFile<MappedByteBuffer> {
-        private NettyMappedFile(final MappedByteBuffer buffer) {
-            super(buffer);
-        }
-
-        @Override
-        void unmap(final MappedByteBuffer buffer) {
-            PlatformDependent.freeDirectBuffer(buffer);
-        }
-
-        @Override
-        void sync(final MappedByteBuffer buffer) {
-            buffer.force();
-        }
     }
 
     @NonNullByDefault
@@ -227,7 +196,7 @@ final class MappedFileSupport {
 
     private static Impl legacyImplementation() {
         LOG.info("Using sun.misc.Unsafe for ByteBuffer cleanup");
-        return new Netty();
+        throw new UnsupportedOperationException();
     }
 
     private MappedFileSupport() {

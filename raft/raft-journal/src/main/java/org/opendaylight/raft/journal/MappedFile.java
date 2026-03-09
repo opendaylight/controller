@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 @NonNullByDefault
 abstract sealed class MappedFile<T extends ByteBuffer>
-        permits MappedFileSupport.NettyMappedFile, MappedFileSupport.ReflectMappedFile {
+        permits MappedFileSupport.ReflectMappedFile {
     private static final VarHandle VH;
 
     static {
