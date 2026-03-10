@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cbe022c4_3d68c04c",
+        "filename": "raft/raft-journal/src/main/java/org/opendaylight/raft/journal/MappedByteBuf.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-03-10T14:59:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9f2494da_25061c37",
+      "range": {
+        "startLine": 76,
+        "startChar": 16,
+        "endLine": 76,
+        "endChar": 42
+      },
+      "revId": "07b17fccb39390d4e8b3dc3ecd6a8fc8289af1fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e1b52e5b_d6dc06db",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-03-10T14:52:20Z",
       "side": 1,
       "message": "and use here",
+      "range": {
+        "startLine": 84,
+        "startChar": 12,
+        "endLine": 84,
+        "endChar": 27
+      },
+      "revId": "07b17fccb39390d4e8b3dc3ecd6a8fc8289af1fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bc654d9e_1da9626d",
+        "filename": "raft/raft-journal/src/main/java/org/opendaylight/raft/journal/MappedByteBuf.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-03-10T14:59:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1b52e5b_d6dc06db",
       "range": {
         "startLine": 84,
         "startChar": 12,
