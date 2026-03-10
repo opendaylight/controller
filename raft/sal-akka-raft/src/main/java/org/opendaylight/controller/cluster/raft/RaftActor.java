@@ -227,11 +227,11 @@ public abstract class RaftActor extends AbstractUntypedActor {
                 context.getConfigParams());
         }
 
-        recoveryCompeleted(recovery.recover());
+        recoveryCompleted(recovery.recover());
     }
 
     @NonNullByDefault
-    private void recoveryCompeleted(final RecoveryResult journalResult) throws IOException {
+    private void recoveryCompleted(final RecoveryResult journalResult) throws IOException {
         LOG.debug("{}: Recovery completed and {} restore from snapshot", memberId(),
             journalResult.canRestoreFromSnapshot() ? "can" : "cannot");
 
