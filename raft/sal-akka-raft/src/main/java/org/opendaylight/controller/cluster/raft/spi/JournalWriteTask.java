@@ -129,6 +129,7 @@ public final class JournalWriteTask implements Runnable {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
+    private static final long MAX_DELAY_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
     private final RaftStorageCompleter completer;
@@ -269,7 +270,7 @@ public final class JournalWriteTask implements Runnable {
     }
 
     private void enqueueAndWait(final JournalAction<?> action) throws InterruptedException {
-        final long delay;
+        long delay;
         queueLock.lock();
         try {
             lockedEnqueue(action);
@@ -279,7 +280,10 @@ public final class JournalWriteTask implements Runnable {
         }
 
         if (delay != 0) {
-            // FIXME: add delay capping
+            if (delay > MAX_DELAY_NANOS) {
+                LOG.debug("{}: backpressure {}ns capped to {}ns", memberId(), delay, MAX_DELAY_NANOS, new Throwable());
+                delay = MAX_DELAY_NANOS;
+            }
             LOG.trace("{}: applying backpressure of {}ns", memberId(), delay);
             TimeUnit.NANOSECONDS.sleep(delay);
         }
