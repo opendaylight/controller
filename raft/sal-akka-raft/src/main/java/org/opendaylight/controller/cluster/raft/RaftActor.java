@@ -484,24 +484,29 @@ public abstract class RaftActor extends AbstractUntypedActor {
 
     private void onShutDown() {
         LOG.debug("{}: onShutDown", memberId());
-
         if (shuttingDown) {
             return;
         }
-
         shuttingDown = true;
 
-        switch (getCurrentBehavior().raftRole()) {
-            case Leader:
-            case PreLeader:
-                // Fall-through to more work
-                break;
-            default:
-                // For non-leaders shutdown is a no-op
-                self().tell(PoisonPill.getInstance(), self());
-                return;
+        final var currentBehavior = getCurrentBehavior();
+        if (currentBehavior == null) {
+            self().tell(PoisonPill.getInstance(), self());
+            return;
         }
 
+        switch (currentBehavior.raftRole()) {
+            case null -> throw new NullPointerException();
+            case Candidate, Follower, IsolatedLeader ->
+                // for others shutdown is a no-op
+                self().tell(PoisonPill.getInstance(), self());
+            case Leader, PreLeader ->
+                // operational leaders have more work to do
+                onShutdownLeader();
+        }
+    }
+
+    private void onShutdownLeader() {
         if (context.hasFollowers()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
@@ -516,19 +521,20 @@ public abstract class RaftActor extends AbstractUntypedActor {
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
             }, null, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
-        } else {
-            pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
-                @Override
-                protected void doRun() {
-                    self().tell(PoisonPill.getInstance(), self());
-                }
-
-                @Override
-                protected void doCancel() {
-                    self().tell(PoisonPill.getInstance(), self());
-                }
-            });
+            return;
         }
+
+        pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
+            @Override
+            protected void doRun() {
+                self().tell(PoisonPill.getInstance(), self());
+            }
+
+            @Override
+            protected void doCancel() {
+                self().tell(PoisonPill.getInstance(), self());
+            }
+        });
     }
 
     private void onLeaderTransitioning(final LeaderTransitioning leaderTransitioning) {
