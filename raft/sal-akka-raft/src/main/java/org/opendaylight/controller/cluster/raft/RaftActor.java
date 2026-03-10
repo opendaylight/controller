@@ -291,6 +291,8 @@ public abstract class RaftActor extends AbstractUntypedActor {
     @NonNullByDefault
     private void finishRecovery() {
         recoveryObserver().onRecoveryCompleted();
+        persistenceControl.postRecovery();
+
         onRecoveryComplete();
         initializeBehavior();
     }
