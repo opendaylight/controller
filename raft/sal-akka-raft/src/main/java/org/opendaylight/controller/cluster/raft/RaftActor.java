@@ -322,6 +322,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @NonNullByDefault
     private void finishRecovery() {
         recoveryObserver().onRecoveryCompleted();
+        persistenceControl.postRecovery();
+
         onRecoveryComplete();
         if (LOG.isTraceEnabled()) {
             appendEntriesReplyTracker.begin();

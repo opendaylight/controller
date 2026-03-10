@@ -63,6 +63,10 @@ final class PersistenceControl extends PersistenceProvider {
         }
     }
 
+    void postRecovery() {
+        enabledStorage.enableAccess();
+    }
+
     void stop() {
         enabledStorage.stop();
         disabledStorage.stop();

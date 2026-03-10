@@ -109,7 +109,7 @@ public final class JournalWriteTask implements Runnable {
         }
 
         @Override
-        public void invoke(final @Nullable Exception failure, Void success) {
+        public void invoke(final @Nullable Exception failure, final Void success) {
             switch (failure) {
                 case null -> {
                     // No-op
@@ -127,7 +127,6 @@ public final class JournalWriteTask implements Runnable {
             return helper;
         }
     }
-
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
 

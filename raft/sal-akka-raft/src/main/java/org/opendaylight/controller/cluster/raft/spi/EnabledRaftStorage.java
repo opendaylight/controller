@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.base.VerifyException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,8 +29,8 @@ public final class EnabledRaftStorage extends RaftStorage {
     private final boolean mapped;
 
     // FIXME: we should have a queue push timeout, similar to Pekko circuit breaker to deal with queue waits
-    private JournalWriteTask task;
-    private Thread thread;
+    private JournalWriteTask task = null;
+    private Thread thread = null;
 
     @NonNullByDefault
     public EnabledRaftStorage(final RaftStorageCompleter completer, final Path directory,
@@ -50,7 +51,7 @@ public final class EnabledRaftStorage extends RaftStorage {
     @NonNullByDefault
     public void startPersistEntry(final ReplicatedLogEntry entry, final RaftCallback<Long> callback) {
         try {
-            task.appendEntry(entry, callback);
+            task().appendEntry(entry, callback);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to start persist", e);
@@ -60,7 +61,7 @@ public final class EnabledRaftStorage extends RaftStorage {
     @Override
     public void discardHead(final long firstRetainedIndex) {
         try {
-            task.discardHead(firstRetainedIndex);
+            task().discardHead(firstRetainedIndex);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to delete head entries", e);
@@ -70,7 +71,7 @@ public final class EnabledRaftStorage extends RaftStorage {
     @Override
     public void discardTail(final long firstRemovedIndex) {
         try {
-            task.syncDiscardTail(firstRemovedIndex);
+            task().syncDiscardTail(firstRemovedIndex);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to delete tail entries", e);
@@ -80,13 +81,20 @@ public final class EnabledRaftStorage extends RaftStorage {
     @Override
     public void checkpointLastApplied(final long commitJournalIndex) {
         try {
-            task.setApplyTo(commitJournalIndex);
+            task().setApplyTo(commitJournalIndex);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to update last applied index", e);
         }
     }
 
+    // Allows access to task only after enabledAccess() has started the thread
+    private JournalWriteTask task() {
+        if (thread == null) {
+            throw new VerifyException("cannot access task");
+        }
+        return task;
+    }
 
     // TODO: at least
     //   - creates the directory if not present
@@ -100,10 +108,23 @@ public final class EnabledRaftStorage extends RaftStorage {
         final var journal = new EntryJournalV1(memberId(), directory, compression, mapped);
         LOG.info("{}: journal open: applyTo={}", memberId(), journal.applyToJournalIndex());
         task = new JournalWriteTask(completer(), journal, 2048);
-        thread = Thread.ofVirtual().name(memberId() + "-writer-" + WRITER_COUNTER.incrementAndGet()).start(task);
     }
 
-    // FIXME:  and more: more things:
+    /**
+     * Enable normal operations by starting the writer task.
+     */
+    public void enableAccess() {
+        if (task == null) {
+            throw new VerifyException("not started");
+        }
+        if (thread != null) {
+            throw new VerifyException("already enabled");
+        }
+        thread = Thread.ofVirtual().name(memberId() + "-writer-" + WRITER_COUNTER.incrementAndGet()).start(task);
+        LOG.debug("{}: writer thread {} started", memberId(), thread);
+    }
+
+    // FIXME: and more things:
     //   - terminates any incomplete operations, reporting a CancellationException to them
     //   - unlocks the file
     // - stop() that:
@@ -113,10 +134,17 @@ public final class EnabledRaftStorage extends RaftStorage {
 
     @Override
     protected void preStop() {
+        if (thread == null) {
+            LOG.debug("{}: not enabled, no clean up necessary", memberId());
+            task = null;
+            return;
+        }
+
         LOG.debug("{}: terminating thread {}", memberId(), thread);
         var journal = task.processAndTerminate();
         try {
             thread.join();
+            LOG.debug("{}: terminated thread {}", memberId(), thread);
         } catch (InterruptedException e) {
             LOG.warn("{}: interrupted while waiting for writer to complete, forcing cancellation", memberId(), e);
             thread.interrupt();
