@@ -231,12 +231,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var pekkoResult = pekkoRecovery.handleRecoveryMessage(message);
         if (pekkoResult != null) {
-            pekkoRecoveryCompeleted(pekkoResult);
+            pekkoRecoveryCompleted(pekkoResult);
         }
     }
 
     @NonNullByDefault
-    private void pekkoRecoveryCompeleted(final RecoveryResult pekkoResult) throws IOException {
+    private void pekkoRecoveryCompleted(final RecoveryResult pekkoResult) throws IOException {
         LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
             pekkoResult.canRestoreFromSnapshot() ? "can" : "cannot");
         pekkoRecovery = null;
