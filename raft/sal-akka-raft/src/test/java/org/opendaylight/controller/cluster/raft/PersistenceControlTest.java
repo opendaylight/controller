@@ -13,10 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
@@ -28,18 +25,15 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  *
  * @author Thomas Pantelis
  */
-@ExtendWith(MockitoExtension.class)
 class PersistenceControlTest {
     @TempDir
     private Path directory;
-    @Mock
-    private RaftActor raftActor;
 
     private PersistenceControl control;
 
     @BeforeEach
     void beforeEach() {
-        control = new PersistenceControl(raftActor, new RaftStorageCompleter("test", Runnable::run), directory,
+        control = new PersistenceControl(new RaftStorageCompleter("test", Runnable::run), directory,
             CompressionType.NONE, new Configuration(0, directory));
     }
 
