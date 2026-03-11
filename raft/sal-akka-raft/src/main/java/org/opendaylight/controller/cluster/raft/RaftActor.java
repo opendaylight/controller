@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -37,6 +38,8 @@ import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.RaftState.StartedRaft;
+import org.opendaylight.controller.cluster.raft.RaftState.UnstartedRaft;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -64,7 +67,6 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.NoopRecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.RecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
@@ -72,7 +74,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -116,14 +118,6 @@ public abstract class RaftActor extends AbstractUntypedActor {
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
-    private final @NonNull PersistenceControl persistenceControl;
-    private final @NonNull RestrictedObjectStreams objectStreams;
-    private final @NonNull RaftStorageCompleter completer;
-    // This context should NOT be passed directly to any other actor it is  only to be consumed
-    // by the RaftActorBehaviors.
-    private final @NonNull LocalAccess localAccess;
-    private final @NonNull PeerInfos peerInfos;
-    private final @NonNull String memberId;
 
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
@@ -132,25 +126,20 @@ public abstract class RaftActor extends AbstractUntypedActor {
     private RaftActorVotingConfigSupport votingConfigSupport;
     private boolean shuttingDown;
 
+    private @NonNull RaftState state;
+
     @NonNullByDefault
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion,
             final RestrictedObjectStreams objectStreams) {
-        this.memberId = requireNonNull(memberId);
-        this.objectStreams = requireNonNull(objectStreams);
-
-        completer = new RaftStorageCompleter(memberId, this);
-        peerInfos = new PeerInfos(memberId, peerAddresses);
-
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
-        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        final var streamConfig = new FileBackedOutputStream.Configuration(config.getFileBackedStreamingThreshold(),
-            config.getTempFileDirectory());
-        persistenceControl = new PersistenceControl(completer, localAccess.stateDir(),
-            config.getPreferredCompression(), streamConfig);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
-            objectStreams, persistenceControl, this::applyCommand);
+        state = RaftState.unstartedOf(stateDir, objectStreams, memberId, peerAddresses, this,
+            config.getPreferredCompression(),
+            new Configuration(config.getFileBackedStreamingThreshold(), config.getTempFileDirectory()));
+
+        context = new RaftActorContextImpl(self(), getContext(), state.localAccess, state.peerInfos, config,
+            payloadVersion, state.objectStreams, state.persistenceControl, this::applyCommand);
     }
 
     /**
@@ -159,28 +148,42 @@ public abstract class RaftActor extends AbstractUntypedActor {
      * @return The member name
      */
     public final @NonNull String memberId() {
-        return memberId;
+        return state.memberId;
     }
 
     final @NonNull LocalAccess localAccess() {
-        return localAccess;
+        return state.localAccess;
     }
 
     final @NonNull PeerInfos peerInfos() {
-        return peerInfos;
+        return state.peerInfos;
     }
 
     /**
      * {@return the {@link RestrictedObjectStreams} instance to use for {@link StateMachineCommand} serialization}
      */
     final @NonNull RestrictedObjectStreams objectStreams() {
-        return objectStreams;
+        return state.objectStreams;
     }
 
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
         return super.getSender();
+    }
+
+    private StartedRaft startedState() {
+        if (state instanceof StartedRaft started) {
+            return started;
+        }
+        throw new VerifyException("Unexpected state " + state);
+    }
+
+    private UnstartedRaft unstartedState() {
+        if (state instanceof UnstartedRaft unstarted) {
+            return unstarted;
+        }
+        throw new VerifyException("Unexpected state " + state);
     }
 
     @Override
@@ -190,12 +193,14 @@ public abstract class RaftActor extends AbstractUntypedActor {
 
         super.preStart();
 
-        persistenceControl.start();
+        final var started = unstartedState().toStarted();
+        state = started;
+
         context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         votingConfigSupport = new RaftActorVotingConfigSupport(this);
 
-        runRecovery();
+        runRecovery(started);
     }
 
     @Override
@@ -209,14 +214,14 @@ public abstract class RaftActor extends AbstractUntypedActor {
                 LOG.warn("{}: Error closing behavior {}", memberId(), behavior.raftRole(), e);
             }
         }
-        persistenceControl.stop();
+        state = state.toUnstarted();
 
         super.postStop();
     }
 
-    private void runRecovery() throws IOException {
+    private void runRecovery(final @NonNull StartedRaft started) throws IOException {
         final Recovery<?> recovery;
-        final var journal = persistenceControl.journal();
+        final var journal = started.journal();
         if (journal != null) {
             LOG.debug("{}: starting journal recovery", memberId());
             recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
@@ -244,7 +249,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
                 LOG.debug("{}: Restoring snapshot: {}", memberId(), restoreFrom);
                 final var timestamp = Instant.now();
 
-                localAccess.termInfoStore().storeAndSetTerm(restoreFrom.termInfo());
+                state.localAccess.termInfoStore().storeAndSetTerm(restoreFrom.termInfo());
 
                 final var votingConfig = restoreFrom.votingConfig();
                 if (votingConfig != null) {
@@ -259,7 +264,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
                     recoveryCohort.applyRecoveredSnapshot(restoreState);
                 }
 
-                persistenceControl.snapshotStore().saveSnapshot(
+                state.persistenceControl.snapshotStore().saveSnapshot(
                     new RaftSnapshot(peerInfos().votingConfig(true), restoreFrom.getUnAppliedEntries()),
                     restoreFrom.lastApplied(), toStorage(getRaftActorSnapshotCohort().support(), restoreState),
                     timestamp);
@@ -291,7 +296,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
     @NonNullByDefault
     private void finishRecovery() {
         recoveryObserver().onRecoveryCompleted();
-        persistenceControl.postRecovery();
+        state.persistenceControl.postRecovery();
 
         onRecoveryComplete();
         initializeBehavior();
@@ -332,6 +337,8 @@ public abstract class RaftActor extends AbstractUntypedActor {
 
     @Override
     protected final void handleReceive(final Object message) {
+        final var completer = state.completer;
+
         // dispatch any pending completions first ...
         completer.completeUntilEmpty();
         // ... then handle the message ...
@@ -904,23 +911,23 @@ public abstract class RaftActor extends AbstractUntypedActor {
 
     @VisibleForTesting
     public final boolean isRecoveryApplicable() {
-        return persistenceControl.isRecoveryApplicable();
+        return state.persistenceControl.isRecoveryApplicable();
     }
 
     @VisibleForTesting
     @NonNullByDefault
     protected final PersistenceProvider persistence() {
-        return persistenceControl;
+        return state.persistenceControl;
     }
 
     protected final void setPersistence(final boolean persistent) {
         if (persistent) {
-            if (persistenceControl.becomePersistent() && getCurrentBehavior() != null) {
+            if (state.persistenceControl.becomePersistent() && getCurrentBehavior() != null) {
                 LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
                 captureSnapshot();
             }
         } else {
-            persistenceControl.becomeTransient();
+            state.persistenceControl.becomeTransient();
         }
     }
 
@@ -1089,7 +1096,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
     }
 
     final void saveEmptySnapshot() throws IOException {
-        persistenceControl.saveVotingConfig(context.getPeerServerInfo(true));
+        state.persistenceControl.saveVotingConfig(context.getPeerServerInfo(true));
     }
 
     /**
