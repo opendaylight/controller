@@ -47,8 +47,8 @@ final class PersistenceControl extends PersistenceProvider {
         storage = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final RaftStorageCompleter completer, final Path directory,
-            final CompressionType compression, final Configuration streamConfig) {
+    PersistenceControl(final RaftStorageCompleter completer, final Path directory, final CompressionType compression,
+            final Configuration streamConfig) {
         this(new DisabledRaftStorage(completer, directory, compression, streamConfig),
             new EnabledRaftStorage(completer, directory, compression, streamConfig, DEFAULT_JOURNAL_MAPPED));
     }

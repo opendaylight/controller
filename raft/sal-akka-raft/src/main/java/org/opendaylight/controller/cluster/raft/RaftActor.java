@@ -146,7 +146,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         final var streamConfig = new FileBackedOutputStream.Configuration(config.getFileBackedStreamingThreshold(),
             config.getTempFileDirectory());
-        persistenceControl = new PersistenceControl(this, completer, localAccess.stateDir(),
+        persistenceControl = new PersistenceControl(completer, localAccess.stateDir(),
             config.getPreferredCompression(), streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
