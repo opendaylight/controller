@@ -129,11 +129,14 @@ public abstract class AbstractMdsalTestBase {
                         .unpackDirectory(PAX_EXAM_UNPACK_DIRECTORY).useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                mvnLocalRepoOption(),
 
+                mvnLocalRepoOption(),
                 // Make sure karaf's default repository is consulted before anything else
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, "org.ops4j.pax.url.mvn.defaultRepositories",
-                        "file:${karaf.home}/${karaf.default.repository}@id=system.repository"),
+                    "file:${karaf.home}/${karaf.default.repository}@id=system.repository"),
+                // remote repository, exclude snapshots
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, "org.ops4j.pax.url.mvn.repositories",
+                    "https://repo1.maven.org/maven2@id=central"),
 
                 configureConsole().ignoreLocalConsole().ignoreRemoteShell(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
