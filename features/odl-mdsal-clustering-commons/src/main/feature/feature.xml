@@ -12,7 +12,7 @@
         <feature version="[14,15)">odl-dropwizard-metrics</feature>
         <feature version="[14,15)">odl-netty-4</feature>
         <feature version="[14,15)">odl-servlet-api</feature>
-        <feature version="[14,15)">odl-yangtools-data</feature>
-        <feature version="[14,15)">odl-yangtools-codec</feature>
+        <feature version="[15,16)">odl-yangtools-data</feature>
+        <feature version="[15,16)">odl-yangtools-codec</feature>
     </feature>
 </features>
