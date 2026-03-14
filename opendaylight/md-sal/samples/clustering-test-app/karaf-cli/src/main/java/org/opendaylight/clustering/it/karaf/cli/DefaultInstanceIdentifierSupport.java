@@ -19,17 +19,16 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactorySupplier;
 import org.opendaylight.yangtools.yang.data.util.codec.TypeAwareCodec;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Status;
-import org.opendaylight.yangtools.yang.model.api.TypeAware;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.stmt.LeafEffectiveStatement;
 import org.opendaylight.yangtools.yang.model.api.type.InstanceIdentifierTypeDefinition;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.RequireServiceComponentRuntime;
 
 @Component
-@RequireServiceComponentRuntime
 public final class DefaultInstanceIdentifierSupport implements InstanceIdentifierSupport {
     private final BindingInstanceIdentifierCodec bindingCodec;
     private final TypeAwareCodec<?, ?, ?> jsonCodec;
@@ -51,7 +50,7 @@ public final class DefaultInstanceIdentifierSupport implements InstanceIdentifie
     }
 
     // Mock wiring for JSON codec. Perhaps we should really bind to context-ref, or receive the class, or something.
-    private static final class FakeLeafDefinition implements InstanceIdentifierTypeDefinition, TypeAware {
+    private static final class FakeLeafDefinition implements InstanceIdentifierTypeDefinition, LeafSchemaNode {
         @Override
         public Optional<String> getReference() {
             throw new UnsupportedOperationException();
@@ -93,8 +92,33 @@ public final class DefaultInstanceIdentifierSupport implements InstanceIdentifie
         }
 
         @Override
-        public TypeDefinition<? extends TypeDefinition<?>> getType() {
+        public TypeDefinition<?> typeDefinition() {
             return this;
+        }
+
+        @Override
+        public Optional<Boolean> effectiveConfig() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isAugmenting() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isAddedByUses() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isMandatory() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public LeafEffectiveStatement asEffectiveStatement() {
+            throw new UnsupportedOperationException();
         }
     }
 }
