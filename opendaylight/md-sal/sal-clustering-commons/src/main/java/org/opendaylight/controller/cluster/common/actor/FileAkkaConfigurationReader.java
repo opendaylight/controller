@@ -21,10 +21,10 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true)
-@MetaInfServices
 @Singleton
-public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
+@Component
+@MetaInfServices
+public final class FileAkkaConfigurationReader implements AkkaConfigurationReader {
     private static final Logger LOG = LoggerFactory.getLogger(FileAkkaConfigurationReader.class);
     private static final Path CUSTOM_AKKA_CONF_PATH = Path.of("configuration", "initial", "pekko.conf");
     private static final Path FACTORY_AKKA_CONF_PATH = Path.of("configuration", "factory", "pekko.conf");

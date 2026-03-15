@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.akka.osgi.impl;
+package org.opendaylight.controller.cluster.common.actor.osgi;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
@@ -15,17 +15,17 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class QuarantinedMonitorActorPropsFactory {
+final class QuarantinedMonitorActorPropsFactory {
     private static final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActorPropsFactory.class);
 
     private static final String DEFAULT_HANDLING_DISABLED =
         "pekko.disable-default-actor-system-quarantined-event-handling";
 
     private QuarantinedMonitorActorPropsFactory() {
-
+        // Hidden on purpose
     }
 
-    public static Props createProps(final BundleContext bundleContext, final Config akkaConfig) {
+    static Props createProps(final BundleContext bundleContext, final Config akkaConfig) {
         try {
             if (akkaConfig.getBoolean(DEFAULT_HANDLING_DISABLED)) {
                 LOG.info("{} was set, default handling is disabled", DEFAULT_HANDLING_DISABLED);
