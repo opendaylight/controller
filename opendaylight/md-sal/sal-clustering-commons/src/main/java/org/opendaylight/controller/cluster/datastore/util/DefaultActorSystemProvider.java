@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.akka.impl;
+package org.opendaylight.controller.cluster.datastore.util;
 
 import com.typesafe.config.Config;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +17,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
-import org.opendaylight.controller.cluster.datastore.TerminationMonitor;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.util.ObjectRegistry;
 import org.slf4j.Logger;
@@ -26,15 +25,15 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseable {
+public final class DefaultActorSystemProvider implements ActorSystemProvider, AutoCloseable {
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
-    private static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultActorSystemProvider.class);
 
     private final @NonNull ActorSystem actorSystem;
     private final ObjectRegistry<ActorSystemProviderListener> listeners =
         ObjectRegistry.createConcurrent("ActorSystemProvider listeners");
 
-    public ActorSystemProviderImpl(
+    public DefaultActorSystemProvider(
             final ClassLoader classLoader, final Props quarantinedMonitorActorProps, final Config akkaConfig) {
         LOG.info("Creating new ActorSystem");
 
