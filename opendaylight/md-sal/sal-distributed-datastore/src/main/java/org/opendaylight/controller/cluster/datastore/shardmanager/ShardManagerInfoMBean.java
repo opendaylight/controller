@@ -10,17 +10,24 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import javax.management.MXBean;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.raft.api.RaftRole;
 
-// TODO: can we do an MXBean instead?
+@MXBean
 public interface ShardManagerInfoMBean {
     /**
      * Behaviours we can switch to.
      */
     @NonNullByDefault
     enum TargetBehavior {
+        /**
+         * A {@link RaftRole#Follower}.
+         */
         Follower(RaftRole.Follower),
+        /**
+         * A {@link RaftRole#Leader}.
+         */
         Leader(RaftRole.Leader);
 
         private final RaftRole raftRole;
@@ -29,6 +36,9 @@ public interface ShardManagerInfoMBean {
             this.raftRole = requireNonNull(raftRole);
         }
 
+        /**
+         * {@return the {@link RaftRole}}.
+         */
         public RaftRole raftRole() {
             return raftRole;
         }
