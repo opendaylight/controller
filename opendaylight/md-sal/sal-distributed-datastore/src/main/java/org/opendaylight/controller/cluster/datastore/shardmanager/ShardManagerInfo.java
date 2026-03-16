@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
-final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
+final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMXBean {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerInfo.class);
 
     public static final String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";

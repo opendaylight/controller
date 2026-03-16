@@ -1099,7 +1099,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     @VisibleForTesting
-    ShardManagerInfoMBean getMBean() {
+    ShardManagerInfoMXBean getMBean() {
         return shardManagerMBean;
     }
 
