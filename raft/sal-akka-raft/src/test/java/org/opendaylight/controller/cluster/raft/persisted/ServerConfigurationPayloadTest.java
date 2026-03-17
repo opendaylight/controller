@@ -24,7 +24,7 @@ class ServerConfigurationPayloadTest {
         final var expected = new VotingConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(125, bytes.length);
+        assertEquals(95, bytes.length);
         final var cloned = (VotingConfig) SerializationUtils.deserialize(bytes);
 
         assertEquals(expected.serverInfo(), cloned.serverInfo());
