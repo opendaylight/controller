@@ -50,6 +50,24 @@
       "message": "IMO you have to adapt also AbstractMXBean#server to make this work. Probably, you have to decide if to use annotation or manual registration. Check the docs.",
       "revId": "7e2b2f8f653966513695e0ea17e655f0dbe36357",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5bd052b_9c8daded",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-03-17T10:09:24Z",
+      "side": 1,
+      "message": "Check some other working example, some of the interfaces are annotated and some not.",
+      "parentUuid": "215b0692_d9e938bd",
+      "revId": "7e2b2f8f653966513695e0ea17e655f0dbe36357",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
