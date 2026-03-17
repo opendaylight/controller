@@ -7,17 +7,53 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Serializable;
+import com.google.common.collect.ImmutableList;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.List;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Serialization proxy for {@link VotingConfig}.
  */
-@NonNullByDefault
-record VC(List<ServerInfo> serverInfo) implements Serializable {
-    VC {
-        serverInfo = List.copyOf(serverInfo);
+final class VC implements Externalizable {
+    @java.io.Serial
+    private static final long serialVersionUID = 1L;
+
+    private List<ServerInfo> serverInfo;
+
+    // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+    // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
+    public VC() {
+        // For Externalizable
+    }
+
+    VC(final VotingConfig payload) {
+        serverInfo = payload.serverInfo();
+    }
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeInt(serverInfo.size());
+        for (var info : serverInfo) {
+            out.writeObject(info.peerId());
+            out.writeBoolean(info.isVoting());
+        }
+    }
+
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        final int size = in.readInt();
+
+        final var builder = ImmutableList.<ServerInfo>builderWithExpectedSize(size);
+        for (int i = 0; i < size; ++i) {
+            final var id = (String) in.readObject();
+            final var voting = in.readBoolean();
+            builder.add(new ServerInfo(id, voting));
+        }
+        serverInfo = builder.build();
     }
 
     @java.io.Serial
