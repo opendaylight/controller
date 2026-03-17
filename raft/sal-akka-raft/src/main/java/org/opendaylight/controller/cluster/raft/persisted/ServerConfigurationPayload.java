@@ -19,7 +19,9 @@ import java.util.List;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "14.0.0", forRemoval = true)
 abstract class ServerConfigurationPayload {
+    @Deprecated(since = "14.0.0", forRemoval = true)
     static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
