@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,13 +47,13 @@ final class VC implements Externalizable {
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         final int size = in.readInt();
 
-        final var builder = ImmutableList.<ServerInfo>builderWithExpectedSize(size);
+        final var tmp = new ArrayList<ServerInfo>(size);
         for (int i = 0; i < size; ++i) {
             final var id = (String) in.readObject();
             final var voting = in.readBoolean();
-            builder.add(new ServerInfo(id, voting));
+            tmp.add(new ServerInfo(id, voting));
         }
-        serverInfo = builder.build();
+        serverInfo = List.copyOf(tmp);
     }
 
     @java.io.Serial

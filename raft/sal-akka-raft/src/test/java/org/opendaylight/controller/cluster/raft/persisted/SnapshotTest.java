@@ -26,8 +26,8 @@ class SnapshotTest {
     @Test
     void testSerialization() {
         testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7 },
-            List.of(new DefaultLogEntry(6, 2, new MockCommand("payload"))), 470);
-        testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, List.of(), 345);
+            List.of(new DefaultLogEntry(6, 2, new MockCommand("payload"))), 440);
+        testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, List.of(), 315);
     }
 
     private static void testSerialization(final byte[] state, final List<LogEntry> unapplied,
