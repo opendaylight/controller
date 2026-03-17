@@ -29,7 +29,7 @@ import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationExce
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
+import org.opendaylight.controller.cluster.common.actor.DispatcherType;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
