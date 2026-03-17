@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -31,20 +30,20 @@ public final class VotingConfig extends AbstractRaftCommand {
     private static final long serialVersionUID = 1L;
 
     // FIXME: should be a Map<String, ServerInfo>, but then it really should be something like 'ElectionPolicy'
-    private final ImmutableList<ServerInfo> serverInfo;
+    private final List<ServerInfo> serverInfo;
 
     private int serializedSize = -1;
 
     public VotingConfig(final ServerInfo serverInfo) {
-        this.serverInfo = ImmutableList.of(serverInfo);
+        this.serverInfo = List.of(serverInfo);
     }
 
     public VotingConfig(final ServerInfo... serverInfo) {
-        this.serverInfo = ImmutableList.copyOf(serverInfo);
+        this.serverInfo = List.copyOf(serverInfo);
     }
 
     public VotingConfig(final List<ServerInfo> serverInfo) {
-        this.serverInfo = ImmutableList.copyOf(serverInfo);
+        this.serverInfo = List.copyOf(serverInfo);
     }
 
     /**
@@ -81,7 +80,7 @@ public final class VotingConfig extends AbstractRaftCommand {
 
     @Override
     protected Object writeReplace() {
-        return new ServerConfigurationPayload.Proxy(this);
+        return new VC(serverInfo);
     }
 
     @Override
