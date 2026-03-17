@@ -60,7 +60,7 @@ function join {
     delim=',\n\t\t\t\t'
     final=$1; shift
 
-    for str in $* ; do
+    for str in "$@" ; do
         final=${final}${delim}${str}
     done
 
@@ -75,27 +75,27 @@ function create_strings
     # First create an arrays with one string per controller.
     # Then merge the array using the join utility defined above.
     count=1
-    for ip in ${CONTROLLERIPS[@]} ; do
+    for ip in "${CONTROLLERIPS[@]}" ; do
         ds[$count]=\\\"pekko:\\/\\/opendaylight-cluster-data@${ip}:2550\\\"
         rpc[$count]=\\\"pekko:\\/\\/odl-cluster-rpc@${ip}:2551\\\"
         members[$count]=\\\"member-${count}\\\"
         count=$[count + 1]
     done
 
-    DATA_SEED_LIST=$(join ${ds[@]})
-    RPC_SEED_LIST=$(join ${rpc[@]})
-    MEMBER_NAME_LIST=$(join ${members[@]})
+    DATA_SEED_LIST=$(join "${ds[@]}")
+    RPC_SEED_LIST=$(join "${rpc[@]}")
+    MEMBER_NAME_LIST=$(join "${members[@]}")
 }
 
 function module_shards_builder
 {
 
     module_shards_string="module-shards = [\n\t{\n\t\tname = \"default\"\n\t\tshards = [\n\t\t\t{\n\t\t\t\tname = \"default\"\n\t\t\t\treplicas = []\n\t\t\t}\n\t\t]\n\t}"
-    for name in ${FRIENDLY_MODULE_NAMES[@]} ; do
+    for name in "${FRIENDLY_MODULE_NAMES[@]}" ; do
         module_shards_string="${module_shards_string},\n\t{\n\t\tname = \"${name}\"\n\t\tshards = [\n\t\t\t{\n\t\t\t\tname=\"${name}\"\n\t\t\t\treplicas = []\n\t\t\t}\n\t\t]\n\t}"
     done
 
-    echo -e ${module_shards_string}"\n]"
+    echo -e "${module_shards_string}\n]"
 }
 
 function modules_builder
@@ -103,17 +103,17 @@ function modules_builder
 
     modules_string="modules = [\n\t"
     count=1
-    for name in ${FRIENDLY_MODULE_NAMES[@]} ; do
+    for name in "${FRIENDLY_MODULE_NAMES[@]}" ; do
         modules_string="${modules_string}\n\t{\n\t\tname = \"${name}\"\n\t\tnamespace = \"${MODULE_NAMESPACES[${count}]}\"\n\t\tshard-strategy = \"module\"\n\t},"
         count=$[count + 1]
     done
 
     if [ ${count} == 1 ]; then
         # if no modules found in custom_shard_config.txt just close the bracket
-        echo -e ${modules_string}"\n]"
+        echo -e "${modules_string}\n]"
     else
         # using ::-1 below to remove the extra comma we get from the above loop
-        echo -e ${modules_string::-1}"\n]"
+        echo -e "${modules_string::-1}\n]"
     fi
 }
 
@@ -130,7 +130,7 @@ function get_cli_params
     test "${CONTROLLER_LIST}" == "" && usage "Missing controller list"
 
     # Create the list of controllers from the CONTROLLER_LIST variable
-    CONTROLLERIPS=( ${CONTROLLER_LIST//,/ } )
+    CONTROLLERIPS=( "${CONTROLLER_LIST//,/ }" )
 
     test ${INDEX} -le 0 -o ${INDEX} -gt ${#CONTROLLERIPS[@]} && \
         usage "Invalid index"
@@ -154,6 +154,7 @@ function modify_conf_files
     sed -i -e "/seed-nodes[ ]*=/ { :loop2 /.*\]/ b done2; N; b loop2; :done2 s/seed-nodes.*opendaylight-cluster-data.*\]/seed-nodes = [${DATA_SEED_LIST}]/; s/seed-nodes.*odl-cluster-rpc.*\]/seed-nodes = [${RPC_SEED_LIST}]/}" ${AKKACONF}
 
     if [ -f ${CUSTOM_SHARD_CONFIG_FILE} ]; then
+        # shellcheck source=/dev/null
         source ${CUSTOM_SHARD_CONFIG_FILE}
         if [ "${#FRIENDLY_MODULE_NAMES[@]}" -ne "${#MODULE_NAMESPACES[@]}" ]; then
             echo -e "\ncustom shard config file \"${CUSTOM_SHARD_CONFIG_FILE}\" does not have the same number of FRIENDLY_MODULE_NAMES[] and MODULE_NAMESPACES[]\n"
@@ -181,7 +182,7 @@ function verify_configuration_files
     MODULESHARDSCONF=${CONF_DIR}/module-shards.conf
 
     # Verify configuration files are present in expected location.
-    if [ ! -f ${AKKACONF} -o ! -f ${MODULESHARDSCONF} ]; then
+    if [[ ! -f ${AKKACONF} || ! -f ${MODULESHARDSCONF} ]]; then
         # Check if the configuration files exist in the system
         # directory, then copy them over.
         ORIG_CONF_DIR=${CONTROLLER_DIR}/system/org/opendaylight/controller/sal-clustering-config
@@ -191,9 +192,9 @@ function verify_configuration_files
         ORIG_MODULES_CONF=sal-clustering-config-${version}-moduleconf.xml
         ORIG_MODULESHARDS_CONF=sal-clustering-config-${version}-moduleshardconf.xml
 
-        if [ -f ${ORIG_CONF_DIR}/${ORIG_AKKA_CONF} -a \
-             -f ${ORIG_CONF_DIR}/${ORIG_MODULES_CONF} -a \
-             -f ${ORIG_CONF_DIR}/${ORIG_MODULESHARDS_CONF} ]; then
+        if [[ -f ${ORIG_CONF_DIR}/${ORIG_AKKA_CONF} &&  \
+             -f ${ORIG_CONF_DIR}/${ORIG_MODULES_CONF} &&  \
+             -f ${ORIG_CONF_DIR}/${ORIG_MODULESHARDS_CONF} ]]; then
             cat <<EOF
  NOTE: Cluster configuration files not found. Copying from
  ${ORIG_CONF_DIR}
@@ -215,7 +216,7 @@ EOF
 
 function main
 {
-    get_cli_params $*
+    get_cli_params "$@"
     start_banner
     verify_configuration_files
     create_strings
@@ -223,6 +224,6 @@ function main
     end_banner
 }
 
-main $*
+main "$@"
 
 # vim: ts=4 sw=4 sts=4 et ft=sh :
