@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.collect.ImmutableList;
-import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -17,11 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-// FIXME: 12.0.0: not Serializable
-public final class ShardManagerSnapshot implements Serializable {
-    @java.io.Serial
-    private static final long serialVersionUID = 1L;
-
+public final class ShardManagerSnapshot {
     private final List<String> shardList;
 
     public ShardManagerSnapshot(final @NonNull List<String> shardList) {
@@ -30,11 +25,6 @@ public final class ShardManagerSnapshot implements Serializable {
 
     public List<String> getShardList() {
         return shardList;
-    }
-
-    @java.io.Serial
-    private Object writeReplace() {
-        return new SM(this);
     }
 
     @Override

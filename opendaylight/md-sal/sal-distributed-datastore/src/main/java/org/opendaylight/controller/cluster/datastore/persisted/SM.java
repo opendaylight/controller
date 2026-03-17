@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static com.google.common.base.Verify.verifyNotNull;
-import static java.util.Objects.requireNonNull;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 /**
  * Serialization proxy for {@link ShardManagerSnapshot}.
  */
+@Deprecated(since = "13.0.0", forRemoval = true)
 final class SM implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -28,10 +28,6 @@ final class SM implements Externalizable {
     @SuppressWarnings("checkstyle:RedundantModifier")
     public SM() {
         // For Externalizable
-    }
-
-    SM(final ShardManagerSnapshot snapshot) {
-        this.snapshot = requireNonNull(snapshot);
     }
 
     @Override
