@@ -26,12 +26,12 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 class InstallSnapshotTest {
     @Test
     void testCurrentSerialization() {
-        testSerialization(RaftVersions.CURRENT_VERSION, 1262, 1125);
+        testSerialization(RaftVersions.CURRENT_VERSION, 1232, 1125);
     }
 
     @Test
     void testFluorineSerialization() {
-        testSerialization(RaftVersions.FLUORINE_VERSION, 1302, 1165);
+        testSerialization(RaftVersions.FLUORINE_VERSION, 1272, 1165);
     }
 
     private static void testSerialization(final short raftVersion, final int fullSize, final int emptySize) {
