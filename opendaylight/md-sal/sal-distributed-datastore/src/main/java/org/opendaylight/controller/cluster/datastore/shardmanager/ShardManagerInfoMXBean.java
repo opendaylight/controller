@@ -10,12 +10,10 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import javax.management.MXBean;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.raft.api.RaftRole;
 
-@MXBean
-public interface ShardManagerInfoMBean {
+public interface ShardManagerInfoMXBean {
     /**
      * Behaviours we can switch to.
      */
