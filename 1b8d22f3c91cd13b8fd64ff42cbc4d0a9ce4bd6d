@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df6614e2_0a5c6af8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerInfoMXBean.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-03-18T16:12:30Z",
+      "side": 1,
+      "message": "renaming is not necessary -- the annotation is sufficient",
+      "range": {
+        "startLine": 18,
+        "startChar": 33,
+        "endLine": 18,
+        "endChar": 39
+      },
+      "revId": "1b8d22f3c91cd13b8fd64ff42cbc4d0a9ce4bd6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
