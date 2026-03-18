@@ -120,17 +120,17 @@
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-annotations</artifactId>
-                <version>1.45.1</version>
+                <version>1.45.2</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-client</artifactId>
-                <version>1.45.1</version>
+                <version>1.45.2</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-driver</artifactId>
-                <version>1.45.1</version>
+                <version>1.45.2</version>
             </dependency>
 
             <dependency>
