@@ -910,7 +910,7 @@ Identifier <https://wiki-archive.opendaylight.org/view/OpenDaylight_Controller:M
      be known which node is X (for example: C:X). For more details about
      encoding, see: `RESTCONF RFC 8040 - Encoding YANG Instance Identifiers in
      the Request
-     URI. <https://datatracker.ietf.org/doc/html/rfc8040#section-3.5.3>`__
+     URI. <https://www.rfc-editor.org/rfc/rfc8040#section-3.5.3>`__
 
 Mount point
 ~~~~~~~~~~~
@@ -1086,7 +1086,7 @@ DELETE /rests/data/<identifier>
 -  <identifier> points to a data node which must be removed.
 
 More information is available in the `RESTCONF
-RFC <https://datatracker.ietf.org/doc/html/rfc8040>`__.
+RFC <https://www.rfc-editor.org/rfc/rfc8040>`__.
 
 How RESTCONF works
 ~~~~~~~~~~~~~~~~~~
