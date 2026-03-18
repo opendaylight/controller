@@ -818,8 +818,7 @@ specify that instance-identifier (in this case the identifier of a node)
 when invoking RPC.
 
 Simple code which showcases that for add-flow via Binding-Aware APIs
-(`RoutedServiceTest.java <https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=blob;f=opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/binding/it/RoutedServiceTest.java;h=d49d6f0e25e271e43c8550feb5eef63d96301184;hb=HEAD>`__
-):
+(`RoutedServiceIT.java <https://github.com/opendaylight/controller/blob/3616a92867a3cec75a8aa4efa47d023b7541623b/opendaylight/md-sal/sal-binding-it/src/test/java/org/opendaylight/controller/test/sal/binding/it/RoutedServiceIT.java>`__):
 
 .. code:: java
 
