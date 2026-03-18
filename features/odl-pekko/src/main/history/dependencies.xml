@@ -3,7 +3,7 @@
     <feature version="0.0.0">
         <feature>odl-netty-4</feature>
         <bundle>mvn:com.typesafe/config/1.4.5</bundle>
-        <bundle>mvn:com.typesafe/ssl-config-core_3/0.6.1</bundle>
+        <bundle>mvn:com.typesafe/ssl-config-core_3/0.7.1</bundle>
         <bundle>mvn:io.aeron/aeron-annotations/1.45.2</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.45.2</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.45.2</bundle>
