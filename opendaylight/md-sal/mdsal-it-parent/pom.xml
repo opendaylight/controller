@@ -132,28 +132,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <goal>verify</goal>
             </goals>
             <configuration>
-              <systemProperties>
-                <property>
-                 <name>karaf.distro.groupId</name>
-                 <value>${karaf.distro.groupId}</value>
-                </property>
-                <property>
-                 <name>karaf.distro.artifactId</name>
-                 <value>${karaf.distro.artifactId}</value>
-                </property>
-                <property>
-                 <name>karaf.distro.version</name>
-                 <value>${karaf.distro.version}</value>
-                </property>
-                <property>
-                 <name>karaf.distro.type</name>
-                 <value>${karaf.distro.type}</value>
-                </property>
-                <property>
-                 <name>karaf.keep.unpack</name>
-                 <value>${karaf.keep.unpack}</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <karaf.distro.groupId>${karaf.distro.groupId}</karaf.distro.groupId>
+                <karaf.distro.artifactId>${karaf.distro.artifactId}</karaf.distro.artifactId>
+                <karaf.distro.version>${karaf.distro.version}</karaf.distro.version>
+                <karaf.distro.type>${karaf.distro.type}</karaf.distro.type>
+                <karaf.keep.unpack>${karaf.distro.version}</karaf.keep.unpack>
+              </systemPropertyVariables>
               <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
             </configuration>
           </execution>
