@@ -106,28 +106,28 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
         LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName, yangPath,
-                bindingContext.bindingQName);
+                bindingContext.qname());
 
         checkNotNull(schemaService, "%s: Could not obtain the SchemaService OSGi service", logName);
 
         EffectiveModelContext schemaContext = schemaService.getGlobalContext();
 
-        Module module = schemaContext.findModule(bindingContext.bindingQName.getModule()).orElse(null);
+        Module module = schemaContext.findModule(bindingContext.qname().getModule()).orElse(null);
         checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
-                logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
+                logName, bindingContext.qname().getNamespace(), bindingContext.qname().getRevision());
 
         final SchemaInferenceStack schemaStack = SchemaInferenceStack.of(schemaContext);
         final SchemaTreeEffectiveStatement<?> dataSchema;
         try {
-            dataSchema = schemaStack.enterSchemaTree(bindingContext.bindingQName);
+            dataSchema = schemaStack.enterSchemaTree(bindingContext.qname());
         } catch (IllegalArgumentException e) {
             throw new ConfigXMLReaderException(
-                logName + ": Could not obtain the schema for " + bindingContext.bindingQName, e);
+                logName + ": Could not obtain the schema for " + bindingContext.qname(), e);
         }
 
         checkCondition(bindingContext.schemaType.isInstance(dataSchema),
                 "%s: Expected schema type %s for %s but actual type is %s", logName,
-                bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass());
+                bindingContext.schemaType, bindingContext.qname(), dataSchema.getClass());
 
         NormalizedNode dataNode = parsePossibleDefaultAppConfigXMLFile(schemaStack);
         if (dataNode == null) {
@@ -138,7 +138,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
         // This shouldn't happen but need to handle it in case...
         checkNotNull(appConfig, "%s: Could not create instance for app config binding %s", logName,
-                bindingContext.appConfigBindingClass);
+                bindingContext.bindingClass());
 
         return (T) appConfig;
     }
@@ -161,7 +161,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         if (Strings.isNullOrEmpty(appConfigFileName)) {
             String moduleName = schemaStack.currentModule().argument().getLocalName();
 
-            appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
+            appConfigFileName = moduleName + "_" + bindingContext.qname().getLocalName() + ".xml";
         }
 
         Optional<URL> optionalURL;

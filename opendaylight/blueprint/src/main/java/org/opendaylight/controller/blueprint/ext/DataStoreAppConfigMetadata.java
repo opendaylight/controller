@@ -139,7 +139,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private void retrieveInitialAppConfig(final DataBroker dataBroker) {
         LOG.debug("{}: Got DataBroker instance - reading app config {}", logName(), bindingContext.appConfigPath);
 
-        setDependencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
+        setDependencyDesc("Initial app config " + bindingContext.bindingClass().getSimpleName());
 
         // We register a DTCL to get updates and also read the app config data from the data store. If the app config
         // data is present then both the read and initial DTCN update will return it. If the the data isn't present, we
@@ -160,7 +160,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             @Override
             public void onSuccess(final Optional<DataObject> possibleAppConfig) {
                 LOG.debug("{}: Read of app config {} succeeded: {}", logName(),
-                    bindingContext.appConfigBindingClass.getName(), possibleAppConfig);
+                    bindingContext.bindingClass().getName(), possibleAppConfig);
 
                 setInitialAppConfig(possibleAppConfig);
             }
@@ -170,7 +170,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 // We may have gotten the app config via the data tree change listener so only retry if not.
                 if (readingInitialAppConfig.get()) {
                     LOG.warn("{}: Read of app config {} failed - retrying", logName(),
-                            bindingContext.appConfigBindingClass.getName(), failure);
+                            bindingContext.bindingClass().getName(), failure);
 
                     readInitialAppConfig(dataBroker);
                 }
@@ -268,7 +268,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             return null;
         }
 
-        LOG.debug("{}: parsePossibleDefaultAppConfigElement for {}", logName(), bindingContext.bindingQName);
+        LOG.debug("{}: parsePossibleDefaultAppConfigElement for {}", logName(), bindingContext.qname());
 
         LOG.debug("{}: Got app config schema: {}", logName(), dataSchema);
 

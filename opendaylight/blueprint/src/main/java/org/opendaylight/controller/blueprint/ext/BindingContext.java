@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.binding.ChildOf;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
@@ -19,7 +20,6 @@ import org.opendaylight.yangtools.binding.DataRoot;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
 import org.opendaylight.yangtools.binding.contract.Naming;
-import org.opendaylight.yangtools.binding.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -50,14 +50,14 @@ abstract sealed class BindingContext {
      */
     private static final class ContainerBindingContext extends BindingContext {
         @SuppressWarnings("unchecked")
-        ContainerBindingContext(final Class<? extends DataObject> appConfigBindingClass) {
-            super(appConfigBindingClass, DataObjectIdentifier.builder((Class) appConfigBindingClass).build(),
+        ContainerBindingContext(final BindingClass<?> appConfigBindingClass) {
+            super(appConfigBindingClass, DataObjectIdentifier.builder((Class) appConfigBindingClass.clazz()).build(),
                 ContainerSchemaNode.class);
         }
 
         @Override
         public ContainerNode newDefaultNode(final SchemaTreeInference dataSchema) {
-            return ImmutableNodes.newContainerBuilder().withNodeIdentifier(new NodeIdentifier(bindingQName)).build();
+            return ImmutableNodes.newContainerBuilder().withNodeIdentifier(new NodeIdentifier(qname())).build();
         }
     }
 
@@ -68,24 +68,23 @@ abstract sealed class BindingContext {
         private final String appConfigListKeyValue;
 
         @SuppressWarnings("unchecked")
-        private ListBindingContext(final Class<? extends DataObject> appConfigBindingClass,
+        private ListBindingContext(final BindingClass<?> appConfigBindingClass,
                 final DataObjectIdentifier<?> appConfigPath, final String appConfigListKeyValue) {
-            super((Class<DataObject>) appConfigBindingClass, (DataObjectIdentifier<DataObject>) appConfigPath,
-                    ListSchemaNode.class);
+            super(appConfigBindingClass, (DataObjectIdentifier<DataObject>) appConfigPath, ListSchemaNode.class);
             this.appConfigListKeyValue = appConfigListKeyValue;
         }
 
         static <T extends EntryObject<T, K> & ChildOf<? extends DataRoot<?>>, K extends Key<T>>
-                ListBindingContext newInstance(final Class<T> bindingClass, final String listKeyValue)
+                ListBindingContext newInstance(final BindingClass<T> bindingClass, final String listKeyValue)
                     throws InstantiationException, IllegalAccessException, IllegalArgumentException,
                            InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the YANG list key type is string.
             @SuppressWarnings("unchecked")
-            final var keyInstance = (K) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
+            final var keyInstance = (K) bindingClass.clazz().getMethod(Naming.KEY_AWARE_KEY_NAME)
                 .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
 
-            return new ListBindingContext(bindingClass, DataObjectIdentifier.builder(bindingClass, keyInstance).build(),
-                listKeyValue);
+            return new ListBindingContext(bindingClass,
+                DataObjectIdentifier.builder(bindingClass.clazz(), keyInstance).build(), listKeyValue);
         }
 
         @Override
@@ -95,35 +94,33 @@ abstract sealed class BindingContext {
             // We assume there's only one key for the list.
             final var keys = stmt.findFirstEffectiveSubstatementArgument(KeyEffectiveStatement.class).orElseThrow();
             if (keys.size() != 1) {
-                throw new IllegalArgumentException("Expected only 1 key for list " + appConfigBindingClass);
+                throw new IllegalArgumentException("Expected only 1 key for list " + bindingClass());
             }
 
             QName listKeyQName = keys.iterator().next();
             return ImmutableNodes.newMapEntryBuilder()
-                .withNodeIdentifier(NodeIdentifierWithPredicates.of(bindingQName, listKeyQName, appConfigListKeyValue))
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(qname(), listKeyQName, appConfigListKeyValue))
                 .withChild(ImmutableNodes.leafNode(listKeyQName, appConfigListKeyValue))
                 .build();
         }
     }
 
+    private final BindingClass<?> appConfigBindingClass;
     final DataObjectIdentifier<DataObject> appConfigPath;
-    final Class<?> appConfigBindingClass;
     final Class<? extends DataSchemaNode> schemaType;
-    final QName bindingQName;
 
-    private BindingContext(final Class<?> appConfigBindingClass, final DataObjectIdentifier<DataObject> appConfigPath,
-            final Class<? extends DataSchemaNode> schemaType) {
+    private BindingContext(final BindingClass<?> appConfigBindingClass,
+            final DataObjectIdentifier<DataObject> appConfigPath, final Class<? extends DataSchemaNode> schemaType) {
         this.appConfigBindingClass = appConfigBindingClass;
         this.appConfigPath = appConfigPath;
         this.schemaType = schemaType;
-
-        bindingQName = BindingReflections.findQName(appConfigBindingClass);
     }
 
     static BindingContext create(final String logName, final Class<? extends DataObject> klass,
             final String appConfigListKeyValue) {
+        final var bindingClass = BindingClass.of(logName, klass);
         if (!EntryObject.class.isAssignableFrom(klass)) {
-            return new ContainerBindingContext(klass);
+            return new ContainerBindingContext(bindingClass);
         }
 
         // The binding class corresponds to a yang list.
@@ -135,13 +132,21 @@ abstract sealed class BindingContext {
         }
 
         try {
-            return ListBindingContext.newInstance((Class) klass, appConfigListKeyValue);
+            return ListBindingContext.newInstance((BindingClass) bindingClass, appConfigListKeyValue);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
             | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             throw new ComponentDefinitionException(String.format(
                 "%s: Error initializing for app config list binding class %s",
                 logName, klass.getName()), e);
         }
+    }
+
+    final @NonNull Class<? extends DataObject> bindingClass() {
+        return appConfigBindingClass.clazz();
+    }
+
+    final @NonNull QName qname() {
+        return appConfigBindingClass.qname();
     }
 
     NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
