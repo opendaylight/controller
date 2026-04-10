@@ -44,63 +44,11 @@ import org.xml.sax.SAXException;
  *
  * @author Thomas Pantelis (originally; re-factored by Michael Vorburger.ch)
  */
-public abstract class BindingContext {
-    public static BindingContext create(final String logName, final Class<? extends DataObject> klass,
-            final String appConfigListKeyValue) {
-        if (EntryObject.class.isAssignableFrom(klass)) {
-            // The binding class corresponds to a yang list.
-            // FIXME: support empty keys?
-            if (appConfigListKeyValue == null || appConfigListKeyValue.isEmpty()) {
-                throw new ComponentDefinitionException(String.format(
-                        "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
-                        logName, klass.getName(), DataStoreAppConfigMetadata.LIST_KEY_VALUE));
-            }
-
-            try {
-                return ListBindingContext.newInstance((Class) klass, appConfigListKeyValue);
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                throw new ComponentDefinitionException(String.format(
-                        "%s: Error initializing for app config list binding class %s",
-                        logName, klass.getName()), e);
-            }
-
-        } else {
-            return new ContainerBindingContext(klass);
-        }
-    }
-
-    public final DataObjectIdentifier<DataObject> appConfigPath;
-    public final Class<?> appConfigBindingClass;
-    public final Class<? extends DataSchemaNode> schemaType;
-    public final QName bindingQName;
-
-    private BindingContext(final Class<?> appConfigBindingClass, final DataObjectIdentifier<DataObject> appConfigPath,
-            final Class<? extends DataSchemaNode> schemaType) {
-        this.appConfigBindingClass = appConfigBindingClass;
-        this.appConfigPath = appConfigPath;
-        this.schemaType = schemaType;
-
-        bindingQName = BindingReflections.findQName(appConfigBindingClass);
-    }
-
-    public NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
-            throws XMLStreamException, IOException, SAXException, URISyntaxException {
-        final var resultHolder = new NormalizationResultHolder();
-        final var writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
-        final var xmlParser = XmlParserStream.create(writer, dataSchema);
-        xmlParser.traverse(new DOMSource(element));
-
-        final var result = resultHolder.getResult().data();
-        return result instanceof MapNode mapNode ? mapNode.body().iterator().next() : result;
-    }
-
-    public abstract NormalizedNode newDefaultNode(SchemaTreeInference dataSchema);
-
+abstract sealed class BindingContext {
     /**
      * BindingContext implementation for a container binding.
      */
-    private static class ContainerBindingContext extends BindingContext {
+    private static final class ContainerBindingContext extends BindingContext {
         @SuppressWarnings("unchecked")
         ContainerBindingContext(final Class<? extends DataObject> appConfigBindingClass) {
             super(appConfigBindingClass, DataObjectIdentifier.builder((Class) appConfigBindingClass).build(),
@@ -116,11 +64,11 @@ public abstract class BindingContext {
     /**
      * BindingContext implementation for a list binding.
      */
-    private static class ListBindingContext extends BindingContext {
-        final String appConfigListKeyValue;
+    private static final class ListBindingContext extends BindingContext {
+        private final String appConfigListKeyValue;
 
         @SuppressWarnings("unchecked")
-        ListBindingContext(final Class<? extends DataObject> appConfigBindingClass,
+        private ListBindingContext(final Class<? extends DataObject> appConfigBindingClass,
                 final DataObjectIdentifier<?> appConfigPath, final String appConfigListKeyValue) {
             super((Class<DataObject>) appConfigBindingClass, (DataObjectIdentifier<DataObject>) appConfigPath,
                     ListSchemaNode.class);
@@ -141,7 +89,7 @@ public abstract class BindingContext {
         }
 
         @Override
-        public NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
+        NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
             final var stmt = dataSchema.statementPath().getLast();
 
             // We assume there's only one key for the list.
@@ -157,4 +105,55 @@ public abstract class BindingContext {
                 .build();
         }
     }
+
+    final DataObjectIdentifier<DataObject> appConfigPath;
+    final Class<?> appConfigBindingClass;
+    final Class<? extends DataSchemaNode> schemaType;
+    final QName bindingQName;
+
+    private BindingContext(final Class<?> appConfigBindingClass, final DataObjectIdentifier<DataObject> appConfigPath,
+            final Class<? extends DataSchemaNode> schemaType) {
+        this.appConfigBindingClass = appConfigBindingClass;
+        this.appConfigPath = appConfigPath;
+        this.schemaType = schemaType;
+
+        bindingQName = BindingReflections.findQName(appConfigBindingClass);
+    }
+
+    static BindingContext create(final String logName, final Class<? extends DataObject> klass,
+            final String appConfigListKeyValue) {
+        if (!EntryObject.class.isAssignableFrom(klass)) {
+            return new ContainerBindingContext(klass);
+        }
+
+        // The binding class corresponds to a yang list.
+        // FIXME: support empty keys?
+        if (appConfigListKeyValue == null || appConfigListKeyValue.isEmpty()) {
+            throw new ComponentDefinitionException(String.format(
+                "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
+                logName, klass.getName(), DataStoreAppConfigMetadata.LIST_KEY_VALUE));
+        }
+
+        try {
+            return ListBindingContext.newInstance((Class) klass, appConfigListKeyValue);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            throw new ComponentDefinitionException(String.format(
+                "%s: Error initializing for app config list binding class %s",
+                logName, klass.getName()), e);
+        }
+    }
+
+    NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
+            throws XMLStreamException, IOException, SAXException, URISyntaxException {
+        final var resultHolder = new NormalizationResultHolder();
+        final var writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+        final var xmlParser = XmlParserStream.create(writer, dataSchema);
+        xmlParser.traverse(new DOMSource(element));
+
+        final var result = resultHolder.getResult().data();
+        return result instanceof MapNode mapNode ? mapNode.body().iterator().next() : result;
+    }
+
+    abstract NormalizedNode newDefaultNode(SchemaTreeInference dataSchema);
 }
