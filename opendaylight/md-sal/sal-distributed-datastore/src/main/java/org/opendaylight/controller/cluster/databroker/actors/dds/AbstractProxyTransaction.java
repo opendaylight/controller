@@ -628,14 +628,21 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         successfulRequests.clear();
 
-        enqueueRequest(new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
-            LOG.debug("{}: purge completed", this);
-            parent.purgeTransaction(this);
+        try {
+            enqueueRequest(new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
+                LOG.debug("{}: purge completed", this);
+                parent.purgeTransaction(this);
 
-            if (callback != null) {
-                callback.accept(resp);
-            }
-        }, enqueuedTicks);
+                if (callback != null) {
+                    callback.accept(resp);
+                }
+            }, enqueuedTicks);
+        } catch (IllegalStateException e) {
+            // Connection has been poisoned (e.g. actor shutdown) — remote purge is impossible,
+            // complete the local cleanup directly.
+            LOG.debug("{}: connection closed, completing purge locally", this);
+            parent.purgeTransaction(this);
+        }
     }
 
     // Called with the connection unlocked

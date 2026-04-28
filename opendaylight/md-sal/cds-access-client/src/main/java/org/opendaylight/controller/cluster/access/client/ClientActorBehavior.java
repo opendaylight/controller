@@ -156,6 +156,12 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     public void close() {
         responseMessageAssembler.close();
         staleBackendInfoReg.close();
+        // Fail any pending request futures so that callers blocked on .get() during
+        // OSGi bundle teardown don't hang until the 30-second lock timeout.
+        if (!connections.isEmpty()) {
+            poison(new RuntimeRequestException("Client actor shutting down",
+                new IllegalStateException("shutdown")));
+        }
     }
 
     /**

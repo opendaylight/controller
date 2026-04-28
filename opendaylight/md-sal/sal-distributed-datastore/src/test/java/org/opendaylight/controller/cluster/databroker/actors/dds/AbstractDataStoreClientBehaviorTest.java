@@ -17,6 +17,8 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Status;
@@ -125,6 +127,20 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         internalCommand.execute(behavior);
 
         assertThrows(IllegalStateException.class, () -> behavior.createLocalHistory());
+    }
+
+    @Test
+    public void testCloseCompletesInflightRequests() {
+        // Issue a request that ends up queued in a connecting connection (no backend has responded yet)
+        final var future = behavior.createTransaction().exists(YangInstanceIdentifier.of()).toCompletableFuture();
+
+        behavior.close();
+        clientActorProbe.expectMsgClass(InternalCommand.class).execute(behavior);
+
+        // The in-flight future must complete exceptionally rather than block indefinitely.
+        // Without the fix, connection-level request entries are never poisoned on close()
+        // and any thread blocked on get() hangs until the 30-second bundle lock timeout.
+        assertThrows(ExecutionException.class, () -> future.get(1, TimeUnit.SECONDS));
     }
 
     @Test
