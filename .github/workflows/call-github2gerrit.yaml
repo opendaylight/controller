@@ -7,6 +7,10 @@ name: GitHub to Gerrit Sync
 # yamllint disable-line rule:truthy
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
   pull_request_target:
     types: [opened, reopened, edited, synchronize]
     branches:
