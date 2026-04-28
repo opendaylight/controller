@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -38,6 +39,7 @@ import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
@@ -144,6 +146,25 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         assertEquals(1, behavior.nextHistoryId());
         // increments by one
         assertEquals(2, behavior.nextHistoryId());
+    }
+
+    @Test
+    public void testCloseCompletesInflightRequests() {
+        final var datastoreContext = mock(DatastoreContext.class);
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(util).getDatastoreContext();
+
+        // Issue a request that ends up queued in a connecting connection (no backend has responded yet)
+        final var future = behavior.createTransaction().exists(YangInstanceIdentifier.of());
+
+        behavior.close();
+
+        // the future completes just after we execute the command
+        assertFalse(future.isDone());
+        clientActorProbe.expectMsgClass(InternalCommand.class).execute(behavior);
+        final var ex = assertInstanceOf(ReadFailedException.class, future.exceptionNow());
+        assertEquals("Error executing exists request for path /", ex.getMessage());
+        assertInstanceOf(TerminatedException.class, ex.getCause());
     }
 
     @Test
