@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,15 +28,16 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.InternalCommand;
+import org.opendaylight.controller.cluster.access.client.TerminatedException;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
@@ -125,6 +128,25 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         internalCommand.execute(behavior);
 
         assertThrows(IllegalStateException.class, () -> behavior.createLocalHistory());
+    }
+
+    @Test
+    public void testCloseCompletesInflightRequests() {
+        final var datastoreContext = mock(DatastoreContext.class);
+        doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
+        doReturn(datastoreContext).when(util).getDatastoreContext();
+
+        // Issue a request that ends up queued in a connecting connection (no backend has responded yet)
+        final var future = behavior.createTransaction().exists(YangInstanceIdentifier.of());
+
+        behavior.close();
+
+        // the future completes just after we execute the command
+        assertFalse(future.isDone());
+        clientActorProbe.expectMsgClass(InternalCommand.class).execute(behavior);
+        final var ex = assertInstanceOf(ReadFailedException.class, future.exceptionNow());
+        assertEquals("Error executing exists request for path /", ex.getMessage());
+        assertInstanceOf(TerminatedException.class, ex.getCause());
     }
 
     @Test
