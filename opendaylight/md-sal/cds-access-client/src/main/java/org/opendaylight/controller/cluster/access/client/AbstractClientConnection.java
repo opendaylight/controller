@@ -345,7 +345,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
                 // Requests are always scheduled in sequence, hence checking for timeout is relatively straightforward.
                 // Note we use also inquire about the delay, so we can re-schedule if needed, hence the unusual
                 // tri-state return convention.
-                final OptionalLong delay = lockedCheckTimeout(now);
+                final var delay = lockedCheckTimeout(now);
                 if (delay == null) {
                     // We have timed out. There is no point in scheduling a timer
                     LOG.debug("{}: connection {} timed out", context.persistenceId(), this);
@@ -411,7 +411,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         }
 
         int tasksTimedOut = 0;
-        for (ConnectionEntry head = queue.peek(); head != null; head = queue.peek()) {
+        for (var head = queue.peek(); head != null; head = queue.peek()) {
             final long beenOpen = now - head.getEnqueuedTicks();
             final long requestTimeout = context.config().getRequestTimeout();
             if (beenOpen < requestTimeout) {
@@ -462,10 +462,10 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
 
     // Do not hold any locks while calling this
     private static void poison(final Collection<? extends ConnectionEntry> entries, final RequestException cause) {
-        for (ConnectionEntry e : entries) {
-            final Request<?, ?> request = e.getRequest();
+        for (var entry : entries) {
+            final var request = entry.getRequest();
             LOG.trace("Poisoning request {}", request, cause);
-            e.complete(request.toRequestFailure(cause));
+            entry.complete(request.toRequestFailure(cause));
         }
     }
 

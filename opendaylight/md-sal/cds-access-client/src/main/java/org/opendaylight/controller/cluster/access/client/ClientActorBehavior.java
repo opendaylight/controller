@@ -256,31 +256,31 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
 
         final var failure = command.getMessage();
         final var cause = failure.getCause();
-        if (cause instanceof RetiredGenerationException) {
-            LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), cause);
-            haltClient(cause);
-            poison(cause);
+        if (cause instanceof RetiredGenerationException rge) {
+            LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), rge);
+            haltClient(rge);
+            poison(rge);
             return null;
         }
-        if (cause instanceof NotLeaderException) {
+        if (cause instanceof NotLeaderException nle) {
             if (conn instanceof ReconnectingClientConnection) {
                 // Already reconnecting, do not churn the logs
                 return this;
             }
             if (conn != null) {
-                LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, cause);
-                return conn.reconnect(this, cause);
+                LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, nle);
+                return conn.reconnect(this, nle);
             }
         }
-        if (cause instanceof OutOfSequenceEnvelopeException) {
+        if (cause instanceof OutOfSequenceEnvelopeException seqe) {
             if (conn instanceof ReconnectingClientConnection) {
                 // Already reconnecting, do not churn the logs
                 return this;
             }
             if (conn != null) {
                 LOG.info("{}: connection {} indicated sequencing mismatch on {} sequence {} ({}), reconnecting it",
-                    persistenceId(), conn, failure.getTarget(), failure.getSequence(), command.getTxSequence(), cause);
-                return conn.reconnect(this, cause);
+                    persistenceId(), conn, failure.getTarget(), failure.getSequence(), command.getTxSequence(), seqe);
+                return conn.reconnect(this, seqe);
             }
         }
 

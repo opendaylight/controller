@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<ShardBackendInfo>
         implements DataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStoreClientBehavior.class);
-    private static final RestrictedObjectStreams OBJECT_STREAMS = RestrictedObjectStreams.ofClassLoaders(
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS = RestrictedObjectStreams.ofClassLoaders(
         LocalHistoryIdentifier.class, ClientActorBehavior.class, AbstractDataStoreClientBehavior.class);
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
@@ -68,8 +68,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     private volatile Throwable aborted;
 
-    AbstractDataStoreClientBehavior(final ClientActorContext context,
-            final AbstractShardBackendResolver resolver) {
+    @NonNullByDefault
+    AbstractDataStoreClientBehavior(final ClientActorContext context, final AbstractShardBackendResolver resolver) {
         super(context, resolver, OBJECT_STREAMS);
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
@@ -97,8 +97,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
             // and if they observe aborted being non-null, they will perform their cleanup and not return the handle.
             aborted = cause;
 
-            for (ClientLocalHistory h : histories.values()) {
-                h.localAbort(cause);
+            for (var history : histories.values()) {
+                history.localAbort(cause);
             }
             histories.clear();
         } finally {
