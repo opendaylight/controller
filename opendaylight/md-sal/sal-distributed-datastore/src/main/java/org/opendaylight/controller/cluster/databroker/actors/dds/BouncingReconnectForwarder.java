@@ -13,6 +13,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
@@ -50,7 +51,7 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
         this.cohorts = requireNonNull(cohorts);
     }
 
-    static ReconnectForwarder forCohorts(final ConnectedClientConnection<?> successor,
+    static @NonNull ReconnectForwarder forCohorts(final ConnectedClientConnection<?> successor,
             final Collection<HistoryReconnectCohort> cohorts) {
         return new BouncingReconnectForwarder(successor, Maps.uniqueIndex(Collections2.transform(cohorts,
             HistoryReconnectCohort::getProxy), ProxyReconnectCohort::getIdentifier));

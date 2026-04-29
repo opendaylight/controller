@@ -405,22 +405,22 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         return parent;
     }
 
-    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
+    final @NonNull AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
             final boolean snapshotOnly) {
         return createTransactionProxy(txId, snapshotOnly, false);
     }
 
     // Non-final for mocking
-    AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
-            final boolean isDone) {
+    @NonNull AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
+            final boolean snapshotOnly, final boolean isDone) {
         lock.lock();
         try {
             if (successor != null) {
                 return successor.createTransactionProxy(txId, snapshotOnly, isDone);
             }
 
-            final TransactionIdentifier proxyId = new TransactionIdentifier(identifier, txId.getTransactionId());
-            final AbstractProxyTransaction ret = doCreateTransactionProxy(connection, proxyId, snapshotOnly, isDone);
+            final var proxyId = new TransactionIdentifier(identifier, txId.getTransactionId());
+            final var ret = doCreateTransactionProxy(connection, proxyId, snapshotOnly, isDone);
             proxies.put(proxyId, ret);
             LOG.debug("Allocated proxy {} for transaction {}", proxyId, txId);
             return ret;
@@ -570,8 +570,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     @Holding("lock")
     @SuppressWarnings("checkstyle:hiddenField")
-    abstract AbstractProxyTransaction doCreateTransactionProxy(AbstractClientConnection<ShardBackendInfo> connection,
-            TransactionIdentifier txId, boolean snapshotOnly, boolean isDone);
+    abstract @NonNull AbstractProxyTransaction doCreateTransactionProxy(
+            AbstractClientConnection<ShardBackendInfo> connection, TransactionIdentifier txId, boolean snapshotOnly,
+            boolean isDone);
 
     @Holding("lock")
     @SuppressWarnings("checkstyle:hiddenField")

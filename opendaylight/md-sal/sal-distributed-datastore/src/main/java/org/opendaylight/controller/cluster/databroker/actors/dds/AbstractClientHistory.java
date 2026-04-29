@@ -149,14 +149,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws InversibleLockException if the shard is being reconnected
      */
     @Holding("lock")
-    private ProxyHistory createHistoryProxy(final Long shard) {
-        final AbstractClientConnection<ShardBackendInfo> connection = client.getConnection(shard);
-        final LocalHistoryIdentifier proxyId = new LocalHistoryIdentifier(identifier.getClientId(),
-            identifier.getHistoryId(), shard);
+    private @NonNull ProxyHistory createHistoryProxy(final Long shard) {
+        final var connection = client.getConnection(shard);
+        final var proxyId = new LocalHistoryIdentifier(identifier.getClientId(), identifier.getHistoryId(), shard);
         LOG.debug("Created proxyId {} for history {} shard {}", proxyId, identifier, shard);
 
-        final ProxyHistory ret = createHistoryProxy(proxyId, connection);
-
+        final var ret = createHistoryProxy(proxyId, connection);
         // Request creation of the history, if it is not the single history
         if (ret.getIdentifier().getHistoryId() != 0) {
             connection.sendRequest(new CreateLocalHistoryRequest(ret.getIdentifier(), connection.localActor()),
@@ -219,7 +217,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         checkNotClosed();
 
         synchronized (this) {
-            final ClientTransaction ret = doCreateTransaction();
+            final var ret = doCreateTransaction();
             openTransactions.put(ret.getIdentifier(), ret);
             return ret;
         }
@@ -233,18 +231,18 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
     // Non-final for mocking
-    public ClientSnapshot takeSnapshot() {
+    public @NonNull ClientSnapshot takeSnapshot() {
         checkNotClosed();
 
         synchronized (this) {
-            final ClientSnapshot ret = doCreateSnapshot();
+            final var ret = doCreateSnapshot();
             openTransactions.put(ret.getIdentifier(), ret);
             return ret;
         }
     }
 
     @Holding("this")
-    abstract ClientSnapshot doCreateSnapshot();
+    abstract @NonNull ClientSnapshot doCreateSnapshot();
 
     @Holding("this")
     abstract ClientTransaction doCreateTransaction();

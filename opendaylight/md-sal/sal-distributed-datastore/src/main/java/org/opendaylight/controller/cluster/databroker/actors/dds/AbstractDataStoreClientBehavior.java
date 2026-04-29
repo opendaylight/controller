@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Throwables;
-import com.google.common.base.Verify;
+import com.google.common.base.VerifyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -18,6 +18,7 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Status;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
@@ -112,12 +113,11 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     protected final AbstractDataStoreClientBehavior onCommand(final Object command) {
-        if (command instanceof GetClientRequest) {
-            ((GetClientRequest) command).getReplyTo().tell(new Status.Success(this), ActorRef.noSender());
+        if (command instanceof GetClientRequest request) {
+            request.getReplyTo().tell(new Status.Success(this), ActorRef.noSender());
         } else {
             LOG.warn("{}: ignoring unhandled command {}", persistenceId(), command);
         }
-
         return this;
     }
 
@@ -132,23 +132,23 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         // Step 1: Freeze all AbstractProxyHistory instances pointing to that shard. This indirectly means that no
         //         further TransactionProxies can be created and we can safely traverse maps without risking
         //         missing an entry
-        final Collection<HistoryReconnectCohort> cohorts = new ArrayList<>();
+        final var cohorts = new ArrayList<HistoryReconnectCohort>();
         startReconnect(singleHistory, newConn, cohorts);
-        for (ClientLocalHistory h : histories.values()) {
-            startReconnect(h, newConn, cohorts);
+        for (var history : histories.values()) {
+            startReconnect(history, newConn, cohorts);
         }
 
         return previousEntries -> finishReconnect(newConn, stamp, cohorts, previousEntries);
     }
 
-    private ReconnectForwarder finishReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn,
+    private @NonNull ReconnectForwarder finishReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn,
             final long stamp, final Collection<HistoryReconnectCohort> cohorts,
             final Collection<ConnectionEntry> previousEntries) {
         try {
             // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
             //         the non-throttling interface to the connection, hence we use a wrapper consumer
-            for (HistoryReconnectCohort c : cohorts) {
-                c.replayRequests(previousEntries);
+            for (var cohort : cohorts) {
+                cohort.replayRequests(previousEntries);
             }
 
             // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
@@ -158,8 +158,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         } finally {
             try {
                 // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
-                for (HistoryReconnectCohort c : cohorts) {
-                    c.close();
+                for (var cohort : cohorts) {
+                    cohort.close();
                 }
             } finally {
                 lock.unlockWrite(stamp);
@@ -170,7 +170,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     private static void startReconnect(final AbstractClientHistory history,
             final ConnectedClientConnection<ShardBackendInfo> newConn,
             final Collection<HistoryReconnectCohort> cohorts) {
-        final HistoryReconnectCohort cohort = history.startReconnect(newConn);
+        final var cohort = history.startReconnect(newConn);
         if (cohort != null) {
             cohorts.add(cohort);
         }
@@ -184,9 +184,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     public final ClientLocalHistory createLocalHistory() {
-        final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(),
-            nextHistoryId.getAndIncrement());
-
+        final var historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId.getAndIncrement());
         final long stamp = lock.readLock();
         try {
             if (aborted != null) {
@@ -194,10 +192,13 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
                 throw new IllegalStateException(aborted);
             }
 
-            final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
+            final var history = new ClientLocalHistory(this, historyId);
             LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-            Verify.verify(histories.put(historyId, history) == null);
+            final var prev = histories.putIfAbsent(historyId, history);
+            if (prev != null) {
+                throw new VerifyException("Attempted to replace " + prev + " with " + history);
+            }
             return history;
         } finally {
             lock.unlockRead(stamp);
