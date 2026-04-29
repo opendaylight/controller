@@ -61,7 +61,7 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
                 LOG.debug("{}: switched from {} to {}", persistenceId, currentBehavior, nextBehavior);
             }
 
-            currentBehavior.close();
+            currentBehavior.retire();
             currentBehavior = nextBehavior;
         }
     }
