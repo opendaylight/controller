@@ -218,7 +218,6 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         final var sw = Stopwatch.createStarted();
         context().executeInActor(currentBehavior -> {
             LOG.debug("{}: resumed close after {}", persistenceId(), sw);
-            abortOperations(new IllegalStateException("Client " + getIdentifier() + " has been shut down"));
             super.close();
             return null;
         });
