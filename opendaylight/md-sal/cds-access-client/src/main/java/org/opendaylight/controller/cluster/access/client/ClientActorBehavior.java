@@ -12,11 +12,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Stopwatch;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
 import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelopeException;
@@ -152,10 +154,26 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         return context().getIdentifier();
     }
 
+    /**
+     * Terminate this behavior, causing all pending operations to fail with {@link TerminatedException}.
+     */
     @Override
     public void close() {
+        final var cause = new TerminatedException(Instant.now());
+        LOG.debug("{}: Terminating behavior", persistenceId(), LOG.isTraceEnabled() ? cause : null);
+        final var sw = Stopwatch.createStarted();
+        haltAndPoison(cause);
+        LOG.debug("{}: Behavior terminated in {}", persistenceId(), sw);
+        retire();
+    }
+
+    /**
+     * Retire this behavior, cleaning up its transport-related resources.
+     */
+    final void retire() {
         responseMessageAssembler.close();
         staleBackendInfoReg.close();
+        LOG.trace("{}: Retired behavior", persistenceId());
     }
 
     /**
@@ -258,8 +276,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         final var cause = failure.getCause();
         if (cause instanceof RetiredGenerationException rge) {
             LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), rge);
-            haltClient(rge);
-            poison(rge);
+            haltAndPoison(rge);
             return null;
         }
         if (cause instanceof NotLeaderException nle) {
@@ -285,6 +302,12 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         }
 
         return onRequestFailure(command);
+    }
+
+    @NonNullByDefault
+    private void haltAndPoison(final RequestException cause) {
+        haltClient(cause);
+        poison(cause);
     }
 
     private void poison(final RequestException cause) {
