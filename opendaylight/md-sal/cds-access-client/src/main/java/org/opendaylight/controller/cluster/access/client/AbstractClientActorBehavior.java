@@ -74,4 +74,11 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      * @return Behavior which should be used with the next message. Return null if this actor should shut down.
      */
     abstract @Nullable AbstractClientActorBehavior<?> onReceiveRecover(@NonNull Object recover);
+
+    /**
+     * Retire this behavior, cleaning up its transport-related resources.
+     */
+    void retire() {
+        //no-op
+    }
 }
