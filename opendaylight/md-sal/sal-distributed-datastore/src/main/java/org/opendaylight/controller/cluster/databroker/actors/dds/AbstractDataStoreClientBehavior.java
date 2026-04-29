@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import java.util.ArrayList;
@@ -103,11 +104,6 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         } finally {
             lock.unlockWrite(stamp);
         }
-    }
-
-    private AbstractDataStoreClientBehavior shutdown(final ClientActorBehavior<ShardBackendInfo> currentBehavior) {
-        abortOperations(new IllegalStateException("Client " + getIdentifier() + " has been shut down"));
-        return null;
     }
 
     @Override
@@ -216,8 +212,14 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     public void close() {
-        super.close();
-        context().executeInActor(this::shutdown);
+        LOG.debug("{}: closing", persistenceId());
+        final var sw = Stopwatch.createStarted();
+        context().executeInActor(currentBehavior -> {
+            LOG.debug("{}: resumed close after {}", persistenceId(), sw);
+            abortOperations(new IllegalStateException("Client " + getIdentifier() + " has been shut down"));
+            super.close();
+            return null;
+        });
     }
 
     abstract Long resolveShardForPath(YangInstanceIdentifier path);
