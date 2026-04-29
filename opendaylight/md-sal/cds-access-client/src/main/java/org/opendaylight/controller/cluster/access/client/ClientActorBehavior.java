@@ -46,8 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> the type of associated {@link BackendInfo}
  */
-public abstract class ClientActorBehavior<T extends BackendInfo>
-        implements AutoCloseable, Identifiable<ClientIdentifier> {
+public abstract class ClientActorBehavior<T extends BackendInfo> implements Identifiable<ClientIdentifier> {
     /**
      * Connection reconnect cohort, driven by this class.
      */
@@ -157,8 +156,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     /**
      * Terminate this behavior, causing all pending operations to fail with {@link TerminatedException}.
      */
-    @Override
-    public void close() {
+    protected void terminate() {
         final var cause = new TerminatedException(Instant.now());
         LOG.debug("{}: Terminating behavior", persistenceId(), LOG.isTraceEnabled() ? cause : null);
         final var sw = Stopwatch.createStarted();
