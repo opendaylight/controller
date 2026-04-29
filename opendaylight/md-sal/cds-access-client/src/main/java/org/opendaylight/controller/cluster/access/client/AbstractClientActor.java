@@ -100,7 +100,7 @@ public abstract class AbstractClientActor extends AbstractActor {
     @Override
     public final void postStop() {
         if (currentBehavior != null) {
-            currentBehavior.close();
+            currentBehavior.terminate();
             currentBehavior = null;
         }
     }
