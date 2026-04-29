@@ -87,7 +87,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         // If we have encountered a previous problem there is no cleanup necessary, as we have already cleaned up
         // Thread safely is not an issue, as both this method and any failures are executed from the same (client actor)
         // thread.
-        if (aborted != null) {
+        if (aborted == null) {
             abortOperations(cause);
         }
     }
