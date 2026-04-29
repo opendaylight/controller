@@ -114,7 +114,7 @@ public abstract class AbstractClientActor extends AbstractActor {
                 LOG.debug("{}: switched from {} to {}", logContext, currentBehavior, nextBehavior);
             }
 
-            currentBehavior.close();
+            currentBehavior.retire();
             currentBehavior = nextBehavior;
         }
     }
