@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -29,6 +31,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.InternalCommand;
+import org.opendaylight.controller.cluster.access.client.TerminatedException;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -74,7 +77,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testResolveShardForPath() {
-        assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.of()).longValue());
+        assertEquals(0, behavior.resolveShardForPath(YangInstanceIdentifier.of()));
     }
 
     @Test
@@ -84,46 +87,62 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @Test
     public void testOnCommand() {
-        final TestProbe probe = new TestProbe(system);
-        final GetClientRequest request = new GetClientRequest(probe.ref());
-        final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand(request);
-        final Status.Success success = probe.expectMsgClass(Status.Success.class);
-        assertEquals(behavior, success.status());
+        final var probe = new TestProbe(system);
+        final var request = new GetClientRequest(probe.ref());
+        final var nextBehavior = behavior.onCommand(request);
+        assertEquals(behavior,  probe.expectMsgClass(Status.Success.class).status());
         assertSame(behavior, nextBehavior);
     }
 
     @Test
     public void testOnCommandUnhandled() {
-        final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand("unhandled");
+        final var nextBehavior = behavior.onCommand("unhandled");
         assertSame(behavior, nextBehavior);
     }
 
     @Test
     public void testCreateLocalHistory() {
-        final ClientLocalHistory history = behavior.createLocalHistory();
+        final var history = behavior.createLocalHistory();
         assertEquals(behavior.getIdentifier(), history.getIdentifier().getClientId());
     }
 
     @Test
     public void testCreateTransaction() {
-        final ClientTransaction transaction = behavior.createTransaction();
+        final var transaction = behavior.createTransaction();
         assertEquals(behavior.getIdentifier(), transaction.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
     public void testCreateSnapshot() {
-        final ClientSnapshot snapshot = behavior.createSnapshot();
+        final var snapshot = behavior.createSnapshot();
         assertEquals(behavior.getIdentifier(), snapshot.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
     public void testClose() {
         behavior.close();
-        final InternalCommand<ShardBackendInfo> internalCommand =
-                clientActorProbe.expectMsgClass(InternalCommand.class);
-        internalCommand.execute(behavior);
+        behavior.close();
 
-        assertThrows(IllegalStateException.class, () -> behavior.createLocalHistory());
+        // idempotent: there should be only one message
+        final var internalCommand = clientActorProbe.expectMsgClass(InternalCommand.class);
+        clientActorProbe.expectNoMessage();
+
+        // abort transition after close
+        assertNull(behavior.aborted());
+        internalCommand.execute(behavior);
+        assertInstanceOf(TerminatedException.class, behavior.aborted());
+
+        final var ex = assertThrows(IllegalStateException.class, () -> behavior.createLocalHistory());
+        final var cause = assertInstanceOf(TerminatedException.class, ex.getCause());
+        assertEquals(cause.toString(), ex.getMessage());
+    }
+
+    @Test
+    public void testNextHistoryId() {
+        // starts at one
+        assertEquals(1, behavior.nextHistoryId());
+        // increments by one
+        assertEquals(2, behavior.nextHistoryId());
     }
 
     @Test
