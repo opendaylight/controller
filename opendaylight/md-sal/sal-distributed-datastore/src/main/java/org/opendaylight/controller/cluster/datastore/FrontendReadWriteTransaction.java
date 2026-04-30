@@ -674,13 +674,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
-        final var maybeProto = request.getPersistenceProtocol();
-        if (maybeProto.isEmpty()) {
-            applyModifications(request.getModifications());
-            return replyModifySuccess(request.getSequence());
-        }
-
-        return switch (maybeProto.orElseThrow()) {
+        final var proto = request.persistenceProtocol();
+        return switch (proto) {
+            case null -> {
+                applyModifications(request.modifications());
+                yield replyModifySuccess(request.getSequence());
+            }
             case ABORT -> {
                 if (state instanceof Aborting) {
                     LOG.debug("{}: Transaction {} already aborting", persistenceId(), getIdentifier());
@@ -696,15 +695,15 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 yield null;
             }
             case READY -> {
-                ensureReady(request.getModifications());
+                ensureReady(request.modifications());
                 yield replyModifySuccess(request.getSequence());
             }
             case SIMPLE -> {
-                directCommit(envelope, now, ensureReady(request.getModifications()));
+                directCommit(envelope, now, ensureReady(request.modifications()));
                 yield null;
             }
             case THREE_PHASE -> {
-                coordinatedCommit(envelope, now, ensureReady(request.getModifications()));
+                coordinatedCommit(envelope, now, ensureReady(request.modifications()));
                 yield null;
             }
         };

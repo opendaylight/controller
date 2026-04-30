@@ -19,7 +19,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -35,7 +34,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
@@ -59,7 +57,7 @@ public class ClientTransactionCommitCohortTest {
     private static final String PERSISTENCE_ID = "per-1";
     private static final int TRANSACTIONS = 3;
 
-    private final List<TransactionTester<RemoteProxyTransaction>> transactions = new ArrayList<>();
+    private final ArrayList<TransactionTester<RemoteProxyTransaction>> transactions = new ArrayList<>();
 
     @Mock
     private AbstractClientHistory history;
@@ -74,8 +72,8 @@ public class ClientTransactionCommitCohortTest {
     @Before
     public void setUp() {
         system = ActorSystem.apply();
-        final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
-        final ClientActorContext context =
+        final var clientContextProbe = new TestProbe(system, "clientContext");
+        final var context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
         doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
         doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
@@ -99,7 +97,7 @@ public class ClientTransactionCommitCohortTest {
     @Test
     public void testCanCommit() throws Exception {
         testOpSuccess(ClientTransactionCommitCohort::canCommit, this::expectCanCommit,
-                this::replyCanCommitSuccess, Boolean.TRUE);
+            this::replyCanCommitSuccess, Boolean.TRUE);
     }
 
     @Test
@@ -140,8 +138,8 @@ public class ClientTransactionCommitCohortTest {
     }
 
     private void expectCanCommit(final TransactionTester<RemoteProxyTransaction> tester) {
-        final ModifyTransactionRequest request = tester.expectTransactionRequest(ModifyTransactionRequest.class);
-        assertEquals(Optional.of(PersistenceProtocol.THREE_PHASE), request.getPersistenceProtocol());
+        final var request = tester.expectTransactionRequest(ModifyTransactionRequest.class);
+        assertEquals(PersistenceProtocol.THREE_PHASE, request.persistenceProtocol());
     }
 
     void expectPreCommit(final TransactionTester<?> tester) {
@@ -157,20 +155,20 @@ public class ClientTransactionCommitCohortTest {
     }
 
     void replyCanCommitSuccess(final TransactionTester<?> tester) {
-        final RequestSuccess<?, ?> success = new TransactionCanCommitSuccess(tester.getTransaction().getIdentifier(),
-                tester.getLastReceivedMessage().getSequence());
+        final var success = new TransactionCanCommitSuccess(tester.getTransaction().getIdentifier(),
+            tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
     void replyPreCommitSuccess(final TransactionTester<?> tester) {
-        final RequestSuccess<?, ?> success = new TransactionPreCommitSuccess(tester.getTransaction().getIdentifier(),
-                tester.getLastReceivedMessage().getSequence());
+        final var success = new TransactionPreCommitSuccess(tester.getTransaction().getIdentifier(),
+            tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
     void replyCommitSuccess(final TransactionTester<?> tester) {
-        final RequestSuccess<?, ?> success = new TransactionCommitSuccess(tester.getTransaction().getIdentifier(),
-                tester.getLastReceivedMessage().getSequence());
+        final var success = new TransactionCommitSuccess(tester.getTransaction().getIdentifier(),
+            tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
@@ -183,13 +181,11 @@ public class ClientTransactionCommitCohortTest {
     private static TransactionTester<RemoteProxyTransaction> createTransactionTester(final TestProbe backendProbe,
                                                              final ClientActorContext context,
                                                              final AbstractClientHistory history) {
-        final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(),
-                "default", UnsignedLong.ZERO, Optional.empty(), 3);
-        final AbstractClientConnection<ShardBackendInfo> connection =
-                AccessClientUtil.createConnectedConnection(context, 0L, backend);
-        final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
-        final RemoteProxyTransaction transaction =
-                new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false, false);
+        final var backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(), "default",
+            UnsignedLong.ZERO, Optional.empty(), 3);
+        final var connection = AccessClientUtil.createConnectedConnection(context, 0L, backend);
+        final var proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
+        final var transaction = new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false, false);
         return new TransactionTester<>(transaction, connection, backendProbe);
     }
 
@@ -218,7 +214,7 @@ public class ClientTransactionCommitCohortTest {
                                    final Consumer<TransactionTester<RemoteProxyTransaction>> expectFunction,
                                    final Consumer<TransactionTester<RemoteProxyTransaction>> replyFunction,
                                    final T expectedResult) throws Exception {
-        final ListenableFuture<T> result = operation.apply(cohort);
+        final var result = operation.apply(cohort);
         replySuccess(transactions, expectFunction, replyFunction);
         assertEquals(expectedResult, getWithTimeout(result));
     }
@@ -237,19 +233,18 @@ public class ClientTransactionCommitCohortTest {
     private <T> void testOpFail(final Function<ClientTransactionCommitCohort, ListenableFuture<T>> operation,
             final Consumer<TransactionTester<RemoteProxyTransaction>> expectFunction,
             final Consumer<TransactionTester<RemoteProxyTransaction>> replyFunction) throws Exception {
-        final ListenableFuture<T> canCommit = operation.apply(cohort);
+        final var canCommit = operation.apply(cohort);
         //reply success to all except last transaction
         replySuccess(transactions.subList(0, transactions.size() - 1), expectFunction, replyFunction);
         //reply fail to last transaction
-        final TransactionTester<RemoteProxyTransaction> last = transactions.get(transactions.size() - 1);
+        final var last = transactions.getLast();
         expectFunction.accept(last);
-        final RuntimeException e = new RuntimeException();
-        final RuntimeRequestException cause = new RuntimeRequestException("fail", e);
+        final var ex = new RuntimeException();
+        final var cause = new RuntimeRequestException("fail", ex);
         last.replyFailure(cause);
         //check future fail
-        final ExecutionException exception =
-                assertOperationThrowsException(() -> getWithTimeout(canCommit), ExecutionException.class);
-        assertEquals(e, exception.getCause());
+        final var ee = assertOperationThrowsException(() -> getWithTimeout(canCommit), ExecutionException.class);
+        assertEquals(ex, ee.getCause());
     }
 
 }

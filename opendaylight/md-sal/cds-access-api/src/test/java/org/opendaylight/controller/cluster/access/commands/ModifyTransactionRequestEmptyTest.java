@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.MoreObjects;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
@@ -27,12 +26,12 @@ class ModifyTransactionRequestEmptyTest extends AbstractTransactionRequestTest<M
 
     @Test
     void getPersistenceProtocolTest() {
-        assertEquals(Optional.of(PROTOCOL), OBJECT.getPersistenceProtocol());
+        assertEquals(PROTOCOL, OBJECT.persistenceProtocol());
     }
 
     @Test
     void getModificationsTest() {
-        assertEquals(List.of(), OBJECT.getModifications());
+        assertEquals(List.of(), OBJECT.modifications());
     }
 
     @Test
@@ -48,13 +47,13 @@ class ModifyTransactionRequestEmptyTest extends AbstractTransactionRequestTest<M
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
-        assertEquals(OBJECT.getPersistenceProtocol(), clone.getPersistenceProtocol());
+        assertEquals(OBJECT.persistenceProtocol(), clone.persistenceProtocol());
     }
 
     @Override
     protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
         assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
-        assertEquals(OBJECT.getModifications(), deserialize.getModifications());
-        assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
+        assertEquals(OBJECT.modifications(), deserialize.modifications());
+        assertEquals(OBJECT.persistenceProtocol(), deserialize.persistenceProtocol());
     }
 }
