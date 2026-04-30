@@ -11,6 +11,7 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.VerifyException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -93,9 +94,10 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     private static void commonModifyTransactionRequest(final ModifyTransactionRequest request) {
-        verify(request.getModifications().isEmpty());
-
-        final PersistenceProtocol protocol = request.getPersistenceProtocol().orElseThrow();
-        verify(protocol == PersistenceProtocol.ABORT);
+        verify(request.modifications().isEmpty());
+        final var protocol = request.persistenceProtocol();
+        if (protocol != PersistenceProtocol.ABORT) {
+            throw new VerifyException("Unexpected protocol " + protocol);
+        }
     }
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -57,9 +58,9 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
         default void writeExternal(final ObjectOutput out, final ModifyTransactionRequest msg) throws IOException {
             TransactionRequest.SerialForm.super.writeExternal(out, msg);
 
-            out.writeByte(PersistenceProtocol.byteValue(msg.getPersistenceProtocol().orElse(null)));
+            out.writeByte(PersistenceProtocol.byteValue(msg.persistenceProtocol()));
 
-            final var modifications = msg.getModifications();
+            final var modifications = msg.modifications();
             out.writeInt(modifications.size());
             if (!modifications.isEmpty()) {
                 try (var nnout = msg.getVersion().getStreamVersion().newDataOutput(out)) {
@@ -84,7 +85,7 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     }
 
     ModifyTransactionRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo,
-        final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
+            final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
         super(target, sequence, replyTo);
         this.modifications = ImmutableList.copyOf(modifications);
         this.protocol = protocol;
@@ -94,10 +95,20 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
         return new ModifyTransactionRequestBuilder(txId, replyTo);
     }
 
+    public List<TransactionModification> modifications() {
+        return modifications;
+    }
+
+    public @Nullable PersistenceProtocol persistenceProtocol() {
+        return protocol;
+    }
+
+    @Deprecated(since = "13.0.3", forRemoval = true)
     public Optional<PersistenceProtocol> getPersistenceProtocol() {
         return Optional.ofNullable(protocol);
     }
 
+    @Deprecated(since = "13.0.3", forRemoval = true)
     public List<TransactionModification> getModifications() {
         return modifications;
     }
