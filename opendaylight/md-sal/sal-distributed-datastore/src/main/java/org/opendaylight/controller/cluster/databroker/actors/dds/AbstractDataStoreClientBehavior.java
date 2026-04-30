@@ -7,20 +7,27 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.base.VerifyException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
@@ -59,21 +66,64 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<ShardBackendInfo>
         implements DataStoreClient {
+    private static final class Closed {
+        final Instant when;
+        final String who;
+
+        Closed() {
+            when = Instant.now();
+            who = Thread.currentThread().getName();
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this).omitNullValues().add("who", who).add("when", when).toString();
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStoreClientBehavior.class);
     private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS = RestrictedObjectStreams.ofClassLoaders(
         LocalHistoryIdentifier.class, ClientActorBehavior.class, AbstractDataStoreClientBehavior.class);
+    private static final VarHandle ABORTED_VH;
+    private static final VarHandle CLOSED_VH;
+    private static final VarHandle HISTORY_ID_VH;
 
-    private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
-    private final AtomicLong nextHistoryId = new AtomicLong(1);
+    static {
+        final var lookup = MethodHandles.lookup();
+        try {
+            ABORTED_VH = lookup.findVarHandle(AbstractDataStoreClientBehavior.class, "aborted", Throwable.class);
+            CLOSED_VH = lookup.findVarHandle(AbstractDataStoreClientBehavior.class, "closed", Closed.class);
+            HISTORY_ID_VH = lookup.findVarHandle(AbstractDataStoreClientBehavior.class, "nextHistoryId", long.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    private final ConcurrentHashMap<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
     private final SingleClientHistory singleHistory;
 
-    private volatile Throwable aborted;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
+    private volatile long nextHistoryId = 1;
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
+    private volatile @Nullable Throwable aborted;
+    @SuppressFBWarnings(value = "UUF_UNUSED_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
+    private volatile @Nullable Closed closed;
 
     @NonNullByDefault
     AbstractDataStoreClientBehavior(final ClientActorContext context, final AbstractShardBackendResolver resolver) {
         super(context, resolver, OBJECT_STREAMS);
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
+    }
+
+    @VisibleForTesting
+    final @Nullable Throwable aborted() {
+        return (Throwable) ABORTED_VH.getAcquire(this);
+    }
+
+    @VisibleForTesting
+    final long nextHistoryId() {
+        return (long) HISTORY_ID_VH.getAndAdd(this, 1);
     }
 
     //
@@ -84,28 +134,40 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     protected final void haltClient(final Throwable cause) {
+        requireNonNull(cause);
+
         // If we have encountered a previous problem there is no cleanup necessary, as we have already cleaned up
         // Thread safely is not an issue, as both this method and any failures are executed from the same (client actor)
         // thread.
-        if (aborted == null) {
+        if (aborted() == null) {
             abortOperations(cause);
         }
     }
 
+    @NonNullByDefault
     private void abortOperations(final Throwable cause) {
         final long stamp = lock.writeLock();
         try {
-            // This acts as a barrier, application threads check this after they have added an entry in the maps,
-            // and if they observe aborted being non-null, they will perform their cleanup and not return the handle.
-            aborted = cause;
-
-            for (var history : histories.values()) {
-                history.localAbort(cause);
-            }
-            histories.clear();
+            lockedAbortOperations(cause);
         } finally {
             lock.unlockWrite(stamp);
         }
+    }
+
+    @NonNullByDefault
+    private void lockedAbortOperations(final Throwable cause) {
+        // This acts as a barrier, application threads check this after they have added an entry in the maps,
+        // and if they observe aborted being non-null, they will perform their cleanup and not return the handle.
+        final var witness = (Throwable) ABORTED_VH.compareAndExchange(this, null, cause);
+        if (witness != null) {
+            LOG.debug("{}: already aborted", persistenceId(), LOG.isTraceEnabled() ? witness : null);
+            return;
+        }
+
+        for (var history : histories.values()) {
+            history.localAbort(cause);
+        }
+        histories.clear();
     }
 
     @Override
@@ -181,25 +243,31 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     public final ClientLocalHistory createLocalHistory() {
-        final var historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId.getAndIncrement());
+        final var historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId());
         final long stamp = lock.readLock();
         try {
-            if (aborted != null) {
-                Throwables.throwIfUnchecked(aborted);
-                throw new IllegalStateException(aborted);
-            }
-
-            final var history = new ClientLocalHistory(this, historyId);
-            LOG.debug("{}: creating a new local history {}", persistenceId(), history);
-
-            final var prev = histories.putIfAbsent(historyId, history);
-            if (prev != null) {
-                throw new VerifyException("Attempted to replace " + prev + " with " + history);
-            }
-            return history;
+            return lockedCreateLocalHistory(historyId);
         } finally {
             lock.unlockRead(stamp);
         }
+    }
+
+    @NonNullByDefault
+    private ClientLocalHistory lockedCreateLocalHistory(final LocalHistoryIdentifier historyId) {
+        final var ex = aborted();
+        if (ex != null) {
+            Throwables.throwIfUnchecked(ex);
+            throw new IllegalStateException(ex);
+        }
+
+        final var history = new ClientLocalHistory(this, historyId);
+        LOG.debug("{}: creating a new local history {}", persistenceId(), history);
+
+        final var prev = histories.putIfAbsent(historyId, history);
+        if (prev != null) {
+            throw new VerifyException("Attempted to replace " + prev + " with " + history);
+        }
+        return history;
     }
 
     @Override
@@ -214,6 +282,12 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     public void close() {
+        final var witness = (Closed) CLOSED_VH.compareAndExchange(this, null, new Closed());
+        if (witness != null) {
+            LOG.debug("{}: already closed by {} at {}", persistenceId(), witness.who, witness.when);
+            return;
+        }
+
         LOG.debug("{}: closing", persistenceId());
         final var sw = Stopwatch.createStarted();
         context().executeInActor(currentBehavior -> {
