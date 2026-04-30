@@ -49,7 +49,6 @@ import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,10 +111,10 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private <T> FluentFuture<T> sendReadRequest(final AbstractReadTransactionRequest<?> request,
             final Consumer<Response<?, ?>> completer, final ListenableFuture<T> future) {
         // Check if a previous operation failed. If it has, do not bother sending anything and report a failure
-        final Exception local = operationFailure;
+        final var local = operationFailure;
         if (local != null) {
             return FluentFutures.immediateFailedFluentFuture(
-                    new ReadFailedException("Previous operation failed", local));
+                new ReadFailedException("Previous operation failed", local));
         }
 
         // Make sure we send any modifications before issuing a read
@@ -353,36 +352,35 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
             final TransactionRequest<?> tmp;
             switch (maybeProto.orElseThrow()) {
-                case ABORT:
+                case null -> throw new NullPointerException();
+                case ABORT -> {
                     tmp = abortRequest();
                     sendRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         callback.accept(resp);
                     });
-                    break;
-                case SIMPLE:
+                }
+                case SIMPLE -> {
                     tmp = commitRequest(false);
                     sendRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         callback.accept(resp);
                     });
-                    break;
-                case THREE_PHASE:
+                }
+                case THREE_PHASE -> {
                     tmp = commitRequest(true);
                     sendRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         callback.accept(resp);
                     });
-                    break;
-                case READY:
+                }
+                case READY -> {
                     tmp = readyRequest();
                     sendRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         callback.accept(resp);
                     });
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unhandled protocol " + maybeProto.orElseThrow());
+                }
             }
         }
     }
@@ -396,19 +394,17 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        if (request instanceof CommitLocalTransactionRequest commitRequest) {
-            replayLocalCommitRequest(commitRequest, callback, enqueuedTicks);
-        } else if (request instanceof AbortLocalTransactionRequest) {
-            enqueueRequest(abortRequest(), callback, enqueuedTicks);
-        } else {
-            throw unhandledRequest(request);
+        switch (request) {
+            case CommitLocalTransactionRequest commit -> replayLocalCommitRequest(commit, callback, enqueuedTicks);
+            case AbortLocalTransactionRequest abort -> enqueueRequest(abortRequest(), callback, enqueuedTicks);
+            default -> throw unhandledRequest(request);
         }
     }
 
     private void replayLocalCommitRequest(final CommitLocalTransactionRequest request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        final DataTreeModification mod = request.getModification();
-        final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
+        final var mod = request.getModification();
+        final var optTicks = OptionalLong.of(enqueuedTicks);
 
         mod.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
@@ -434,7 +430,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { /* NOOP */ };
-        final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
+        final var optTicks = OptionalLong.of(enqueuedTicks);
 
         switch (request) {
             case ModifyTransactionRequest modify -> handleReplayedModifyTransactionRequest(enqueuedTicks, cb, modify);
@@ -486,7 +482,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
+        final var maybeProto = req.getPersistenceProtocol();
         if (maybeProto.isPresent()) {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
@@ -496,36 +492,35 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
             final TransactionRequest<?> tmp;
             switch (maybeProto.orElseThrow()) {
-                case ABORT:
+                case null -> throw new NullPointerException();
+                case ABORT -> {
                     tmp = abortRequest();
                     enqueueRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         cb.accept(resp);
                     }, enqueuedTicks);
-                    break;
-                case SIMPLE:
+                }
+                case SIMPLE -> {
                     tmp = commitRequest(false);
                     enqueueRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         cb.accept(resp);
                     }, enqueuedTicks);
-                    break;
-                case THREE_PHASE:
+                }
+                case THREE_PHASE -> {
                     tmp = commitRequest(true);
                     enqueueRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         cb.accept(resp);
                     }, enqueuedTicks);
-                    break;
-                case READY:
+                }
+                case READY -> {
                     tmp = readyRequest();
                     enqueueRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         cb.accept(resp);
                     }, enqueuedTicks);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unhandled protocol " + maybeProto.orElseThrow());
+                }
             }
         }
     }
