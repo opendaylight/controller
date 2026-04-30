@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSucc
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
-import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
@@ -38,7 +37,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPurgeReque
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -200,7 +198,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private Exception recordFailedResponse(final Response<?, ?> response) {
         final Exception failure;
         if (response instanceof RequestFailure<?, ?> requestFailure) {
-            final RequestException cause = requestFailure.getCause();
+            final var cause = requestFailure.getCause();
             failure = cause instanceof RequestTimeoutException
                     ? new DataStoreUnavailableException(cause.getMessage(), cause) : cause;
         } else {
@@ -285,7 +283,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             return Optional.empty();
         }
 
-        final ModifyTransactionRequest request = builder.build();
+        final var request = builder.build();
         builderBusy = false;
         return Optional.of(request);
     }
@@ -338,10 +336,10 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private void handleForwardedModifyTransactionRequest(final Consumer<Response<?, ?>> callback,
             final ModifyTransactionRequest req) {
-        req.getModifications().forEach(this::appendModification);
+        req.modifications().forEach(this::appendModification);
 
-        final Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isPresent()) {
+        final var proto = req.persistenceProtocol();
+        if (proto != null) {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
             if (markSealed()) {
@@ -350,32 +348,31 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                 }
             }
 
-            final TransactionRequest<?> tmp;
-            switch (maybeProto.orElseThrow()) {
+            switch (proto) {
                 case null -> throw new NullPointerException();
                 case ABORT -> {
-                    tmp = abortRequest();
+                    final var tmp = abortRequest();
                     sendRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         callback.accept(resp);
                     });
                 }
                 case SIMPLE -> {
-                    tmp = commitRequest(false);
+                    final var tmp = commitRequest(false);
                     sendRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         callback.accept(resp);
                     });
                 }
                 case THREE_PHASE -> {
-                    tmp = commitRequest(true);
+                    final var tmp = commitRequest(true);
                     sendRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         callback.accept(resp);
                     });
                 }
                 case READY -> {
-                    tmp = readyRequest();
+                    final var tmp = readyRequest();
                     sendRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         callback.accept(resp);
@@ -480,42 +477,41 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private void handleReplayedModifyTransactionRequest(final long enqueuedTicks, final Consumer<Response<?, ?>> cb,
             final ModifyTransactionRequest req) {
-        req.getModifications().forEach(this::appendModification);
+        req.modifications().forEach(this::appendModification);
 
-        final var maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isPresent()) {
+        final var proto = req.persistenceProtocol();
+        if (proto != null) {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
             if (markSealed()) {
                 verify(sealOnly(), "Attempted to replay seal on %s", this);
             }
 
-            final TransactionRequest<?> tmp;
-            switch (maybeProto.orElseThrow()) {
+            switch (proto) {
                 case null -> throw new NullPointerException();
                 case ABORT -> {
-                    tmp = abortRequest();
+                    final var tmp = abortRequest();
                     enqueueRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         cb.accept(resp);
                     }, enqueuedTicks);
                 }
                 case SIMPLE -> {
-                    tmp = commitRequest(false);
+                    final var tmp = commitRequest(false);
                     enqueueRequest(tmp, resp -> {
                         completeModify(tmp, resp);
                         cb.accept(resp);
                     }, enqueuedTicks);
                 }
                 case THREE_PHASE -> {
-                    tmp = commitRequest(true);
+                    final var tmp = commitRequest(true);
                     enqueueRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         cb.accept(resp);
                     }, enqueuedTicks);
                 }
                 case READY -> {
-                    tmp = readyRequest();
+                    final var tmp = readyRequest();
                     enqueueRequest(tmp, resp -> {
                         recordSuccessfulRequest(tmp);
                         cb.accept(resp);

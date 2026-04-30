@@ -13,7 +13,6 @@ import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequ
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionSuccess;
-import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
@@ -60,16 +59,17 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
 
     private TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
             final RequestEnvelope envelope, final long now) {
-        // The only valid request here is with abort protocol
-        final var proto = request.getPersistenceProtocol()
-            .orElseThrow(() -> new IllegalArgumentException("Commit protocol is missing in " + request));
-        if (proto != PersistenceProtocol.ABORT) {
-            throw new IllegalArgumentException("Unsupported commit protocol in " + proto);
-        }
-
-        openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
-            new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
-        return null;
+        final var proto = request.persistenceProtocol();
+        return switch (proto) {
+            case ABORT -> {
+                openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
+                new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
+                yield null;
+            }
+            // The only valid request here is with abort protocol
+            case null -> throw new IllegalArgumentException("Commit protocol is missing in " + request);
+            default -> throw new IllegalArgumentException("Unsupported commit protocol in " + proto);
+        };
     }
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request) {

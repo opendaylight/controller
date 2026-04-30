@@ -14,7 +14,6 @@ import static org.opendaylight.controller.cluster.access.commands.TransactionMod
 
 import com.google.common.base.MoreObjects;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -42,12 +41,12 @@ class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<Modify
 
     @Test
     void getPersistenceProtocolTest() {
-        assertEquals(Optional.of(PROTOCOL), OBJECT.getPersistenceProtocol());
+        assertEquals(PROTOCOL, OBJECT.persistenceProtocol());
     }
 
     @Test
     void getModificationsTest() {
-        assertEquals(MODIFICATIONS, OBJECT.getModifications());
+        assertEquals(MODIFICATIONS, OBJECT.modifications());
     }
 
     @Test
@@ -63,17 +62,17 @@ class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<Modify
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
-        assertEquals(OBJECT.getModifications(), clone.getModifications());
-        assertEquals(OBJECT.getPersistenceProtocol(), clone.getPersistenceProtocol());
+        assertEquals(OBJECT.modifications(), clone.modifications());
+        assertEquals(OBJECT.persistenceProtocol(), clone.persistenceProtocol());
     }
 
     @Override
     protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
         assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
-        assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
-        assertNotNull(deserialize.getModifications());
-        assertEquals(1, deserialize.getModifications().size());
-        final var modification = deserialize.getModifications().get(0);
+        assertEquals(OBJECT.persistenceProtocol(), deserialize.persistenceProtocol());
+        assertNotNull(deserialize.modifications());
+        assertEquals(1, deserialize.modifications().size());
+        final var modification = deserialize.modifications().getFirst();
         assertEquals(YangInstanceIdentifier.of(), modification.getPath());
         assertEquals(TYPE_WRITE, modification.getType());
     }

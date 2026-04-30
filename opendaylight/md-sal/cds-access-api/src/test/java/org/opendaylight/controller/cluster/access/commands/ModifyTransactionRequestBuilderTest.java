@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
@@ -60,29 +60,29 @@ class ModifyTransactionRequestBuilderTest {
     void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
-        assertEquals(transactionModification, modifyTransactionRequest.getModifications().get(0));
+        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.persistenceProtocol());
+        assertEquals(transactionModification, modifyTransactionRequest.modifications().getFirst());
     }
 
     @Test
     void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
-        assertTrue(modifyTransactionRequest.getModifications().isEmpty());
+        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.persistenceProtocol());
+        assertEquals(List.of(), modifyTransactionRequest.modifications());
     }
 
     @Test
     void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.persistenceProtocol());
     }
 
     @Test
     void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.persistenceProtocol());
     }
 }
