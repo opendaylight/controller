@@ -270,7 +270,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private void commonModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback,
             final BiConsumer<TransactionRequest<?>, Consumer<Response<?, ?>>> sendMethod) {
-        for (var mod : request.getModifications()) {
+        for (var mod : request.modifications()) {
             switch (mod) {
                 case TransactionDelete delete -> delete(delete.getPath());
                 case TransactionWrite write -> write(write.getPath(), write.getData());
@@ -278,7 +278,8 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             }
         }
 
-        request.getPersistenceProtocol().ifPresent(proto -> {
+        final var proto = request.persistenceProtocol();
+        if (proto != null) {
             final var cb = verifyNotNull(callback, "Request %s has null callback", request);
             if (markSealed()) {
                 sealOnly();
@@ -293,7 +294,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                 case SIMPLE -> sendMethod.accept(commitRequest(false), cb);
                 case THREE_PHASE -> sendMethod.accept(commitRequest(true), cb);
             }
-        });
+        }
     }
 
     @Override
