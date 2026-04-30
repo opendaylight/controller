@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,6 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import com.google.common.base.Ticker;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.pekko.testkit.TestProbe;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -72,87 +72,81 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
 
     @Test
     public void testHandleForwardedRemoteReadRequest() {
-        final TestProbe probe = createProbe();
-        final ReadTransactionRequest request =
-                new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
+        final var probe = createProbe();
+        final var request = new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         setupExecuteInActor();
 
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
-        final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
+        final var captor = ArgumentCaptor.<Response<?, ?>>captor();
         verify(callback).accept(captor.capture());
-        final Response<?, ?> value = captor.getValue();
-        assertTrue(value instanceof ReadTransactionSuccess);
-        final ReadTransactionSuccess success = (ReadTransactionSuccess) value;
+        final var value = captor.getValue();
+        final var success = assertInstanceOf(ReadTransactionSuccess.class, captor.getValue());
         assertEquals(Optional.of(DATA_1), success.getData());
     }
 
     @Test
     public void testHandleForwardedRemoteExistsRequest() {
-        final TestProbe probe = createProbe();
-        final ExistsTransactionRequest request =
-                new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
+        final var probe = createProbe();
+        final var request = new ExistsTransactionRequest(TRANSACTION_ID, 0, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         setupExecuteInActor();
 
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
-        final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
+        final var captor = ArgumentCaptor.<Response<?, ?>>captor();
         verify(callback).accept(captor.capture());
-        final Response<?, ?> value = captor.getValue();
-        assertTrue(value instanceof ExistsTransactionSuccess);
-        final ExistsTransactionSuccess success = (ExistsTransactionSuccess) value;
+        final var success = assertInstanceOf(ExistsTransactionSuccess.class, captor.getValue());
         assertTrue(success.getExists());
     }
 
     @Test
     public void testHandleForwardedRemotePurgeRequest() {
-        final TestProbe probe = createProbe();
-        final TransactionPurgeRequest request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
+        final var probe = createProbe();
+        final var request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
         testHandleForwardedRemoteRequest(request);
     }
 
     @Override
     @Test
     public void testForwardToRemoteAbort() {
-        final TestProbe probe = createProbe();
-        final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
-        final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
-        assertEquals(Optional.of(PersistenceProtocol.ABORT), modifyRequest.getPersistenceProtocol());
+        final var probe = createProbe();
+        final var request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
+        final var modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
+        assertEquals(PersistenceProtocol.ABORT, modifyRequest.persistenceProtocol());
     }
 
     @Override
     @Test
     public void testForwardToRemoteCommit() {
-        final TestProbe probe = createProbe();
-        final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
-        final CommitLocalTransactionRequest request =
-                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), modification, null, true);
+        final var probe = createProbe();
+        final var modification = mock(CursorAwareDataTreeModification.class);
+        final var request = new CommitLocalTransactionRequest(TRANSACTION_ID, 0, probe.ref(), modification, null, true);
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
-        final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
+        final var modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
         verify(modification).applyToCursor(any());
-        assertEquals(Optional.of(PersistenceProtocol.THREE_PHASE), modifyRequest.getPersistenceProtocol());
+        assertEquals(PersistenceProtocol.THREE_PHASE, modifyRequest.persistenceProtocol());
         checkModifications(modifyRequest);
     }
 
     @Test
     public void testForwardToLocalAbort() {
-        final TestProbe probe = createProbe();
-        final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
+        final var probe = createProbe();
+        final var request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
         testForwardToLocal(request, AbortLocalTransactionRequest.class);
     }
 
     @Test
     public void testForwardToLocalPurge() {
-        final TestProbe probe = createProbe();
-        final TransactionPurgeRequest request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
+        final var probe = createProbe();
+        final var request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
         testForwardToLocal(request, TransactionPurgeRequest.class);
     }
 
     protected <R extends TransactionRequest<R>> R testForwardToLocal(final TransactionRequest<?> toForward,
                                                                      final Class<R> expectedMessageClass) {
         final Consumer<Response<?, ?>> callback = createCallbackMock();
-        final TransactionTester<LocalReadWriteProxyTransaction> transactionTester = createLocalProxy();
-        final LocalReadWriteProxyTransaction successor = transactionTester.getTransaction();
+        final var transactionTester = createLocalProxy();
+        final var successor = transactionTester.getTransaction();
         transaction.forwardToLocal(successor, toForward, callback);
         return transactionTester.expectTransactionRequest(expectedMessageClass);
     }
@@ -165,7 +159,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
      * @return void - always null
      */
     protected static final <T> Answer<T> applyToCursorAnswer(final InvocationOnMock invocation) {
-        final DataTreeModificationCursor cursor = invocation.getArgument(0);
+        final var cursor = invocation.<DataTreeModificationCursor>getArgument(0);
         cursor.write(PATH_1.getLastPathArgument(), DATA_1);
         cursor.merge(PATH_2.getLastPathArgument(), DATA_2);
         cursor.delete(PATH_3.getLastPathArgument());
