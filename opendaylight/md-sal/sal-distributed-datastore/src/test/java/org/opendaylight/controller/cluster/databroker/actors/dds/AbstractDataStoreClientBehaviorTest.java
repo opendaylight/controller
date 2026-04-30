@@ -139,22 +139,22 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         doReturn(datastoreContext).when(util).getDatastoreContext();
 
         //set up data tree mock
-        final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
+        final var modification = mock(CursorAwareDataTreeModification.class);
         doReturn(Optional.empty()).when(modification).readNode(YangInstanceIdentifier.of());
-        final DataTreeSnapshot snapshot = mock(DataTreeSnapshot.class);
+        final var snapshot = mock(DataTreeSnapshot.class);
         doReturn(modification).when(snapshot).newModification();
-        final DataTree dataTree = mock(DataTree.class);
+        final var dataTree = mock(DataTree.class);
         doReturn(snapshot).when(dataTree).takeSnapshot();
 
-        final TestProbe backendProbe = new TestProbe(system, "backend");
+        final var backendProbe = new TestProbe(system, "backend");
         final long shard = 0L;
 
         behavior.createTransaction().read(YangInstanceIdentifier.of());
-        final AbstractClientConnection<ShardBackendInfo> connection = behavior.getConnection(shard);
+        final var connection = behavior.getConnection(shard);
         //check cached connection for same shard
         assertSame(connection, behavior.getConnection(shard));
 
-        final ConnectClientRequest connectClientRequest = actorContextProbe.expectMsgClass(ConnectClientRequest.class);
+        final var connectClientRequest = actorContextProbe.expectMsgClass(ConnectClientRequest.class);
         assertEquals(CLIENT_ID, connectClientRequest.getTarget());
         final long sequence = 0L;
         assertEquals(sequence, connectClientRequest.getSequence());
@@ -162,7 +162,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
                 3));
         assertEquals(clientActorProbe.ref(), connection.localActor());
         //capture and execute command passed to client context
-        final InternalCommand<ShardBackendInfo> command = clientActorProbe.expectMsgClass(InternalCommand.class);
+        final var command = clientActorProbe.expectMsgClass(InternalCommand.class);
         command.execute(behavior);
         //check, whether command was reaplayed
         verify(modification).readNode(YangInstanceIdentifier.of());
