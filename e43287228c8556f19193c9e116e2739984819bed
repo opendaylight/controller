@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ffa4338e_2e476bfe",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-05-06T14:18:34Z",
+      "side": 1,
+      "message": "really?",
+      "revId": "e43287228c8556f19193c9e116e2739984819bed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e54627d9_70726022",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/dependency-reduced-pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-05-06T14:18:34Z",
+      "side": 1,
+      "message": "delete this",
+      "revId": "e43287228c8556f19193c9e116e2739984819bed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
