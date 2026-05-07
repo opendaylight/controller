@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d9b2100a_48b8436e",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-05-07T14:16:40Z",
+      "side": 1,
+      "message": "yes 😊 the only final implementation would be in ClientActorBehavior",
+      "parentUuid": "ffa4338e_2e476bfe",
+      "revId": "e43287228c8556f19193c9e116e2739984819bed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e54627d9_70726022",
