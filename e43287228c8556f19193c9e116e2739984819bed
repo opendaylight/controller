@@ -51,6 +51,24 @@
       "message": "delete this",
       "revId": "e43287228c8556f19193c9e116e2739984819bed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4eacf76a_da472bcf",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/dependency-reduced-pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-05-07T14:18:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e54627d9_70726022",
+      "revId": "e43287228c8556f19193c9e116e2739984819bed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
