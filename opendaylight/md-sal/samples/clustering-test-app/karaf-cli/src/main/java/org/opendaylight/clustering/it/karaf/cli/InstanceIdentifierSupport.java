@@ -9,15 +9,14 @@ package org.opendaylight.clustering.it.karaf.cli;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * Codec providing translation between CLI representation and {@link InstanceIdentifier}. This is mostly useful for
+ * Codec providing translation between CLI representation and {@link DataObjectIdentifier}. This is mostly useful for
  * injecting invocation contexts for {@code routed RPC}s and actions.
  */
 public interface InstanceIdentifierSupport {
     /**
-     * Parse a CLI argument into its {@link InstanceIdentifier} representation.
+     * Parse a CLI argument into its {@link DataObjectIdentifier} representation.
      *
      * @param argument Argument to parse
      * @return Parse InstanceIdentifier

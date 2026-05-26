@@ -135,7 +135,6 @@ import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSe
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -164,7 +163,7 @@ public final class MdsalLowLevelTestProvider {
     private final DOMRpcProviderService domRpcService;
     private final DataTreeChangeExtension dataTreeChangeExtension;
 
-    private final Map<InstanceIdentifier<?>, Registration> routedRegistrations = new HashMap<>();
+    private final Map<DataObjectIdentifier<?>, Registration> routedRegistrations = new HashMap<>();
     private final Map<String, ObjectRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
     private final Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
 
@@ -338,7 +337,7 @@ public final class MdsalLowLevelTestProvider {
             case DataObjectIdentifier<?> doi -> context = doi;
         }
 
-        final var rpcRegistration = routedRegistrations.remove(context.toLegacy());
+        final var rpcRegistration = routedRegistrations.remove(context);
         if (rpcRegistration == null) {
             return RpcResultBuilder.<UnregisterBoundConstantOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_MISSING,
@@ -436,8 +435,7 @@ public final class MdsalLowLevelTestProvider {
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Constant value is null").buildFuture();
         }
 
-        final var iid = context.toLegacy();
-        if (routedRegistrations.containsKey(iid)) {
+        if (routedRegistrations.containsKey(context)) {
             return RpcResultBuilder.<RegisterBoundConstantOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_EXISTS,
                     "There is already an rpc registered for context: " + context)
@@ -445,9 +443,9 @@ public final class MdsalLowLevelTestProvider {
         }
 
         final var rpcRegistration = RoutedGetConstantService.registerNew(bindingNormalizedNodeSerializer, domRpcService,
-            constant, iid);
+            constant, context);
 
-        routedRegistrations.put(iid, rpcRegistration);
+        routedRegistrations.put(context, rpcRegistration);
         return RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build()).buildFuture();
     }
 

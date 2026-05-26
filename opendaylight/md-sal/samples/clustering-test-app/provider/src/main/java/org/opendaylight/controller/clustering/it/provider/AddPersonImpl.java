@@ -36,8 +36,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.People;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.Person;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.people.PersonBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -99,10 +99,9 @@ public final class AddPersonImpl implements AddPerson, AutoCloseable {
         final SettableFuture<RpcResult<AddPersonOutput>> futureResult = SettableFuture.create();
 
         // Each entry will be identifiable by a unique key, we have to create that identifier
-        final var personId = InstanceIdentifier.builder(People.class)
+        final var personId = DataObjectIdentifier.builder(People.class)
                 .child(Person.class, person.key())
-                .build()
-                .toIdentifier();
+                .build();
         // Place entry in data store tree
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, personId, person);
