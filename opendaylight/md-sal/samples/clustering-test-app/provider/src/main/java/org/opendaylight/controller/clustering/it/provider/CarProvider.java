@@ -25,7 +25,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -77,7 +76,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -101,9 +99,6 @@ public final class CarProvider {
     private static final Logger LOG = LoggerFactory.getLogger(CarProvider.class);
 
     private static final String ENTITY_TYPE = "cars";
-    private static final InstanceIdentifier<Cars> CARS_IID = InstanceIdentifier.builder(Cars.class).build();
-    private static final DataTreeIdentifier<Cars> CARS_DTID = DataTreeIdentifier.of(
-            LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
     private final DataBroker dataProvider;
     private final DOMDataBroker domDataBroker;
@@ -290,7 +285,8 @@ public final class CarProvider {
     private ListenableFuture<RpcResult<RegisterLoggingDtclOutput>> registerLoggingDtcl(
             final RegisterLoggingDtclInput input) {
         LOG.info("Registering a new CarDataTreeChangeListener");
-        final var reg = dataProvider.registerTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
+        final var reg = dataProvider.registerTreeChangeListener(LogicalDatastoreType.CONFIGURATION,
+            DataObjectIdentifier.builder(Cars.class).build(), new CarDataTreeChangeListener());
         carsDtclRegistrations.add(reg);
         return RpcResultBuilder.success(new RegisterLoggingDtclOutputBuilder().build()).buildFuture();
     }

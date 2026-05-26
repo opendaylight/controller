@@ -32,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.ops4j.pax.exam.util.Filter;
 import org.slf4j.Logger;
@@ -148,11 +147,10 @@ public class RoutedServiceIT extends AbstractIT {
      * @return instance identifier to {@link UnorderedList}
      */
     private static DataObjectIdentifier<UnorderedList> createNodeRef(final String string) {
-        return InstanceIdentifier.builder(Lists.class)
+        return DataObjectIdentifier.builder(Lists.class)
                 .child(UnorderedContainer.class)
                 .child(UnorderedList.class, new UnorderedListKey(string))
-                .build()
-                .toIdentifier();
+                .build();
     }
 
     /**
