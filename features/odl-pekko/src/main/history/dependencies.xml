@@ -12,6 +12,7 @@
         <bundle>mvn:org.opendaylight.controller/scala3-library/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <feature>wrap</feature>
-        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.1</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.3</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/native/0.9.33-5</bundle>
     </feature>
 </features>
