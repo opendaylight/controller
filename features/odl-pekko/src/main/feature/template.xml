@@ -13,6 +13,7 @@
         <bundle>mvn:org.opendaylight.controller/repackaged-pekko/{{versionAsInProject}}</bundle>
         <bundle>mvn:org.opendaylight.controller/scala3-library/{{versionAsInProject}}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/{{versionAsInProject}}</bundle>
-        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/{{versionAsInProject}}</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.3$Bundle-SymbolicName=org.lmdbjava.lmdbjava&amp;Bundle-Version=0.9.3</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/native/0.9.33-5$Bundle-SymbolicName=org.lmdbjava.native&amp;Bundle-Version=0.9.33.5&amp;Fragment-Host=org.lmdbjava.lmdbjava</bundle>
     </feature>
 </features>

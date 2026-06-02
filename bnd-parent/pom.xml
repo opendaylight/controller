@@ -137,7 +137,7 @@
             <dependency>
                 <groupId>org.lmdbjava</groupId>
                 <artifactId>lmdbjava</artifactId>
-                <version>0.9.1</version>
+                <version>0.9.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.github.jnr</groupId>
@@ -152,6 +152,11 @@
                         <artifactId>jnr-constants</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.lmdbjava</groupId>
+                <artifactId>native</artifactId>
+                <version>0.9.33-5</version>
             </dependency>
 
             <dependency>
