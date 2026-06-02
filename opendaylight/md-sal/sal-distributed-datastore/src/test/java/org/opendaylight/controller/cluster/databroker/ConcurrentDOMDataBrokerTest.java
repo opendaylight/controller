@@ -330,7 +330,7 @@ public class ConcurrentDOMDataBrokerTest {
 
     @Test
     public void testSubmitWithOnlyOneSubTransaction() throws InterruptedException {
-        DOMStore configDomStore = mock(DOMStore.class);
+        final DOMStore configDomStore = mock(DOMStore.class);
         DOMStore operationalDomStore = mock(DOMStore.class);
         DOMStoreReadWriteTransaction mockStoreReadWriteTransaction = mock(DOMStoreReadWriteTransaction.class);
 
