@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-pekko">
+    <repository>mvn:org.opendaylight.odlparent/odl-netty-4/{{versionAsInProject}}/xml/features</repository>
+    <feature name="odl-pekko">
+        <feature version="{{semVerRange}}">odl-netty-4</feature>
+        <feature prerequisite="true" dependency="false">wrap</feature>
+        <bundle>mvn:com.typesafe/config/{{versionAsInProject}}</bundle>
+        <bundle>mvn:com.typesafe/ssl-config-core_3/{{versionAsInProject}}</bundle>
+        <bundle>mvn:io.aeron/aeron-annotations/{{versionAsInProject}}</bundle>
+        <bundle>mvn:io.aeron/aeron-client/{{versionAsInProject}}</bundle>
+        <bundle>mvn:io.aeron/aeron-driver/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.agrona/agrona/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/repackaged-pekko/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/scala3-library/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.reactivestreams/reactive-streams/{{versionAsInProject}}</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/{{versionAsInProject}}</bundle>
+    </feature>
+</features>
