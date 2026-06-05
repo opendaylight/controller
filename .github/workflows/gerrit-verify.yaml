@@ -56,7 +56,7 @@ jobs:
     steps:
       - name: Clear votes
         # yamllint disable-line rule:line-length
-        uses: lfit/gerrit-review-action@537251ec667665b386f70b330b05446e3fc29087 # v0.9
+        uses: lfit/gerrit-review-action@a5de1d5bf17c2603ae81544dc2a455017b454ec8 # v1.1.1
         with:
           host: ${{ vars.GERRIT_SERVER }}
           username: ${{ vars.GERRIT_SSH_USER }}
@@ -137,7 +137,7 @@ jobs:
         uses: im-open/workflow-conclusion@7b146947e59eaf7fc3328822357861ab1758c088 # v2.2.5
       - name: Set vote
         # yamllint disable-line rule:line-length
-        uses: lfit/gerrit-review-action@537251ec667665b386f70b330b05446e3fc29087 # v0.9
+        uses: lfit/gerrit-review-action@a5de1d5bf17c2603ae81544dc2a455017b454ec8 # v1.1.1
         with:
           host: ${{ vars.GERRIT_SERVER }}
           username: ${{ vars.GERRIT_SSH_USER }}
