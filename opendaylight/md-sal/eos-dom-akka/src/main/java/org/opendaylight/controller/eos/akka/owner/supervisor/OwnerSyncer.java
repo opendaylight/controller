@@ -28,6 +28,7 @@ import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
 import org.apache.pekko.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import org.apache.pekko.pattern.StatusReply;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterActivated;
@@ -90,6 +91,7 @@ public final class OwnerSyncer extends AbstractSupervisor {
     @Override
     public Receive<OwnerSupervisorCommand> createReceive() {
         return newReceiveBuilder()
+                .onMessage(ActivateDataCenter.class, this::onActivateDataCenter)
                 .onMessage(InitialCandidateSync.class, this::onInitialCandidateSync)
                 .onMessage(InitialOwnerSync.class, this::onInitialOwnerSync)
                 .onMessage(GetEntitiesBackendRequest.class, this::onFailEntityRpc)
@@ -98,6 +100,15 @@ public final class OwnerSyncer extends AbstractSupervisor {
                 .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
                 .onMessage(ClearCandidates.class, this::finishClearCandidates)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onActivateDataCenter(final ActivateDataCenter command) {
+        LOG.debug("Datacenter is already activating, acknowledging immediately");
+        final var replyTo = command.getReplyTo();
+        if (replyTo != null) {
+            replyTo.tell(DataCenterActivated.INSTANCE);
+        }
+        return this;
     }
 
     private Behavior<OwnerSupervisorCommand> onFailEntityRpc(final OwnerSupervisorRequest message) {

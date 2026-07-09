@@ -44,9 +44,11 @@ import org.apache.pekko.cluster.typed.Cluster;
 import org.apache.pekko.cluster.typed.Subscribe;
 import org.apache.pekko.pattern.StatusReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.AbstractEntityRequest;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.CandidatesChanged;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
+import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterActivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DataCenterDeactivated;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.DeactivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendReply;
@@ -161,6 +163,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     @Override
     public Receive<OwnerSupervisorCommand> createReceive() {
         return newReceiveBuilder()
+                .onMessage(ActivateDataCenter.class, this::onActivateDatacenter)
                 .onMessage(CandidatesChanged.class, this::onCandidatesChanged)
                 .onMessage(DeactivateDataCenter.class, this::onDeactivateDatacenter)
                 .onMessage(OwnerChanged.class, this::onOwnerChanged)
@@ -174,6 +177,15 @@ public final class OwnerSupervisor extends AbstractSupervisor {
                 .onMessage(ClearCandidatesForMember.class, this::onClearCandidatesForMember)
                 .onMessage(ClearCandidates.class, this::finishClearCandidates)
                 .build();
+    }
+
+    private Behavior<OwnerSupervisorCommand> onActivateDatacenter(final ActivateDataCenter command) {
+        LOG.debug("Datacenter already active on {}, acknowledging immediately", cluster.selfMember());
+        final var replyTo = command.getReplyTo();
+        if (replyTo != null) {
+            replyTo.tell(DataCenterActivated.INSTANCE);
+        }
+        return this;
     }
 
     private Behavior<OwnerSupervisorCommand> onDeactivateDatacenter(final DeactivateDataCenter command) {
