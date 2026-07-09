@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.testkit.typed.javadsl.ActorTestKit;
 import org.apache.pekko.actor.typed.ActorRef;
@@ -172,6 +173,15 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
 
         unreachableMember(ownerSupervisor, "member-2", DEFAULT_DATACENTER);
         verifyGetOwnershipState(service, entity, EntityOwnershipState.NO_OWNER);
+    }
+
+    @Test
+    public void testActivateDataCenterIsIdempotent() throws Exception {
+        // The default datacenter role self-activates on startup, so the OwnerSupervisor singleton is already
+        // active by the time the test runs. A repeat activateDataCenter() must reply immediately instead of
+        // going unhandled and waiting out the full 20s ask timeout.
+        service.activateDataCenter().get(5, TimeUnit.SECONDS);
+        service.activateDataCenter().get(5, TimeUnit.SECONDS);
     }
 
     @Test
