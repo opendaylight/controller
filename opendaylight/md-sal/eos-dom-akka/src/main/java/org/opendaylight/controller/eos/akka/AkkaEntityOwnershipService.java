@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -98,6 +99,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     private final String localCandidate;
     private final Scheduler scheduler;
     private final String datacenter;
+    private final Executor callbackExecutor;
 
     private final ActorRef<BootstrapCommand> bootstrap;
     private final RunningContext runningContext;
@@ -115,6 +117,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
             throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
         scheduler = typedActorSystem.scheduler();
+        callbackExecutor = actorSystem.dispatcher();
 
         final Cluster cluster = Cluster.get(typedActorSystem);
         datacenter = cluster.selfMember().dataCenter();
@@ -264,23 +267,23 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
         return runningContext;
     }
 
-    private static <R extends StateCheckerReply, O extends RpcOutput> ListenableFuture<RpcResult<O>> toRpcFuture(
+    private <R extends StateCheckerReply, O extends RpcOutput> ListenableFuture<RpcResult<O>> toRpcFuture(
             final CompletionStage<R> stage, final Function<R, O> outputFunction) {
 
         final SettableFuture<RpcResult<O>> future = SettableFuture.create();
-        stage.whenComplete((reply, failure) -> {
+        stage.whenCompleteAsync((reply, failure) -> {
             if (failure != null) {
                 future.setException(failure);
             } else {
                 future.set(RpcResultBuilder.success(outputFunction.apply(reply)).build());
             }
-        });
+        }, callbackExecutor);
         return future;
     }
 
-    private static ListenableFuture<Empty> toListenableFuture(final String op, final CompletionStage<?> stage) {
+    private ListenableFuture<Empty> toListenableFuture(final String op, final CompletionStage<?> stage) {
         final SettableFuture<Empty> future = SettableFuture.create();
-        stage.whenComplete((reply, failure) -> {
+        stage.whenCompleteAsync((reply, failure) -> {
             if (failure != null) {
                 LOG.warn("{} DataCenter failed", op, failure);
                 future.setException(failure);
@@ -288,7 +291,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
                 LOG.debug("{} DataCenter successful", op);
                 future.set(Empty.value());
             }
-        });
+        }, callbackExecutor);
         return future;
     }
 }
