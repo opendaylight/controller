@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "510ce32b_9bbc7cc6",
+        "filename": "raft/raft-journal/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-07-16T12:02:02Z",
+      "side": 1,
+      "message": "remove this line",
+      "range": {
+        "startLine": 40,
+        "startChar": 9,
+        "endLine": 40,
+        "endChar": 59
+      },
+      "revId": "e562ead25e3efcc76b5f608f7e2f758cdcbc4953",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
