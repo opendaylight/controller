@@ -29,6 +29,11 @@ repos:
         args: ["--fix=lf"]
         exclude: '^.*\.(bin|patch|diff|xml|XML|yang|YANG)$'
 
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: acc9d9de6369b76d22cb4167029d2035e8730b98 # frozen: v0.19.1
+    hooks:
+      - id: gitlint
+
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: a30f0d816e5062a67d87c8de753cfe499672b959 # frozen: v1.5.5
     hooks:
