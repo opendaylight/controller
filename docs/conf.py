@@ -18,3 +18,10 @@ data = ET.parse('pom.xml')
 project_version = data.getroot().find('./{http://maven.apache.org/POM/4.0.0}version').text
 version = project_version
 release = project_version
+
+# ponytail: ignore permanently-dead external links (retired hosts) so
+# docs-linkcheck does not fail on pre-existing rot. Drop entries if a live
+# replacement URL is found.
+linkcheck_ignore = globals().get("linkcheck_ignore", []) + [
+    r"https://wiki-archive\.opendaylight\.org/.*",
+]
