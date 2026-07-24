@@ -53,6 +53,9 @@ concurrency:
   group: sonar-${{ github.workflow }}-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}-${{ github.event.inputs.GERRIT_CHANGE_ID || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   sonar-scan:
     # yamllint disable-line rule:line-length
