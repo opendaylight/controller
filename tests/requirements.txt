@@ -1,0 +1,6 @@
+allure-pytest==2.14.3
+pytest==8.4.0
+pytest-dependency==0.6.0
+pytest-env==1.1.5
+pytest-ordering==0.6
+pytest-retry==1.7.0

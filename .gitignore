@@ -48,6 +48,12 @@ __pycache__/
 .tox/
 .pytest_cache/
 
+# PyTest execution
+tests/allure-results/
+tests/opendaylight/
+tests/results/
+tests/tmp/
+
 # Node.js
 node_modules/
 node_modules/
