@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2026 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License v1.0 which accompanies this distribution,
+# and is available at http://www.eclipse.org/legal/epl-v10.html
+#
+# These variables are considered global and immutable, so their names are in ALL_CAPS.
+#
+
+from pydantic_settings import BaseSettings
+
+
+class Variables(BaseSettings):
+    """
+    Defines all global test settings, which can be overridden by environment
+    variables.
+    """
+
+    ODL_IP: str = "127.0.0.1"
+    KARAF_LOG_LEVEL: str = "INFO"
+
+
+variables = Variables()
