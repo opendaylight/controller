@@ -77,6 +77,83 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>integration-tests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <tox.args></tox.args>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>clean-opendaylight-distribution-in-tests</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>clean</goal>
+                </goals>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>${project.basedir}/tests/opendaylight</directory>
+                      <followSymlinks>false</followSymlinks>
+                    </fileset>
+                    <fileset>
+                      <directory>${project.basedir}/tests/build_tools</directory>
+                      <followSymlinks>false</followSymlinks>
+                    </fileset>
+                  </filesets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-opendaylight-distribution-to-tests</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.basedir}/tests/opendaylight</outputDirectory>
+                  <resources>
+                    <resource>
+                    <directory>${project.basedir}/karaf/test-distribution/target/assembly/</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>python-pytest</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>tox</executable>
+                  <commandlineArgs>-e pytest ${tox.args}</commandlineArgs>
+                  <workingDirectory>${project.basedir}/tests</workingDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <scm>
