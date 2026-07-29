@@ -1,4 +1,8 @@
 allure-pytest==2.14.3
+paramiko==4.0.0
+psutil==7.1.0
+pydantic==2.12.3
+pydantic-settings==2.11.0
 pytest==8.4.0
 pytest-dependency==0.6.0
 pytest-env==1.1.5
