@@ -16,6 +16,40 @@
       "message": "recheck",
       "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "365218db_94a1228e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-08-03T08:10:43Z",
+      "side": 1,
+      "message": "Why former ROBOT tests di not require it?",
+      "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2bfc20f_6136576e",
+        "filename": "features/features-controller-testing/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-08-03T08:10:43Z",
+      "side": 1,
+      "message": "\u003ctype\u003e\n\u003cclassifier\u003e",
+      "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
