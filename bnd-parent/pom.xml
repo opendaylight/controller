@@ -12,13 +12,13 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>bnd-parent</artifactId>
-        <version>14.0.21</version>
+        <version>14.0.22</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>bnd-parent</artifactId>
-    <version>11.0.5-SNAPSHOT</version>
+    <version>11.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>Bundle parent (bnd-based)</description>
@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>controller-artifacts</artifactId>
-                <version>11.0.5-SNAPSHOT</version>
+                <version>11.0.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
