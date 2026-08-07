@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26cd5dec_b768fac9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-08-07T14:46:08Z",
+      "side": 1,
+      "message": "I very much dislike the idea of proliferating infrautils into controller. The log message checks a very small fraction of things that go on.\n\nHonestly, the check of \u0027is everything up\u0027 should not be determined by DUT, but rather by the test harness -- the test knows which parts of the system it needs to have operational.",
+      "revId": "851519037c5e0fdd5299421878cde98c43d4e540",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0bb8a067_e2714405",
+        "filename": "features/features-controller-testing/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-08-07T14:46:08Z",
+      "side": 1,
+      "message": "this is not where we keep upstream dependency versions",
+      "range": {
+        "startLine": 37,
+        "startChar": 25,
+        "endLine": 37,
+        "endChar": 31
+      },
+      "revId": "851519037c5e0fdd5299421878cde98c43d4e540",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
