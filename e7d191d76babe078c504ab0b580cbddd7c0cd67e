@@ -50,6 +50,23 @@
       "message": "recheck",
       "revId": "e7d191d76babe078c504ab0b580cbddd7c0cd67e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "50f2a606_33123b52",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-08-07T07:03:17Z",
+      "side": 1,
+      "message": "[ERROR]   DataCentersTest.testDatacenterActivation:89-\u003eAbstractNativeEosTest.verifyListenerState:336 » ConditionTimeout Assertion condition defined as a Lambda expression in org.opendaylight.controller.eos.akka.AbstractNativeEosTest expected:\u003cfalse\u003e but was:\u003ctrue\u003e within 10 seconds.",
+      "revId": "e7d191d76babe078c504ab0b580cbddd7c0cd67e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
