@@ -35,6 +35,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a90ab40_189e7193",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2026-08-07T07:57:46Z",
+      "side": 1,
+      "message": "Because former ROBOT tests were running original tests on integration distribution.\n`02:12:39 Distribution bundle URL is https://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/org/opendaylight/integration/karaf/0.23.2-SNAPSHOT/karaf-0.23.2-20260725.223751-170.zip`\nhttps://jenkins.opendaylight.org/releng/view/controller/job/controller-csit-1node-rest-cars-perf-all-vanadium/51/console\n\nController tests are using default karaf-version: karaf4 value https://github.com/opendaylight/releng-builder/blob/2a9d67fea575e9472504a2c5c641936516e4430d/jjb/defaults.yaml#L9C5-L9C19\nNot overwriting it https://github.com/opendaylight/releng-builder/blob/2a9d67fea575e9472504a2c5c641936516e4430d/jjb/controller/controller-csit-rest-cars-perf.yaml#L3\nThis means that the opendaylight project build which is used in testing is `integration` https://github.com/opendaylight/releng-builder/blob/2a9d67fea575e9472504a2c5c641936516e4430d/jjb/integration/integration-set-variables.sh#L20",
+      "parentUuid": "365218db_94a1228e",
+      "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d2bfc20f_6136576e",
@@ -48,6 +66,24 @@
       "writtenOn": "2026-08-03T08:10:43Z",
       "side": 1,
       "message": "\u003ctype\u003e\n\u003cclassifier\u003e",
+      "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c5c6de72_5db3fea8",
+        "filename": "features/features-controller-testing/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2026-08-07T07:57:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d2bfc20f_6136576e",
       "revId": "b3e07b0c8f6869cb2c738d137f046557d7c3441d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
