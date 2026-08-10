@@ -130,7 +130,7 @@ function get_cli_params
     test "${CONTROLLER_LIST}" == "" && usage "Missing controller list"
 
     # Create the list of controllers from the CONTROLLER_LIST variable
-    CONTROLLERIPS=( "${CONTROLLER_LIST//,/ }" )
+    IFS=', ' read -ra CONTROLLERIPS <<< "${CONTROLLER_LIST}"
 
     test ${INDEX} -le 0 -o ${INDEX} -gt ${#CONTROLLERIPS[@]} && \
         usage "Invalid index"
