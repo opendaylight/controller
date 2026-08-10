@@ -157,10 +157,10 @@ function get_cli_params
     test "${CONTROLLER_LIST}" == "" && usage "Missing controller list"
 
     # Create the list of controllers from the CONTROLLER_LIST variable
-    CONTROLLERIPS=( "${CONTROLLER_LIST//,/ }" )
+    IFS=', ' read -ra CONTROLLERIPS <<< "${CONTROLLER_LIST}"
 
     # Get the local node's IP addresses
-    LOCAL_IPS=( "$(get_local_ip_addresses)" )
+    IFS=' ' read -ra LOCAL_IPS <<< "$(get_local_ip_addresses)"
 
     for CONTROLLER_IP in "${LOCAL_IPS[@]}" ;
     do
