@@ -59,7 +59,7 @@ permissions:
 jobs:
   sonar-scan:
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/composed-maven-sonar-cloud.yaml@0688b118b3290649e0cb3580612e6369b6509774 # v0.10.0
+    uses: lfit/releng-reusable-workflows/.github/workflows/composed-maven-sonar-cloud.yaml@f7aae218f1fa0257e3dcd19f5c7d3f88f482f266 # v0.10.1
     with:
       GERRIT_BRANCH: ${{ inputs.GERRIT_BRANCH || 'master' }}
       GERRIT_CHANGE_ID: ${{ inputs.GERRIT_CHANGE_ID || '' }}
