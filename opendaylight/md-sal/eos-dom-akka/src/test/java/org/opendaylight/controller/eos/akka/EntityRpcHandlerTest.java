@@ -56,8 +56,8 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
         system1 = startupActorSystem(2550, List.of("member-1"), TWO_NODE_SEED_NODES);
         system2 = startupActorSystem(2551, List.of("member-2"), TWO_NODE_SEED_NODES, "dc-backup");
 
-        service1 = new AkkaEntityOwnershipService(system1, CODEC_CONTEXT);
-        service2 = new AkkaEntityOwnershipService(system2, CODEC_CONTEXT);
+        service1 = new AkkaEntityOwnershipService(system1, CODEC_TREE);
+        service2 = new AkkaEntityOwnershipService(system2, CODEC_TREE);
 
         // need to wait until all nodes are ready
         final var cluster = Cluster.get(Adapter.toTyped(system2));
@@ -105,7 +105,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         await().untilAsserted(() -> {
             final var getEntityResult = service1.getEntity(new GetEntityInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
+                .setName(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get();
 
@@ -120,18 +120,18 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
             final var entities = getEntitiesResult.nonnullEntities();
             assertEquals(1, entities.size());
             assertTrue(entities.get(new EntitiesKey(
-                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
+                new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()),
                 new EntityType(ENTITY_TYPE)))
                 .getCandidateNodes().contains(new NodeName("member-1")));
             assertTrue(entities.get(new EntitiesKey(
-                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
+                new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()),
                 new EntityType(ENTITY_TYPE)))
                 .getOwnerNode().getValue().equals("member-1"));
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var getEntityResult = service2.getEntity(new GetEntityInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
+                .setName(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get().getResult();
 
@@ -141,7 +141,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var getOwnerResult = service2.getEntityOwner(new GetEntityOwnerInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
+                .setName(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get().getResult();
 

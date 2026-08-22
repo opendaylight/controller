@@ -74,7 +74,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         typedSystem = Adapter.toTyped(system);
         replicator = DistributedData.get(typedSystem).replicator();
 
-        service = new AkkaEntityOwnershipService(system, CODEC_CONTEXT);
+        service = new AkkaEntityOwnershipService(system, CODEC_TREE);
     }
 
     @After
@@ -201,7 +201,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         verifyEntityCandidateRegistered(ENTITY_TYPE, entityId, "member-1");
 
         var result = service.getEntity(new GetEntityInputBuilder()
-            .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
+            .setName(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()))
             .setType(new EntityType(ENTITY_TYPE))
             .build())
             .get()
@@ -228,15 +228,15 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
         final var entities = getEntitiesResult.nonnullEntities();
         assertEquals(1, entities.size());
         assertTrue(entities.get(
-            new EntitiesKey(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
+            new EntitiesKey(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()),
                 new EntityType(ENTITY_TYPE))).getCandidateNodes().contains(new NodeName("member-1")));
         assertTrue(entities.get(new EntitiesKey(
-                        new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
+                        new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()),
                         new EntityType(ENTITY_TYPE)))
                 .getOwnerNode().getValue().equals("member-1"));
 
         final var getOwnerResult = service.getEntityOwner(new GetEntityOwnerInputBuilder()
-            .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
+            .setName(new EntityName(NODE_SERIALIZER.fromYangInstanceIdentifier(entityId).toIdentifier()))
             .setType(new EntityType(ENTITY_TYPE))
             .build()).get().getResult();
 

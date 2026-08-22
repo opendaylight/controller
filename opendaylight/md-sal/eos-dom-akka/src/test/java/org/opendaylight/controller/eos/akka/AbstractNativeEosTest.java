@@ -36,6 +36,7 @@ import org.apache.pekko.cluster.ddata.ORMap;
 import org.apache.pekko.cluster.ddata.ORSet;
 import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
 import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.eos.akka.bootstrap.EOSMain;
 import org.opendaylight.controller.eos.akka.bootstrap.command.BootstrapCommand;
 import org.opendaylight.controller.eos.akka.bootstrap.command.GetRunningContext;
@@ -56,8 +57,10 @@ import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeL
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
-import org.opendaylight.yangtools.binding.data.codec.impl.di.DefaultBindingDOMCodecFactory;
-import org.opendaylight.yangtools.binding.data.codec.spi.BindingDOMCodecServices;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingDataCodec;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.yangtools.binding.data.codec.dynamic.dagger.BindingDataCodecFactoryModule;
 import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +87,11 @@ public abstract class AbstractNativeEosTest {
                     "pekko://ClusterSystem@127.0.0.1:2552",
                     "pekko://ClusterSystem@127.0.0.1:2553");
 
-    protected static final BindingDOMCodecServices CODEC_CONTEXT =
-        new DefaultBindingDOMCodecFactory().createBindingDOMCodec(BindingRuntimeHelpers.createRuntimeContext());
+    private static final @NonNull BindingDataCodec CODEC_CONTEXT =
+        BindingDataCodecFactoryModule.provideBindingDataCodecFactory()
+            .newBindingDataCodec(BindingRuntimeHelpers.createRuntimeContext());
+    protected static final @NonNull BindingCodecTree CODEC_TREE = CODEC_CONTEXT.tree();
+    protected static final @NonNull BindingNormalizedNodeSerializer NODE_SERIALIZER = CODEC_CONTEXT.nodeSerializer();
 
     private static final String REMOTE_PROTOCOL = "pekko";
     private static final String PORT_PARAM = "pekko.remote.artery.canonical.port";
@@ -166,7 +172,7 @@ public abstract class AbstractNativeEosTest {
             throws ExecutionException, InterruptedException {
         final org.apache.pekko.actor.ActorSystem system = startupActorSystem(port, roles, seedNodes, dataCenter);
         final ActorRef<BootstrapCommand> eosBootstrap =
-                Adapter.spawn(system, EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()), "EOSBootstrap");
+                Adapter.spawn(system, EOSMain.create(CODEC_TREE.getInstanceIdentifierCodec()), "EOSBootstrap");
 
         final CompletionStage<RunningContext> ask = AskPattern.ask(eosBootstrap,
                 GetRunningContext::new,
@@ -212,7 +218,7 @@ public abstract class AbstractNativeEosTest {
     }
 
     private static Behavior<BootstrapCommand> rootBehavior() {
-        return Behaviors.setup(context -> EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()));
+        return Behaviors.setup(context -> EOSMain.create(CODEC_TREE.getInstanceIdentifierCodec()));
     }
 
     protected static void registerCandidates(final ClusterNode node, final DOMEntity entity, final String... members) {
@@ -445,7 +451,7 @@ public abstract class AbstractNativeEosTest {
 
         protected MockNativeEntityOwnershipService(final ActorSystem classicActorSystem)
                 throws ExecutionException, InterruptedException {
-            super(classicActorSystem, CODEC_CONTEXT);
+            super(classicActorSystem, CODEC_TREE);
             this.classicActorSystem = classicActorSystem;
         }
 
