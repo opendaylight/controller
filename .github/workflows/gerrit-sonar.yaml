@@ -73,11 +73,11 @@ jobs:
       JDK_VERSION: "21"
       MVN_VERSION: "3.9.9"
       MVN_PARAMS: >-
-        -Dodl.jacoco.aggregateFile=${{ github.workspace }}/target/jacoco.exec -Dskip.karaf.featureTest=true
+        -Dodl.jacoco.aggregateFile="${GITHUB_WORKSPACE}"/target/jacoco.exec -Dskip.karaf.featureTest=true
       MVN_PHASES: >-
         clean install
         jacoco:report
-        -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec
+        -Djacoco.dataFile="${GITHUB_WORKSPACE}"/target/jacoco.exec
         org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar
       SONAR_PROJECT_KEY: "opendaylight_controller"
       SONAR_ORG: "opendaylight"
