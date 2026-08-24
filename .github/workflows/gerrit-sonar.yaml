@@ -53,33 +53,46 @@ concurrency:
   group: sonar-${{ github.workflow }}-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}-${{ github.event.inputs.GERRIT_CHANGE_ID || github.run_id }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   sonar-scan:
+    permissions:
+      contents: read
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/composed-maven-sonar-cloud.yaml@f7aae218f1fa0257e3dcd19f5c7d3f88f482f266 # v0.10.1
+    uses: lfreleng-actions/security-workflows/.github/workflows/sonarqube-cloud.yaml@5882f138dd24fcd6cb4ebc8bb3a68cee45a437a6 # v0.3.0
     with:
-      GERRIT_BRANCH: ${{ inputs.GERRIT_BRANCH || 'master' }}
-      GERRIT_CHANGE_ID: ${{ inputs.GERRIT_CHANGE_ID || '' }}
-      GERRIT_CHANGE_NUMBER: ${{ inputs.GERRIT_CHANGE_NUMBER || '' }}
-      GERRIT_CHANGE_URL: ${{ inputs.GERRIT_CHANGE_URL || '' }}
-      GERRIT_EVENT_TYPE: ${{ inputs.GERRIT_EVENT_TYPE || 'schedule' }}
-      GERRIT_PATCHSET_NUMBER: ${{ inputs.GERRIT_PATCHSET_NUMBER || '' }}
-      GERRIT_PATCHSET_REVISION: ${{ inputs.GERRIT_PATCHSET_REVISION || '' }}
-      GERRIT_PROJECT: ${{ inputs.GERRIT_PROJECT || 'controller' }}
-      GERRIT_REFSPEC: ${{ inputs.GERRIT_REFSPEC || 'refs/heads/master' }}
-      JDK_VERSION: "21"
-      MVN_VERSION: "3.9.9"
-      MVN_PARAMS: >-
-        -Dodl.jacoco.aggregateFile="${GITHUB_WORKSPACE}"/target/jacoco.exec -Dskip.karaf.featureTest=true
-      MVN_PHASES: >-
-        clean install
+      # Gerrit dispatches carry a refspec and check out the change;
+      # the weekly schedule leaves it empty and takes the branch.
+      gerrit_refspec: ${{ inputs.GERRIT_REFSPEC || '' }}
+      gerrit_project: ${{ inputs.GERRIT_PROJECT || '' }}
+      gerrit_branch: ${{ inputs.GERRIT_BRANCH || '' }}
+      ref: ${{ inputs.GERRIT_BRANCH || 'master' }}
+      # Sonar reads bytecode and a coverage report, so build first.
+      build_type: "maven"
+      java_version: "21"
+      mvn_version: "3.9.9"
+      # Pinned to the version the legacy lane used; upgrading the
+      # scanner is a separate change.
+      maven_sonar_plugin_version: "3.9.1.2184"
+      mvn_phases: >-
+        clean
+        install
         jacoco:report
-        -Djacoco.dataFile="${GITHUB_WORKSPACE}"/target/jacoco.exec
-        org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar
-      SONAR_PROJECT_KEY: "opendaylight_controller"
-      SONAR_ORG: "opendaylight"
+        -Djacoco.dataFile=${GITHUB_WORKSPACE}/target/jacoco.exec
+      mvn_params: >-
+        -Dodl.jacoco.aggregateFile=${GITHUB_WORKSPACE}/target/jacoco.exec
+        -Dskip.karaf.featureTest=true
+      # The scan runs its own Maven invocation, so it needs the
+      # same coverage coordinates the build was given.
+      maven_args: >-
+        -Dodl.jacoco.aggregateFile=${GITHUB_WORKSPACE}/target/jacoco.exec
+        -Djacoco.dataFile=${GITHUB_WORKSPACE}/target/jacoco.exec
+      sonar_project_key: "opendaylight_controller"
+      sonar_organization: "opendaylight"
     secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+      # The legacy workflow read vars.GLOBAL_SETTINGS internally;
+      # this one takes it from the caller, and ODL needs it to
+      # resolve snapshot dependencies.
+      maven_global_settings: ${{ vars.GLOBAL_SETTINGS }}
