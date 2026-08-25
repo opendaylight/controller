@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -851,6 +853,52 @@ public abstract class AbstractDistributedDataStoreIntegrationTest extends Abstra
                 state -> assertEquals(12, state.getSnapshotIndex()));
 
             verifySnapshot("member-1-shard-cars-testRootOverwrite", 12, 1);
+        }
+    }
+
+    /**
+     * Verifies that a transaction chain releases a transaction once it has committed.
+     *
+     * <p>The chain writes an entry and then deletes it, so the committed data tree no longer references the entry.
+     * The only thing that could still keep the entry reachable is the chain holding onto the transaction that wrote
+     * it. After the commit, at idle, the entry must therefore be garbage-collectable. If the chain retains the
+     * completed transaction, the entry stays reachable and this test fails.
+     */
+    @Test
+    public void committedTransactionIsReleasedFromChain() throws Exception {
+        final var testKit = new IntegrationTestKit(stateDir(), system, datastoreContextBuilder);
+        try (var dataStore = testKit.setupTestDataStore("modRetentionTest", "cars-1");
+            var chain = dataStore.createTransactionChain()) {
+
+            // Establish the containers the car lives under.
+            var tx = chain.newWriteOnlyTransaction();
+            tx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+            tx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+            testKit.doCommit(tx.ready());
+
+            // Write the car and remember it weakly.
+            final var carPath = CarsModel.newCarPath("car");
+            var car = CarsModel.newCarEntry("car", Uint64.valueOf(1000));
+            final var carRef = new WeakReference<>(car);
+            tx = chain.newWriteOnlyTransaction();
+            tx.write(carPath, car);
+            testKit.doCommit(tx.ready());
+
+            // Delete it, so the committed data tree no longer holds it.
+            tx = chain.newWriteOnlyTransaction();
+            tx.delete(carPath);
+            testKit.doCommit(tx.ready());
+
+            car = null;
+            tx = null;
+
+            // The car is gone from the data tree, so once its writing transaction is released it must be
+            // collectable. GC on each poll until it clears, or fail with the retained node if it never does.
+            await().atMost(4, TimeUnit.SECONDS).pollInterval(500, TimeUnit.MILLISECONDS).untilAsserted(() -> {
+                System.gc();
+                assertNull("committed and deleted car is still reachable at idle, the chain did not release the "
+                    + "transaction that wrote it", carRef.get());
+            });
         }
     }
 
