@@ -515,6 +515,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
                     // This is a terminal request, hence we do not need to record it
                     LOG.debug("Transaction {} directCommit completed", this);
+
+                    // The commit is done, so let the parent ProxyHistory release this transaction.
+                    // completeTransaction() clears its lastSealed field, which was still pointing at this transaction.
+                    parent.completeTransaction(this);
+
                     enqueuePurge();
                 });
 
