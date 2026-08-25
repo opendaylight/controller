@@ -11,9 +11,15 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.common.primitives.UnsignedLong;
+import java.util.Optional;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -23,11 +29,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
+import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLocalHistory> {
@@ -40,6 +52,14 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     private AbstractTransactionCommitCohort cohort;
     @Mock
     private ClientTransaction transaction;
+    @Mock
+    private ReadOnlyDataTree dataTree;
+    @Mock
+    private DataTreeSnapshot firstSnapshot;
+    @Mock
+    private DataTreeSnapshot secondSnapshot;
+    @Mock
+    private CursorAwareDataTreeModification modification;
 
     @Before
     public void setUp() {
@@ -161,5 +181,42 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
         final IllegalStateException ise = assertThrows(IllegalStateException.class,
             () -> object().onTransactionReady(transaction, cohort));
         assertThat(ise.getMessage(), endsWith(" is idle when readying transaction null"));
+    }
+
+    /**
+     * Once a transaction committed through directCommit() completes, the local history must release it so the next
+     * transaction on the chain is built on a fresh data-tree snapshot instead of reusing the committed
+     * transaction's.
+     */
+    @Test
+    public void nextTransactionRebasesOnFreshSnapshotAfterCommit() {
+        // takeSnapshot() hands the first snapshot to the first transaction, the second to the next one.
+        when(dataTree.takeSnapshot()).thenReturn(firstSnapshot, secondSnapshot);
+        when(firstSnapshot.newModification()).thenReturn(modification);
+
+        // A backend reporting a local data tree makes createClient() build a Local (co-located) history.
+        final var backendProbe = new TestProbe(system, "backend");
+        final var backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(), SHARD_NAME,
+            UnsignedLong.ZERO, Optional.of(dataTree), 3);
+        final AbstractClientConnection<ShardBackendInfo> connection = AccessClientUtil.createConnectedConnection(
+            clientActorContext, 0L, backend);
+        final var localHistory = ProxyHistory.createClient(object(), connection, HISTORY_ID);
+
+        // Commit a read-write transaction on the chain through directCommit().
+        final var tx1 = (LocalReadWriteProxyTransaction) localHistory.createTransactionProxy(
+            new TransactionIdentifier(HISTORY_ID, 0L), false);
+        tx1.seal();
+        tx1.directCommit();
+
+        final var tester = new TransactionTester<>(tx1, connection, backendProbe);
+        final var request = tester.expectTransactionRequest(CommitLocalTransactionRequest.class);
+        tester.replySuccess(new TransactionCommitSuccess(request.getTarget(), request.getSequence()));
+
+        // Once the committed transaction is released, the next transaction must be built on a fresh data-tree
+        // snapshot rather than reusing the committed transaction's snapshot.
+        final var tx2 = (LocalReadOnlyProxyTransaction) localHistory.createTransactionProxy(
+            new TransactionIdentifier(HISTORY_ID, 1L), true);
+        assertSame("transaction not rebased on a fresh snapshot", secondSnapshot, tx2.readOnlyView());
+        verify(dataTree, times(2)).takeSnapshot();
     }
 }
