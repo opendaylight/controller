@@ -512,8 +512,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
                     }
 
                     // This is a terminal request, hence we do not need to record it
-                    LOG.debug("Transaction {} directCommit completed", this);
-                    enqueuePurge();
+                    onCommitCompleted("directCommit");
                 });
 
                 return ret;
@@ -596,13 +595,17 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
                 default -> ret.voteNo(unhandledResponseException(resp));
             }
-            LOG.debug("Transaction {} doCommit completed", this);
-
-            // Needed for ProxyHistory$Local data tree rebase points.
-            parent.completeTransaction(this);
-
-            enqueuePurge();
+            onCommitCompleted("doCommit");
         });
+    }
+
+    private void onCommitCompleted(final String commitKind) {
+        LOG.debug("Transaction {} {} completed", this, commitKind);
+
+        // Needed for ProxyHistory$Local data tree rebase points.
+        parent.completeTransaction(this);
+
+        enqueuePurge();
     }
 
     private void enqueuePurge() {
