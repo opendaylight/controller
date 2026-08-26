@@ -22,6 +22,30 @@
       },
       "revId": "167eaeeea5e8dfaebec8f651dfee089c2bcd30ab",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f59b3c81_35f79007",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractDistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 868,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2026-08-26T15:23:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9442d709_01530cf5",
+      "range": {
+        "startLine": 868,
+        "startChar": 16,
+        "endLine": 868,
+        "endChar": 55
+      },
+      "revId": "167eaeeea5e8dfaebec8f651dfee089c2bcd30ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
