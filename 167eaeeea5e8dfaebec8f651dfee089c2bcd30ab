@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9442d709_01530cf5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractDistributedDataStoreIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 868,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-08-26T11:54:37Z",
+      "side": 1,
+      "message": "this is nice for an end-to-end test, but it really assumes System.gc() does something it is not guaranteed to do:\n\n     * There is no guarantee that this effort will recycle any particular\n     * number of unused objects, reclaim any particular amount of space, or\n     * complete at any particular time, if at all, before the method returns or ever.\n     * There is also no guarantee that this effort will determine\n     * the change of reachability in any particular number of objects,\n     * or that any particular number of {@link java.lang.ref.Reference Reference}\n     * objects will be cleared and enqueued.\n\nThis should be tested in actors.dds using protocol interactions and examining\nLocalReadOnlyProxyTransaction.readOnlyView() -- the fix should result in it allocating a fresh snapshot (see doCreateTransactionProxy())",
+      "range": {
+        "startLine": 868,
+        "startChar": 16,
+        "endLine": 868,
+        "endChar": 55
+      },
+      "revId": "167eaeeea5e8dfaebec8f651dfee089c2bcd30ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
