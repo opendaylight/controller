@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -143,7 +144,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final var successor = transactionTester.getTransaction();
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         transaction.sealOnly();
-        final var request = transaction.flushState().orElseThrow();
+        final var request = transaction.flushState();
+        assertNotNull(request);
         transaction.forwardToSuccessor(successor, request, null);
         verify(modification).applyToCursor(any());
         transactionTester.getTransaction().seal();

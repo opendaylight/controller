@@ -280,14 +280,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    Optional<ModifyTransactionRequest> flushState() {
+    ModifyTransactionRequest flushState() {
         if (!builderBusy) {
-            return Optional.empty();
+            return null;
         }
 
-        final ModifyTransactionRequest request = builder.build();
+        final var request = builder.build();
         builderBusy = false;
-        return Optional.of(request);
+        return request;
     }
 
     @Override
