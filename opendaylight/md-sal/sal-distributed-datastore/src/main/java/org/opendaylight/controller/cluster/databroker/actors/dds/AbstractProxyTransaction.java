@@ -701,13 +701,12 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             final var req = eentry.getRequest();
 
             if (getIdentifier().equals(req.getTarget())) {
-                if (req instanceof TransactionRequest<?> tx) {
-                    LOG.debug("Replaying queued request {} to successor {}", req, successor);
-                    successor.doReplayRequest(tx, eentry.getCallback(), eentry.getEnqueuedTicks());
-                    it.remove();
-                } else {
+                if (!(req instanceof TransactionRequest<?> tx)) {
                     throw new VerifyException("Unhandled request " + req);
                 }
+                LOG.debug("Replaying queued request {} to successor {}", req, successor);
+                successor.doReplayRequest(tx, eentry.getCallback(), eentry.getEnqueuedTicks());
+                it.remove();
             }
         }
 
