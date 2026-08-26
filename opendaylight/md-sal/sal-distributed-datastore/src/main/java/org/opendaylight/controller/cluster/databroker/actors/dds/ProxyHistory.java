@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -18,7 +17,6 @@ import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -234,21 +232,19 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void replayRequests(final Collection<ConnectionEntry> previousEntries) {
             // First look for our Create message
-            Iterator<ConnectionEntry> it = previousEntries.iterator();
+            var it = previousEntries.iterator();
             while (it.hasNext()) {
-                final ConnectionEntry e = it.next();
-                final Request<?, ?> req = e.getRequest();
-                if (identifier.equals(req.getTarget())) {
-                    verify(req instanceof LocalHistoryRequest, "Unexpected request %s", req);
-                    if (req instanceof CreateLocalHistoryRequest) {
-                        successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
-                        it.remove();
-                        break;
-                    }
+                final var e = it.next();
+                final var req = e.getRequest();
+                if (identifier.equals(req.getTarget())
+                    && verifyLocalHistoryRequest(req) instanceof CreateLocalHistoryRequest createLocalHistory) {
+                    successor.connection.enqueueRequest(createLocalHistory, e.getCallback(), e.getEnqueuedTicks());
+                    it.remove();
+                    break;
                 }
             }
 
-            for (AbstractProxyTransaction t : proxies.values()) {
+            for (var t : proxies.values()) {
                 LOG.debug("{} replaying messages to old proxy {} towards successor {}", identifier, t, successor);
                 t.replayMessages(successor, previousEntries);
             }
@@ -264,25 +260,30 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             // Now look for any finalizing messages
             it = previousEntries.iterator();
             while (it.hasNext()) {
-                final ConnectionEntry e  = it.next();
-                final Request<?, ?> req = e.getRequest();
-                if (identifier.equals(req.getTarget())) {
-                    verify(req instanceof LocalHistoryRequest, "Unexpected request %s", req);
-                    if (req instanceof DestroyLocalHistoryRequest) {
-                        successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
-                        it.remove();
-                        break;
-                    }
+                final var e  = it.next();
+                final var req = e.getRequest();
+                if (identifier.equals(req.getTarget())
+                    && verifyLocalHistoryRequest(req) instanceof DestroyLocalHistoryRequest destroyLocalHistory) {
+                    successor.connection.enqueueRequest(destroyLocalHistory, e.getCallback(), e.getEnqueuedTicks());
+                    it.remove();
+                    break;
                 }
             }
+        }
+
+        private static LocalHistoryRequest<?> verifyLocalHistoryRequest(final Request<?, ?> req) {
+            if (req instanceof LocalHistoryRequest<?> lhReq) {
+                return lhReq;
+            }
+            throw new VerifyException("Unexpected request " + req);
         }
 
         @Holding("lock")
         @Override
         ProxyHistory finishReconnect() {
-            final ProxyHistory ret = verifyNotNull(successor);
+            final var ret = verifyNotNull(successor);
 
-            for (AbstractProxyTransaction t : proxies.values()) {
+            for (var t : proxies.values()) {
                 t.finishReconnect();
             }
 
