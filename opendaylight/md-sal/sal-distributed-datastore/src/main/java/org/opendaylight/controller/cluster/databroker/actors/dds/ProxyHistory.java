@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -132,10 +133,16 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         void onTransactionCompleted(final AbstractProxyTransaction tx) {
-            verify(tx instanceof LocalProxyTransaction, "Unexpected transaction %s", tx);
-            if (tx instanceof LocalReadWriteProxyTransaction
-                    && LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
-                LOG.debug("Completed last sealed transaction {}", tx);
+            switch (tx) {
+                case LocalReadOnlyProxyTransaction unused -> {
+                    // no-op
+                }
+                case LocalReadWriteProxyTransaction rw -> {
+                    if (LAST_SEALED_UPDATER.compareAndSet(this, rw, null)) {
+                        LOG.debug("Completed last sealed transaction {}", tx);
+                    }
+                }
+                case RemoteProxyTransaction remote -> throw new VerifyException("Unexpected transaction " + remote);
             }
         }
 
