@@ -11,7 +11,6 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
@@ -73,9 +72,9 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    Optional<ModifyTransactionRequest> flushState() {
+    ModifyTransactionRequest flushState() {
         // No-op
-        return Optional.empty();
+        return null;
     }
 
     @Override

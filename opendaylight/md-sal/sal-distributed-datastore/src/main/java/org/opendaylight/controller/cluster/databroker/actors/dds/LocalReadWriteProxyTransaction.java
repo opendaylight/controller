@@ -227,7 +227,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    Optional<ModifyTransactionRequest> flushState() {
+    ModifyTransactionRequest flushState() {
         final var builder = ModifyTransactionRequest.builder(getIdentifier(), localActor()).setSequence(0);
 
         sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
@@ -247,7 +247,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             }
         });
 
-        return Optional.of(builder.build());
+        return builder.build();
     }
 
     CursorAwareDataTreeSnapshot getSnapshot() {
