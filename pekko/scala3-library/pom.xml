@@ -37,7 +37,7 @@
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
         <!-- Used in bnd.bnd -->
-        <scala3.library.version>3.3.7</scala3.library.version>
+        <scala3.library.version>3.3.8</scala3.library.version>
     </properties>
 
     <dependencies>
