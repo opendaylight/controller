@@ -105,21 +105,17 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             }
 
             // onTransactionCompleted() runs concurrently
-            final LocalReadWriteProxyTransaction localSealed = lastSealed;
-            final DataTreeSnapshot baseSnapshot;
-            if (localSealed != null) {
-                baseSnapshot = localSealed.getSnapshot();
-            } else {
-                baseSnapshot = takeSnapshot();
-            }
+            final var localSealed = lastSealed;
+            final var baseSnapshot = localSealed != null ? localSealed.getSnapshot() : takeSnapshot();
 
             if (snapshotOnly) {
                 return new LocalReadOnlyProxyTransaction(this, txId, baseSnapshot);
             }
 
-            lastOpen = new LocalReadWriteProxyTransaction(this, txId, baseSnapshot);
-            LOG.debug("Proxy {} open transaction {}", this, lastOpen);
-            return lastOpen;
+            final var ret = new LocalReadWriteProxyTransaction(this, txId, baseSnapshot);
+            lastOpen = ret;
+            LOG.debug("Proxy {} open transaction {}", this, ret);
+            return ret;
         }
 
         @Override
