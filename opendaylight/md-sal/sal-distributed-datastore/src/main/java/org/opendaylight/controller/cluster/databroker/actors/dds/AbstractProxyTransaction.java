@@ -446,13 +446,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     final void abort(final VotingFuture<Empty> ret) {
         checkSealed();
 
-        sendDoAbort(t -> {
-            if (t instanceof TransactionAbortSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
-            } else {
-                ret.voteNo(unhandledResponseException(t));
+        sendDoAbort(resp -> {
+            switch (resp) {
+                case TransactionAbortSuccess unused -> ret.voteYes();
+                case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
 
             // This is a terminal request, hence we do not need to record it
@@ -496,21 +494,21 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final SettableFuture<Boolean> ret = SettableFuture.create();
-                sendRequest(verifyNotNull(commitRequest(false)), t -> {
-                    if (t instanceof TransactionCommitSuccess) {
-                        ret.set(Boolean.TRUE);
-                    } else if (t instanceof RequestFailure) {
-                        final Throwable cause = ((RequestFailure<?, ?>) t).getCause().unwrap();
-                        if (cause instanceof ClosedTransactionException) {
-                            // This is okay, as it indicates the transaction has been completed. It can happen
-                            // when we lose connectivity with the backend after it has received the request.
-                            ret.set(Boolean.TRUE);
-                        } else {
-                            ret.setException(cause);
+                final var ret = SettableFuture.<Boolean>create();
+                sendRequest(verifyNotNull(commitRequest(false)), resp -> {
+                    switch (resp) {
+                        case TransactionCommitSuccess unused -> ret.set(Boolean.TRUE);
+                        case RequestFailure<?, ?> failure -> {
+                            final var cause = failure.getCause().unwrap();
+                            if (cause instanceof ClosedTransactionException) {
+                                // This is okay, as it indicates the transaction has been completed. It can happen
+                                // when we lose connectivity with the backend after it has received the request.
+                                ret.set(Boolean.TRUE);
+                            } else {
+                                ret.setException(cause);
+                            }
                         }
-                    } else {
-                        ret.setException(unhandledResponseException(t));
+                        default -> ret.setException(unhandledResponseException(resp));
                     }
 
                     // This is a terminal request, hence we do not need to record it
@@ -535,11 +533,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final var req = verifyNotNull(commitRequest(true));
 
-                sendRequest(req, t -> {
-                    switch (t) {
+                sendRequest(req, resp -> {
+                    switch (resp) {
                         case TransactionCanCommitSuccess success -> ret.voteYes();
                         case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                        default -> ret.voteNo(unhandledResponseException(t));
+                        default -> ret.voteNo(unhandledResponseException(resp));
                     }
                     recordSuccessfulRequest(req);
                     LOG.debug("Transaction {} canCommit completed", this);
@@ -562,11 +560,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkSealed();
 
         final var req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());
-        sendRequest(req, t -> {
-            switch (t) {
+        sendRequest(req, resp -> {
+            switch (resp) {
                 case TransactionPreCommitSuccess success -> ret.voteYes();
                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                default -> ret.voteNo(unhandledResponseException(t));
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
             onPreCommitComplete(req);
         });
@@ -592,11 +590,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
-            switch (t) {
+        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
+            switch (resp) {
                 case TransactionCommitSuccess success -> ret.voteYes();
                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                default -> ret.voteNo(unhandledResponseException(t));
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
             LOG.debug("Transaction {} doCommit completed", this);
 
@@ -701,13 +699,12 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             final var req = eentry.getRequest();
 
             if (getIdentifier().equals(req.getTarget())) {
-                if (req instanceof TransactionRequest<?> tx) {
-                    LOG.debug("Replaying queued request {} to successor {}", req, successor);
-                    successor.doReplayRequest(tx, eentry.getCallback(), eentry.getEnqueuedTicks());
-                    it.remove();
-                } else {
+                if (!(req instanceof TransactionRequest<?> tx)) {
                     throw new VerifyException("Unhandled request " + req);
                 }
+                LOG.debug("Replaying queued request {} to successor {}", req, successor);
+                successor.doReplayRequest(tx, eentry.getCallback(), eentry.getEnqueuedTicks());
+                it.remove();
             }
         }
 
