@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -136,10 +137,16 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         void onTransactionCompleted(final AbstractProxyTransaction tx) {
-            verify(tx instanceof LocalProxyTransaction, "Unexpected transaction %s", tx);
-            if (tx instanceof LocalReadWriteProxyTransaction
-                    && LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
-                LOG.debug("Completed last sealed transaction {}", tx);
+            switch (tx) {
+                case LocalReadWriteProxyTransaction readWrite -> {
+                    if (LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
+                        LOG.debug("Completed last sealed transaction {}", tx);
+                    }
+                }
+                case LocalReadOnlyProxyTransaction unused -> {
+                    // no-op
+                }
+                case RemoteProxyTransaction remote -> throw new VerifyException("Unexpected transaction " +  remote);
             }
         }
 
@@ -160,9 +167,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
                 final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
-            final DataTreeSnapshot snapshot = takeSnapshot();
-            return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot) :
-                new LocalReadWriteProxyTransaction(this, txId, snapshot);
+            final var snapshot = takeSnapshot();
+            return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot)
+                : new LocalReadWriteProxyTransaction(this, txId, snapshot);
         }
 
         @Override
@@ -191,7 +198,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private static final class RemoteSingle extends AbstractRemote {
         RemoteSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier) {
+                final LocalHistoryIdentifier identifier) {
             super(parent, connection, identifier);
         }
 
@@ -211,7 +218,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         private static final long serialVersionUID = 1L;
 
         RequestReplayException(final String format, final Object... args) {
-            super(String.format(format, args));
+            super(format.formatted(args));
         }
 
         @Override
@@ -290,14 +297,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void replayEntry(final ConnectionEntry entry, final Consumer<ConnectionEntry> replayTo)
                 throws RequestException {
-            final Request<?, ?> request = entry.getRequest();
-            if (request instanceof TransactionRequest) {
-                lookupProxy(request).replayRequest((TransactionRequest<?>) request, entry.getCallback(),
-                    entry.getEnqueuedTicks());
-            } else if (request instanceof LocalHistoryRequest) {
-                replayTo.accept(entry);
-            } else {
-                throw new IllegalArgumentException("Unhandled request " + request);
+            final var request = entry.getRequest();
+            switch (request) {
+                case LocalHistoryRequest<?> unused -> replayTo.accept(entry);
+                case TransactionRequest<?> txRequest ->
+                    lookupProxy(request).replayRequest(txRequest, entry.getCallback(), entry.getEnqueuedTicks());
+                default -> throw new IllegalArgumentException("Unhandled request " + request);
             }
         }
 
