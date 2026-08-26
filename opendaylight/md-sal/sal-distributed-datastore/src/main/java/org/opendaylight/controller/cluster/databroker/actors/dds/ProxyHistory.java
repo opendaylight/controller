@@ -156,16 +156,16 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private static final class LocalSingle extends AbstractLocal {
         LocalSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
+                final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
             super(parent, connection, identifier, dataTree);
         }
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
                 final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
-            final DataTreeSnapshot snapshot = takeSnapshot();
-            return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot) :
-                new LocalReadWriteProxyTransaction(this, txId, snapshot);
+            final var snapshot = takeSnapshot();
+            return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot)
+                : new LocalReadWriteProxyTransaction(this, txId, snapshot);
         }
 
         @Override
@@ -176,7 +176,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private static final class Remote extends AbstractRemote {
         Remote(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier) {
+                final LocalHistoryIdentifier identifier) {
             super(parent, connection, identifier);
         }
 
@@ -194,7 +194,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     private static final class RemoteSingle extends AbstractRemote {
         RemoteSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier) {
+                final LocalHistoryIdentifier identifier) {
             super(parent, connection, identifier);
         }
 
@@ -211,10 +211,11 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     private static final class RequestReplayException extends RequestException {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         RequestReplayException(final String format, final Object... args) {
-            super(String.format(format, args));
+            super(format.formatted(args));
         }
 
         @Override
