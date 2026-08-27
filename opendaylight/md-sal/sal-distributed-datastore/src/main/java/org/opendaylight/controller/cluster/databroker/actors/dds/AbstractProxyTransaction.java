@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
@@ -18,12 +17,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
@@ -177,10 +177,17 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProxyTransaction.class);
-    private static final AtomicIntegerFieldUpdater<AbstractProxyTransaction> SEALED_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(AbstractProxyTransaction.class, "sealed");
+    private static final VarHandle SEALED_VH;
     private static final AtomicReferenceFieldUpdater<AbstractProxyTransaction, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractProxyTransaction.class, State.class, "state");
+
+    static {
+        try {
+            SEALED_VH = MethodHandles.lookup().findVarHandle(AbstractProxyTransaction.class, "sealed", boolean.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     /**
      * Transaction has been open and is being actively worked on.
@@ -238,26 +245,22 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * from lock ordering, where the successor injection works with a locked queue and locks proxy objects -- leading
      * to a potential AB-BA deadlock in case of a naive implementation.
      *
-     * For tracking user-visible state we use a single volatile int, which is flipped atomically from 0 to 1 exactly
-     * once in {@link AbstractProxyTransaction#seal()}. That keeps common operations fast, as they need to perform
-     * only a single volatile read to assert state correctness.
+     * For tracking user-visible state we use a single volatile boolean, which is flipped atomically from false to true
+     * exactly once in {@link AbstractProxyTransaction#seal()}. That keeps common operations fast, as they need
+     * to perform only a single volatile read to assert state correctness.
      *
      * For synchronizing client actor (successor-injecting) and user (commit-driving) thread, we keep a separate state
      * variable. It uses pre-allocated objects for fast paths (i.e. no successor present) and a per-transition object
      * for slow paths (when successor is injected/present).
      */
-    private volatile int sealed;
+    private volatile boolean sealed;
     private volatile State state;
 
     AbstractProxyTransaction(final ProxyHistory parent, final boolean isDone) {
         this.parent = requireNonNull(parent);
-        if (isDone) {
-            state = DONE;
-            // DONE implies previous seal operation completed
-            sealed = 1;
-        } else {
-            state = OPEN;
-        }
+        // DONE implies previous seal operation completed
+        sealed = isDone;
+        state = isDone ? DONE : OPEN;
     }
 
     final void executeInActor(final Runnable command) {
@@ -327,8 +330,9 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      */
     final void seal() {
         // Transition user-visible state first
-        final boolean success = markSealed();
-        checkState(success, "Proxy %s was already sealed", getIdentifier());
+        if (!markSealed()) {
+            throw new IllegalStateException("Proxy " + getIdentifier() + " was already sealed");
+        }
 
         if (!sealAndSend(OptionalLong.empty())) {
             sealSuccessor();
@@ -392,15 +396,19 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * @return True if this call has transitioned to sealed state.
      */
     final boolean markSealed() {
-        return SEALED_UPDATER.compareAndSet(this, 0, 1);
+        return SEALED_VH.compareAndSet(this, false, true);
     }
 
     private void checkNotSealed() {
-        checkState(sealed == 0, "Transaction %s has already been sealed", getIdentifier());
+        if (sealed) {
+            throw new IllegalStateException("Transaction " + getIdentifier() + " has already been sealed");
+        }
     }
 
     private void checkSealed() {
-        checkState(sealed != 0, "Transaction %s has not been sealed yet", getIdentifier());
+        if (!sealed) {
+            throw new IllegalStateException("Transaction " + getIdentifier() + " has not been sealed yet");
+        }
     }
 
     private SuccessorState getSuccessorState() {
