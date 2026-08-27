@@ -12,7 +12,6 @@ import static com.google.common.base.Verify.verifyNotNull;
 import com.google.common.collect.ImmutableBiMap;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.apache.pekko.dispatch.ExecutionContexts;
@@ -42,8 +41,7 @@ import scala.concurrent.Future;
 final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);
 
-    private final ConcurrentMap<Long, ResolvingBackendInfo> backends = new ConcurrentHashMap<>();
-
+    private final ConcurrentHashMap<Long, ResolvingBackendInfo> backends = new ConcurrentHashMap<>();
     private final Future<Registration> shardAvailabilityChangesRegFuture;
 
     private @GuardedBy("this") long nextShard = 1;
@@ -92,7 +90,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     }
 
     private @NonNull Long resolveCookie(final String shardName) {
-        final Long cookie = shards.get(shardName);
+        final var cookie = shards.get(shardName);
         return cookie != null ? cookie : populateShard(shardName);
     }
 
@@ -115,21 +113,20 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
          * method runs the inherent risk of stage completing before the insertion does (i.e. we have a removal of
          * non-existent element.
          */
-        final ResolvingBackendInfo existing = backends.get(cookie);
+        final var existing = backends.get(cookie);
         if (existing != null) {
             return existing.stage();
         }
 
-        final String shardName = shards.inverse().get(cookie);
+        final var shardName = shards.inverse().get(cookie);
         if (shardName == null) {
             LOG.warn("Failing request for non-existent cookie {}", cookie);
             throw new IllegalArgumentException("Cookie " + cookie + " does not have a shard assigned");
         }
 
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
-        final ResolvingBackendInfo toInsert = resolveBackendInfo(shardName, cookie);
-
-        final ResolvingBackendInfo raced = backends.putIfAbsent(cookie, toInsert);
+        final var toInsert = resolveBackendInfo(shardName, cookie);
+        final var raced = backends.putIfAbsent(cookie, toInsert);
         if (raced != null) {
             // We have had a concurrent insertion, return that
             LOG.debug("Race during insertion of state for cookie {} shard {}", cookie, shardName);
@@ -138,7 +135,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
 
         // We have succeeded in populating the map, now we need to take care of pruning the entry if it fails to
         // complete
-        final CompletionStage<ShardBackendInfo> stage = toInsert.stage();
+        final var stage = toInsert.stage();
         stage.whenComplete((info, failure) -> {
             if (failure != null) {
                 LOG.debug("Resolution of cookie {} shard {} failed, removing state", cookie, shardName, failure);
@@ -155,7 +152,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     @Override
     public CompletionStage<ShardBackendInfo> refreshBackendInfo(final Long cookie,
             final ShardBackendInfo staleInfo) {
-        final ResolvingBackendInfo existing = backends.get(cookie);
+        final var existing = backends.get(cookie);
         if (existing != null) {
             if (!staleInfo.equals(existing.result())) {
                 return existing.stage();
