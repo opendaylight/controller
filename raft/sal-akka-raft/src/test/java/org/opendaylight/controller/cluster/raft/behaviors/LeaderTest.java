@@ -1947,14 +1947,12 @@ class LeaderTest extends AbstractLeaderTest<Leader> {
         // Check if the leader has been receiving SendHeartbeat messages despite getting AppendEntriesReply
         final var heartbeats = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
 
-        assertTrue(String.format("%s heartbeat(s) is less than expected", heartbeats.size()),
-                heartbeats.size() > 1);
+        assertTrue("%s heartbeat(s) is less than expected".formatted(heartbeats.size()), heartbeats.size() > 1);
 
         // Check if follower-2 got AppendEntries during this time and was not starved
         final var appendEntries = MessageCollectorActor.getAllMatching(follower2Actor, AppendEntries.class);
 
-        assertTrue(String.format("%s append entries is less than expected", appendEntries.size()),
-                appendEntries.size() > 1);
+        assertTrue("%s append entries is less than expected".formatted(appendEntries.size()), appendEntries.size() > 1);
     }
 
     @Test

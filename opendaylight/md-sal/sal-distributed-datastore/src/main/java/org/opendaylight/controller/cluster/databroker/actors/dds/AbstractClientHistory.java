@@ -206,7 +206,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     private void checkNotClosed() {
         if (state == State.CLOSED) {
-            throw new DOMTransactionChainClosedException(String.format("Local history %s is closed", identifier));
+            throw new DOMTransactionChainClosedException("Local history " + identifier + " is closed");
         }
     }
 

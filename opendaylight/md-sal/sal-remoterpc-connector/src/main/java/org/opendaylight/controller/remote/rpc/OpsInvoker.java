@@ -109,8 +109,7 @@ final class OpsInvoker extends AbstractUntypedActor {
                 return errors.isEmpty() ? new RpcResponse(result.value())
                         // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
                         // discarding any output
-                        : new Failure(new RpcErrorsException(String.format("Execution of rpc %s failed", type),
-                            errors));
+                        : new Failure(new RpcErrorsException("Execution of rpc " + type + " failed", errors));
             }
         }, MoreExecutors.directExecutor());
     }
@@ -142,8 +141,7 @@ final class OpsInvoker extends AbstractUntypedActor {
                 return errors.isEmpty() ? new ActionResponse(result.value(), errors)
                     // This is legacy (wrong) behavior, which ignores the fact that errors may be just warnings,
                     // discarding any output
-                    : new Failure(new RpcErrorsException(String.format("Execution of action %s failed", type),
-                        errors));
+                    : new Failure(new RpcErrorsException("Execution of action " + type + " failed", errors));
             }
         }, MoreExecutors.directExecutor());
     }
