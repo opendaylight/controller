@@ -89,33 +89,60 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     }
 
     /**
-     * Base class for representing logical state of this proxy. See individual instantiations and {@link SuccessorState}
-     * for details.
+     * Interface representing logical state of this proxy. See individual {@link SingletonState} and
+     * {@link SuccessorState} for details.
      */
-    private static class State {
-        private final String string;
-
-        State(final String string) {
-            this.string = requireNonNull(string);
-        }
-
-        @Override
-        public final String toString() {
-            return string;
-        }
+    private sealed interface State {
+        // nothing else
     }
 
     /**
-     * State class used when a successor has interfered. Contains coordinator latch, the successor and previous state.
-     * This is a temporary state introduced during reconnection process and is necessary for correct state hand-off
-     * between the old connection (potentially being accessed by the user) and the new connection (being cleaned up
-     * by the actor.
+     * Singleton {@link State}s.
+     */
+    private enum SingletonState implements State {
+        /**
+         * Transaction has been open and is being actively worked on.
+         */
+        OPEN,
+        /**
+         * Transaction has been sealed by the user, but it has not completed flushing to the backed, yet. This is
+         * a transitional state, as we are waiting for the user to initiate commit procedures.
+         *
+         * <p>Since the reconnect mechanics relies on state replay for transactions, this state needs to be flushed into
+         * the queue to re-create state in successor transaction (which may be based on different messages as locality
+         * may have changed). Hence the transition to {@link #FLUSHED} state needs to be handled in a thread-safe
+         * manner.
+         */
+        SEALED,
+        /**
+         * Transaction state has been flushed into the queue, i.e. it is visible by the successor and potentially
+         * the backend. At this point the transaction does not hold any state besides successful requests, all other
+         * state is held either in the connection's queue or the successor object.
+         *
+         * <p>Transition to this state indicates we have all input from the user we need to initiate the correct commit
+         * protocol.
+         */
+        FLUSHED,
+        /**
+         * Transaction state has been completely resolved, we have received confirmation of the transaction fate from
+         * the backend. The only remaining task left to do is finishing up the state cleanup, which is done via purge
+         * request. We need to hang on to the transaction until that is done, as we have to make sure backend completes
+         * purging its state -- otherwise we could have a leak on the backend.
+         */
+        DONE;
+    }
+
+    /**
+     * A {@link State} used when a successor has interfered. Contains coordinator latch, the successor and previous
+     * state. This is a temporary state introduced during reconnection process and is necessary for correct state
+     * hand-off between the old connection (potentially being accessed by the user) and the new connection (being
+     * cleaned up by the actor.
      *
      * <p>When a user operation encounters this state, it synchronizes on the it and wait until reconnection completes,
      * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
      * to the problem of state transfer, but the user will observe it only if the race condition is hit.
      */
-    private static final class SuccessorState extends State {
+    private static final class SuccessorState implements State {
         private final CountDownLatch latch = new CountDownLatch(1);
 
         private AbstractProxyTransaction successor;
@@ -123,10 +150,6 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         // SUCCESSOR + DONE
         private boolean done;
-
-        SuccessorState() {
-            super("SUCCESSOR");
-        }
 
         // Synchronize with succession process and return the successor
         AbstractProxyTransaction await() {
@@ -154,7 +177,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             }
             prevState = requireNonNull(newPrevState);
             // We cannot have duplicate successor states, so this check is sufficient
-            done = DONE.equals(newPrevState);
+            done = SingletonState.DONE.equals(newPrevState);
         }
 
         // To be called from safe contexts, where successor is known to be completed
@@ -177,6 +200,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         void setDone() {
             done = true;
         }
+
+        @Override
+        public String toString() {
+            return "SUCCESSOR";
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProxyTransaction.class);
@@ -191,39 +219,6 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             throw new ExceptionInInitializerError(e);
         }
     }
-
-    /**
-     * Transaction has been open and is being actively worked on.
-     */
-    private static final State OPEN = new State("OPEN");
-
-    /**
-     * Transaction has been sealed by the user, but it has not completed flushing to the backed, yet. This is
-     * a transition state, as we are waiting for the user to initiate commit procedures.
-     *
-     * <p>Since the reconnect mechanics relies on state replay for transactions, this state needs to be flushed into the
-     * queue to re-create state in successor transaction (which may be based on different messages as locality may have
-     * changed). Hence the transition to {@link #FLUSHED} state needs to be handled in a thread-safe manner.
-     */
-    private static final State SEALED = new State("SEALED");
-
-    /**
-     * Transaction state has been flushed into the queue, i.e. it is visible by the successor and potentially
-     * the backend. At this point the transaction does not hold any state besides successful requests, all other state
-     * is held either in the connection's queue or the successor object.
-     *
-     * <p>Transition to this state indicates we have all input from the user we need to initiate the correct commit
-     * protocol.
-     */
-    private static final State FLUSHED = new State("FLUSHED");
-
-    /**
-     * Transaction state has been completely resolved, we have received confirmation of the transaction fate from
-     * the backend. The only remaining task left to do is finishing up the state cleanup, which is done via purge
-     * request. We need to hang on to the transaction until that is done, as we have to make sure backend completes
-     * purging its state -- otherwise we could have a leak on the backend.
-     */
-    private static final State DONE = new State("DONE");
 
     // Touched from client actor thread only
     private final ArrayDeque<Object> successfulRequests = new ArrayDeque<>();
@@ -263,7 +258,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         this.parent = requireNonNull(parent);
         // DONE implies previous seal operation completed
         sealed = isDone;
-        state = isDone ? DONE : OPEN;
+        state = isDone ? SingletonState.DONE : SingletonState.OPEN;
     }
 
     final void executeInActor(final Runnable command) {
@@ -390,7 +385,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     private boolean sealState() {
         parent.onTransactionSealed(this);
         // Transition internal state to sealed and detect presence of a successor
-        return STATE_UPDATER.compareAndSet(this, OPEN, SEALED);
+        return STATE_UPDATER.compareAndSet(this, SingletonState.OPEN, SingletonState.SEALED);
     }
 
     /**
@@ -498,7 +493,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
+            if (STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED)) {
                 final var ret = SettableFuture.<Boolean>create();
                 sendRequest(verifyNotNull(commitRequest(false)), resp -> {
                     switch (resp) {
@@ -534,7 +529,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
+            if (STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED)) {
                 final var req = verifyNotNull(commitRequest(true));
 
                 sendRequest(req, resp -> {
@@ -625,11 +620,13 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         LOG.debug("{}: initiating purge", this);
 
-        final var prev = state;
-        if (prev instanceof SuccessorState successor) {
-            successor.setDone();
-        } else if (!STATE_UPDATER.compareAndSet(this, prev, DONE)) {
-            LOG.warn("{}: moved from state {} while we were purging it", this, prev);
+        switch (state) {
+            case SuccessorState successor -> successor.setDone();
+            case SingletonState singleton -> {
+                if (!STATE_UPDATER.compareAndSet(this, singleton, SingletonState.DONE)) {
+                    LOG.warn("{}: moved from state {} while we were purging it", this, singleton);
+                }
+            }
         }
 
         successfulRequests.clear();
@@ -721,7 +718,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
          * reconnecting have been forced to slow paths, which will be unlocked once we unblock the state latch
          * at the end of this method.
          */
-        if (SEALED.equals(prevState)) {
+        if (SingletonState.SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             final long enqueuedTicks = parent.currentTime();
             final var toFlush = flushState();
