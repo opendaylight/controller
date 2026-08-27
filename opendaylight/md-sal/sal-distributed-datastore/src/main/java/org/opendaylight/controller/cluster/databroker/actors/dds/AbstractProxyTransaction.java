@@ -446,13 +446,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     final void abort(final VotingFuture<Empty> ret) {
         checkSealed();
 
-        sendDoAbort(t -> {
-            if (t instanceof TransactionAbortSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
-            } else {
-                ret.voteNo(unhandledResponseException(t));
+        sendDoAbort(resp -> {
+            switch (resp) {
+                case TransactionAbortSuccess unused -> ret.voteYes();
+                case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
 
             // This is a terminal request, hence we do not need to record it
@@ -535,11 +533,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final var req = verifyNotNull(commitRequest(true));
 
-                sendRequest(req, t -> {
-                    switch (t) {
-                        case TransactionCanCommitSuccess success -> ret.voteYes();
+                sendRequest(req, resp -> {
+                    switch (resp) {
+                        case TransactionCanCommitSuccess unused -> ret.voteYes();
                         case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                        default -> ret.voteNo(unhandledResponseException(t));
+                        default -> ret.voteNo(unhandledResponseException(resp));
                     }
                     recordSuccessfulRequest(req);
                     LOG.debug("Transaction {} canCommit completed", this);
@@ -562,11 +560,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkSealed();
 
         final var req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());
-        sendRequest(req, t -> {
-            switch (t) {
-                case TransactionPreCommitSuccess success -> ret.voteYes();
+        sendRequest(req, resp -> {
+            switch (resp) {
+                case TransactionPreCommitSuccess unused -> ret.voteYes();
                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                default -> ret.voteNo(unhandledResponseException(t));
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
             onPreCommitComplete(req);
         });
@@ -592,11 +590,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
-            switch (t) {
-                case TransactionCommitSuccess success -> ret.voteYes();
+        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
+            switch (resp) {
+                case TransactionCommitSuccess unused -> ret.voteYes();
                 case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                default -> ret.voteNo(unhandledResponseException(t));
+                default -> ret.voteNo(unhandledResponseException(resp));
             }
             LOG.debug("Transaction {} doCommit completed", this);
 
