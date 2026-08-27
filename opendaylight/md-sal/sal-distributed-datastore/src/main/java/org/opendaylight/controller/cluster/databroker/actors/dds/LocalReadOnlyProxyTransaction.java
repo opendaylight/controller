@@ -23,14 +23,12 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
 /**
  * A read-only specialization of {@link LocalProxyTransaction}. This class is NOT thread-safe.
- *
- * @author Robert Varga
  */
 final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     private final DataTreeSnapshot snapshot;
 
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-        final DataTreeSnapshot snapshot) {
+            final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
         this.snapshot = requireNonNull(snapshot);
     }
@@ -94,7 +92,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     private static void commonModifyTransactionRequest(final ModifyTransactionRequest request) {
         verify(request.getModifications().isEmpty());
 
-        final PersistenceProtocol protocol = request.getPersistenceProtocol().orElseThrow();
+        final var protocol = request.getPersistenceProtocol().orElseThrow();
         verify(protocol == PersistenceProtocol.ABORT);
     }
 }
