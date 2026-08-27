@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -21,8 +19,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * client actor. That requires some state transfer with {@link AbstractDataStoreClientBehavior}. In order to reduce
  * request latency, all messages are carbon-copied (and enqueued first) to the client actor.
  */
-@Beta
-public class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
+public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
     ClientLocalHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
         super(client, historyId);
     }
@@ -33,8 +30,10 @@ public class ClientLocalHistory extends AbstractClientHistory implements AutoClo
     }
 
     private State ensureIdleState() {
-        final State local = state();
-        Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
+        final var local = state();
+        if (local != State.IDLE) {
+            throw new IllegalStateException("Local history %s state is %s".formatted(this, local));
+        }
         return local;
     }
 
@@ -53,7 +52,7 @@ public class ClientLocalHistory extends AbstractClientHistory implements AutoClo
     @Override
     void onTransactionAbort(final AbstractClientHandle<?> snap) {
         if (snap instanceof ClientTransaction) {
-            final State local = state();
+            final var local = state();
             if (local == State.TX_OPEN) {
                 updateState(local, State.IDLE);
             }
@@ -65,21 +64,16 @@ public class ClientLocalHistory extends AbstractClientHistory implements AutoClo
     @Override
     AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
             final AbstractTransactionCommitCohort cohort) {
-
-        final State local = state();
-        switch (local) {
-            case CLOSED:
-                return super.onTransactionReady(tx, cohort);
-            case IDLE:
-                throw new IllegalStateException(String.format("Local history %s is idle when readying transaction %s",
-                    this, tx.getIdentifier()));
-            case TX_OPEN:
+        final var local = state();
+        return switch (local) {
+            case IDLE -> throw new IllegalStateException(
+                "Local history %s is idle when readying transaction %s".formatted(this, tx.getIdentifier()));
+            case TX_OPEN -> {
                 updateState(local, State.IDLE);
-                return super.onTransactionReady(tx, cohort);
-            default:
-                throw new IllegalStateException(String.format("Local history %s in unhandled state %s", this, local));
-
-        }
+                yield super.onTransactionReady(tx, cohort);
+            }
+            case CLOSED -> super.onTransactionReady(tx, cohort);
+        };
     }
 
     @Override
