@@ -307,13 +307,11 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void forwardEntry(final ConnectionEntry entry, final Consumer<ConnectionEntry> forwardTo)
                 throws RequestException {
-            final Request<?, ?> request = entry.getRequest();
-            if (request instanceof TransactionRequest) {
-                lookupProxy(request).forwardRequest((TransactionRequest<?>) request, entry.getCallback());
-            } else if (request instanceof LocalHistoryRequest) {
-                forwardTo.accept(entry);
-            } else {
-                throw new IllegalArgumentException("Unhandled request " + request);
+            final var request = entry.getRequest();
+            switch (request) {
+                case LocalHistoryRequest<?> unused -> forwardTo.accept(entry);
+                case TransactionRequest<?> req -> lookupProxy(req).forwardRequest(req, entry.getCallback());
+                default -> throw new IllegalArgumentException("Unhandled request " + request);
             }
         }
 
