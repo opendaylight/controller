@@ -278,22 +278,25 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             }
         }
 
-        request.getPersistenceProtocol().ifPresent(proto -> {
-            final var cb = verifyNotNull(callback, "Request %s has null callback", request);
-            if (markSealed()) {
-                sealOnly();
-            }
+        final var protocol = request.persistenceProtocol();
+        if (protocol == null) {
+            return;
+        }
 
-            switch (proto) {
-                case null -> throw new NullPointerException();
-                case ABORT -> sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
-                case READY -> {
-                    // No-op, as we have already issued a sealOnly() and we are not transmitting anything
-                }
-                case SIMPLE -> sendMethod.accept(commitRequest(false), cb);
-                case THREE_PHASE -> sendMethod.accept(commitRequest(true), cb);
+        final var cb = verifyNotNull(callback, "Request %s has null callback", request);
+        if (markSealed()) {
+            sealOnly();
+        }
+
+        switch (protocol) {
+            case null -> throw new NullPointerException();
+            case ABORT -> sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
+            case READY -> {
+                // No-op, as we have already issued a sealOnly() and we are not transmitting anything
             }
-        });
+            case SIMPLE -> sendMethod.accept(commitRequest(false), cb);
+            case THREE_PHASE -> sendMethod.accept(commitRequest(true), cb);
+        }
     }
 
     @Override
