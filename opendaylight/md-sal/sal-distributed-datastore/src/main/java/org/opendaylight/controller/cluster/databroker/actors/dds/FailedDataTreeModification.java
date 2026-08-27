@@ -28,7 +28,6 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 record FailedDataTreeModification(
         @NonNull EffectiveModelContext modelContext,
         @NonNull Exception cause) implements CursorAwareDataTreeModification {
-
     FailedDataTreeModification {
         requireNonNull(modelContext);
         requireNonNull(cause);
