@@ -220,7 +220,7 @@ public final class ClusterAdminRpcService {
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    onMessageFailure(String.format("Failed to add replica for shard %s", shardName), ret, failure);
+                    onMessageFailure("Failed to add replica for shard " + shardName, ret, failure);
                 }
             }, MoreExecutors.directExecutor());
         return ret;
@@ -410,8 +410,7 @@ public final class ClusterAdminRpcService {
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    onMessageFailure(String.format("Failed to change member voting states for shard %s", shardName),
-                        ret, failure);
+                    onMessageFailure("Failed to change member voting states for shard " + shardName, ret, failure);
                 }
             }, MoreExecutors.directExecutor());
         return ret;
@@ -743,8 +742,9 @@ public final class ClusterAdminRpcService {
     private static <T> void onMessageFailure(final String msg, final SettableFuture<RpcResult<T>> returnFuture,
             final Throwable failure) {
         LOG.error("{}", msg, failure);
-        returnFuture.set(ClusterAdminRpcService.<T>newFailedRpcResultBuilder(String.format("%s: %s", msg,
-                failure.getMessage())).build());
+        returnFuture.set(ClusterAdminRpcService.<T>newFailedRpcResultBuilder(
+            "%s: %s".formatted(msg, failure.getMessage()))
+            .build());
     }
 
     private <T> ListenableFuture<T> ask(final ActorRef actor, final Object message, final Timeout timeout) {

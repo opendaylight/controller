@@ -68,7 +68,7 @@ public final class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCoho
                     if (year.longValue() < 1990) {
                         return FluentFutures.immediateFailedFluentFuture(new DataValidationFailedException(
                                 DOMDataTreeIdentifier.class, candidate.getRootPath(),
-                                String.format("Invalid year %d - year must be >= 1990", year)));
+                                "Invalid year %d - year must be >= 1990".formatted(year)));
                     }
                 }
             }

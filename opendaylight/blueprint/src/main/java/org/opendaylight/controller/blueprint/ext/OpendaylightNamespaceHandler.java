@@ -136,15 +136,11 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         // but as long as there's at least one processor registered, it correctly uses the extended filter.
         registerComponentProcessor(context);
 
-        String oldFilter = serviceRef.getExtendedFilter() == null ? null :
-            serviceRef.getExtendedFilter().getStringValue();
+        String oldFilter = serviceRef.getExtendedFilter() == null ? null
+            : serviceRef.getExtendedFilter().getStringValue();
 
-        String filter;
-        if (Strings.isNullOrEmpty(oldFilter)) {
-            filter = String.format("(type=%s)", attr.getValue());
-        } else {
-            filter = String.format("(&(%s)(type=%s))", oldFilter, attr.getValue());
-        }
+        String filter = Strings.isNullOrEmpty(oldFilter) ? "(type=%s)".formatted(attr.getValue())
+            : "(&(%s)(type=%s))".formatted(oldFilter, attr.getValue());
 
         LOG.debug("decorateServiceReferenceType for {} with type {}, old filter: {}, new filter: {}",
                 serviceRef.getId(), attr.getValue(), oldFilter, filter);
@@ -251,7 +247,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         try {
             return UntrustedXML.newDocumentBuilder().parse(new InputSource(new StringReader(xml))).getDocumentElement();
         } catch (SAXException | IOException e) {
-            throw new ComponentDefinitionException(String.format("Error %s parsing XML: %s", name, xml), e);
+            throw new ComponentDefinitionException("Error %s parsing XML: %s".formatted(name, xml), e);
         }
     }
 

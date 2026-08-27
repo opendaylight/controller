@@ -18,21 +18,17 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DistinctNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
-
-    private final List<DataTreeCandidate> changeList = new ArrayList<>();
-
+    private final ArrayList<DataTreeCandidate> changeList = new ArrayList<>();
     private final CountDownLatch onInitialDataLatch = new CountDownLatch(1);
     private final AtomicInteger onInitialDataEventCount = new AtomicInteger();
 
@@ -82,47 +78,47 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     public void waitForChangeEvents(final YangInstanceIdentifier... expPaths) {
         boolean done = Uninterruptibles.awaitUninterruptibly(changeLatch, 5, TimeUnit.SECONDS);
         if (!done) {
-            fail(String.format("Missing change notifications. Expected: %d. Actual: %d",
+            fail("Missing change notifications. Expected: %d. Actual: %d".formatted(
                     expChangeEventCount, expChangeEventCount - changeLatch.getCount()));
         }
 
         for (int i = 0; i < expPaths.length; i++) {
-            final DataTreeCandidate candidate = changeList.get(i);
-            final NormalizedNode dataAfter = candidate.getRootNode().dataAfter();
+            final var candidate = changeList.get(i);
+            final var dataAfter = candidate.getRootNode().dataAfter();
             if (dataAfter == null) {
-                fail(String.format("Change %d does not contain data after. Actual: %s", i + 1,
-                    candidate.getRootNode()));
+                fail("Change %d does not contain data after. Actual: %s".formatted(i + 1, candidate.getRootNode()));
             }
 
-            final Optional<YangInstanceIdentifier> relativePath = expPaths[i].relativeTo(candidate.getRootPath());
-            if (!relativePath.isPresent()) {
-                assertEquals(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i],
-                        dataAfter), expPaths[i].getLastPathArgument(), dataAfter.name());
-            } else {
-                NormalizedNode nextChild = dataAfter;
-                for (PathArgument pathArg: relativePath.orElseThrow().getPathArguments()) {
-                    boolean found = false;
-                    if (nextChild instanceof DistinctNodeContainer) {
-                        Optional<NormalizedNode> maybeChild = ((DistinctNodeContainer)nextChild)
-                                .findChildByArg(pathArg);
-                        if (maybeChild.isPresent()) {
-                            found = true;
-                            nextChild = maybeChild.orElseThrow();
-                        }
-                    }
+            final var expPath = expPaths[i];
+            final var relativePath = expPath.relativeTo(candidate.getRootPath());
+            if (relativePath.isEmpty()) {
+                assertEquals("Change %d does not contain %s. Actual: %s".formatted(i + 1, expPath, dataAfter),
+                    expPath.getLastPathArgument(), dataAfter.name());
+                continue;
+            }
 
-                    if (!found) {
-                        fail(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i], dataAfter));
+            NormalizedNode nextChild = dataAfter;
+            for (var pathArg : relativePath.orElseThrow().getPathArguments()) {
+                boolean found = false;
+                if (nextChild instanceof DistinctNodeContainer) {
+                    Optional<NormalizedNode> maybeChild = ((DistinctNodeContainer)nextChild).findChildByArg(pathArg);
+                    if (maybeChild.isPresent()) {
+                        found = true;
+                        nextChild = maybeChild.orElseThrow();
                     }
+                }
+
+                if (!found) {
+                    fail("Change %d does not contain %s. Actual: %s".formatted(i + 1, expPath, dataAfter));
                 }
             }
         }
     }
 
     public void verifyNotifiedData(final YangInstanceIdentifier... paths) {
-        Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
+        final var pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
-            for (DataTreeCandidate c : changeList) {
+            for (var c : changeList) {
                 pathSet.remove(c.getRootPath());
             }
         }
@@ -140,9 +136,9 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     }
 
     public void verifyNoNotifiedData(final YangInstanceIdentifier... paths) {
-        Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
+        final var pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
-            for (DataTreeCandidate c : changeList) {
+            for (var c : changeList) {
                 assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
                         pathSet.contains(c.getRootPath()));
             }

@@ -153,9 +153,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
-                String.format("Could not start write transactions - error writing top-level path %s:  %s",
-                    ID_INTS_YID, containerNode), e).buildFuture();
+            return RpcResultBuilder.<WriteTransactionsOutput>failed()
+                .withError(ErrorType.APPLICATION,
+                    "Could not start write transactions - error writing top-level path %s:  %s".formatted(
+                        ID_INTS_YID, containerNode), e)
+                .buildFuture();
         } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OptimisticLockFailedException) {
@@ -164,9 +166,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
                 LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
             } else {
                 LOG.error("Error writing top-level path {}: {}", ID_INTS_YID, containerNode, e);
-                return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
-                    String.format("Could not start write transactions - error writing top-level path %s:  %s",
-                        ID_INTS_YID, containerNode), e).buildFuture();
+                return RpcResultBuilder.<WriteTransactionsOutput>failed()
+                    .withError(ErrorType.APPLICATION,
+                        "Could not start write transactions - error writing top-level path %s:  %s".formatted(
+                            ID_INTS_YID, containerNode), e)
+                    .buildFuture();
             }
         }
 
@@ -177,9 +181,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error writing top-level path {}: {}", idListItem, entry, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
-                String.format("Could not start write transactions - error writing list entry path %s: %s",
-                    idListItem, entry), e).buildFuture();
+            return RpcResultBuilder.<WriteTransactionsOutput>failed()
+                .withError(ErrorType.APPLICATION,
+                    "Could not start write transactions - error writing list entry path %s: %s".formatted(
+                        idListItem, entry), e)
+                .buildFuture();
         }
 
         LOG.debug("Filling the item list with initial values.");
@@ -195,9 +201,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error("Error filling initial item list path {}: {}", itemListId, itemListNode, e);
-            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(ErrorType.APPLICATION,
-                String.format("Could not start write transactions - error filling initial item list path %s: %s",
-                    itemListId, itemListNode), e).buildFuture();
+            return RpcResultBuilder.<WriteTransactionsOutput>failed()
+                .withError(ErrorType.APPLICATION,
+                    "Could not start write transactions - error filling initial item list path %s: %s".formatted(
+                        itemListId, itemListNode), e)
+                .buildFuture();
         }
 
         final WriteTransactionsHandler handler;

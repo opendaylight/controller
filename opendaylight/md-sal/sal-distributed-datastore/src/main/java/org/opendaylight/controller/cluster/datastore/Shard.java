@@ -465,9 +465,9 @@ public class Shard extends RaftActor {
             }
         }
 
-        throw new IllegalArgumentException(String.format(
-            "No common version between backend versions %s and client versions %s", SUPPORTED_ABIVERSIONS,
-            clientRange));
+        throw new IllegalArgumentException(
+            "No common version between backend versions %s and client versions %s".formatted(SUPPORTED_ABIVERSIONS,
+                clientRange));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
