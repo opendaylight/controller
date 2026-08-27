@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -57,7 +59,7 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
         default void writeExternal(final ObjectOutput out, final ModifyTransactionRequest msg) throws IOException {
             TransactionRequest.SerialForm.super.writeExternal(out, msg);
 
-            out.writeByte(PersistenceProtocol.byteValue(msg.getPersistenceProtocol().orElse(null)));
+            out.writeByte(PersistenceProtocol.byteValue(msg.persistenceProtocol()));
 
             final var modifications = msg.getModifications();
             out.writeInt(modifications.size());
@@ -74,8 +76,8 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final List<TransactionModification> modifications;
-    private final PersistenceProtocol protocol;
+    private final @NonNull List<TransactionModification> modifications;
+    private final @Nullable PersistenceProtocol protocol;
 
     private ModifyTransactionRequest(final ModifyTransactionRequest request, final ABIVersion version) {
         super(request, version);
@@ -94,6 +96,10 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
         return new ModifyTransactionRequestBuilder(txId, replyTo);
     }
 
+    public @Nullable PersistenceProtocol persistenceProtocol() {
+        return protocol;
+    }
+
     public Optional<PersistenceProtocol> getPersistenceProtocol() {
         return Optional.ofNullable(protocol);
     }
@@ -104,8 +110,9 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("modifications", modifications.size())
-                .add("protocol", protocol);
+        return super.addToStringAttributes(toStringHelper)
+            .add("modifications", modifications.size())
+            .add("protocol", protocol);
     }
 
     @Override

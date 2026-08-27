@@ -674,13 +674,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
-        final var maybeProto = request.getPersistenceProtocol();
-        if (maybeProto.isEmpty()) {
-            applyModifications(request.getModifications());
-            return replyModifySuccess(request.getSequence());
-        }
-
-        return switch (maybeProto.orElseThrow()) {
+        return switch (request.persistenceProtocol()) {
+            case null -> {
+                applyModifications(request.getModifications());
+                yield replyModifySuccess(request.getSequence());
+            }
             case ABORT -> {
                 if (state instanceof Aborting) {
                     LOG.debug("{}: Transaction {} already aborting", persistenceId(), getIdentifier());

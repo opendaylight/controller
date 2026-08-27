@@ -340,8 +340,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final var maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isEmpty()) {
+        final var protocol = req.persistenceProtocol();
+        if (protocol == null) {
             return;
         }
 
@@ -351,7 +351,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             LOG.debug("Proxy {} has a successor, which should receive seal through a separate request", this);
         }
 
-        switch (maybeProto.orElseThrow()) {
+        switch (protocol) {
             case null -> throw new NullPointerException();
             case ABORT -> {
                 final var tmp = abortRequest();
@@ -481,8 +481,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final var maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isEmpty()) {
+        final var protocol = req.persistenceProtocol();
+        if (protocol == null) {
             return;
         }
 
@@ -492,7 +492,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             verify(sealOnly(), "Attempted to replay seal on %s", this);
         }
 
-        switch (maybeProto.orElseThrow()) {
+        switch (protocol) {
             case null -> throw new NullPointerException();
             case ABORT -> {
                 final var tmp = abortRequest();

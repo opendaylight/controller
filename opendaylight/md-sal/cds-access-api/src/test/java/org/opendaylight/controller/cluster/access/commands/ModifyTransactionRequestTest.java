@@ -42,6 +42,7 @@ class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<Modify
 
     @Test
     void getPersistenceProtocolTest() {
+        assertEquals(PROTOCOL, OBJECT.persistenceProtocol());
         assertEquals(Optional.of(PROTOCOL), OBJECT.getPersistenceProtocol());
     }
 
@@ -64,13 +65,13 @@ class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<Modify
         assertEquals(OBJECT.getTarget(), clone.getTarget());
         assertEquals(OBJECT.getReplyTo(), clone.getReplyTo());
         assertEquals(OBJECT.getModifications(), clone.getModifications());
-        assertEquals(OBJECT.getPersistenceProtocol(), clone.getPersistenceProtocol());
+        assertEquals(OBJECT.persistenceProtocol(), clone.persistenceProtocol());
     }
 
     @Override
     protected void doAdditionalAssertions(final ModifyTransactionRequest deserialize) {
         assertEquals(OBJECT.getReplyTo(), deserialize.getReplyTo());
-        assertEquals(OBJECT.getPersistenceProtocol(), deserialize.getPersistenceProtocol());
+        assertEquals(OBJECT.persistenceProtocol(), deserialize.persistenceProtocol());
         assertNotNull(deserialize.getModifications());
         assertEquals(1, deserialize.getModifications().size());
         final var modification = deserialize.getModifications().get(0);

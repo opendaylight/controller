@@ -60,7 +60,7 @@ class ModifyTransactionRequestBuilderTest {
     void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.persistenceProtocol());
         assertEquals(transactionModification, modifyTransactionRequest.getModifications().get(0));
     }
 
@@ -68,7 +68,7 @@ class ModifyTransactionRequestBuilderTest {
     void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.persistenceProtocol());
         assertTrue(modifyTransactionRequest.getModifications().isEmpty());
     }
 
@@ -76,13 +76,13 @@ class ModifyTransactionRequestBuilderTest {
     void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.persistenceProtocol());
     }
 
     @Test
     void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
-        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
+        assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.persistenceProtocol());
     }
 }

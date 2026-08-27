@@ -92,7 +92,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     private static void commonModifyTransactionRequest(final ModifyTransactionRequest request) {
         verify(request.getModifications().isEmpty());
 
-        final var protocol = request.getPersistenceProtocol().orElseThrow();
+        final var protocol = request.persistenceProtocol();
         verify(protocol == PersistenceProtocol.ABORT);
     }
 }

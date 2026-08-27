@@ -215,7 +215,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         final ModifyTransactionRequest transformed = successor.expectTransactionRequest(ModifyTransactionRequest.class);
         assertNotNull(transformed);
         assertEquals(successful1.getSequence(), transformed.getSequence());
-        assertEquals(Optional.of(PersistenceProtocol.ABORT), transformed.getPersistenceProtocol());
+        assertEquals(PersistenceProtocol.ABORT, transformed.persistenceProtocol());
 
         ReadTransactionRequest tmpRead = successor.expectTransactionRequest(ReadTransactionRequest.class);
         assertNotNull(tmpRead);
