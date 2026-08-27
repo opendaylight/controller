@@ -73,7 +73,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         // Setup the InMemoryJournal to block shard recovery to ensure the shard is not initialized until we create and
         // submit the write the Tx.
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        // InMemoryJournal.addBlockReadMessagesLatch("member-1-shard-%s-%s".formatted(shardName, testName),
         //    blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
@@ -163,7 +163,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         // Setup the InMemoryJournal to block shard recovery to ensure the shard is not initialized until we create the
         // Tx.
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        // InMemoryJournal.addBlockReadMessagesLatch("member-1-shard-%s-%s".formatted(shardName, testName),
         //     blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
@@ -226,7 +226,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         // Setup the InMemoryJournal to block shard recovery indefinitely.
         final var blockRecoveryLatch = new CountDownLatch(1);
-        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        // InMemoryJournal.addBlockReadMessagesLatch("member-1-shard-%s-%s".formatted(shardName, testName),
         //    blockRecoveryLatch);
 
         final var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName);
@@ -291,7 +291,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         // Setup the InMemoryJournal to block shard recovery
         // indefinitely.
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        // InMemoryJournal.addBlockReadMessagesLatch("member-1-shard-%s-%s".formatted(shardName, testName),
         //    blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {

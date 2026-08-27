@@ -122,7 +122,7 @@ public class MessageCollectorActor extends UntypedAbstractActor {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        throw new AssertionError(String.format("Expected %d messages of type %s. Actual received was %d: %s", count,
+        throw new AssertionError("Expected %d messages of type %s. Actual received was %d: %s".formatted(count,
                 clazz, messages.size(), messages), lastEx);
     }
 
@@ -177,7 +177,7 @@ public class MessageCollectorActor extends UntypedAbstractActor {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        throw new AssertionError(String.format("Expected specific message of type %s. Last message received was: %s",
+        throw new AssertionError("Expected specific message of type %s. Last message received was: %s".formatted(
                 clazz, lastMessage), lastEx);
     }
 

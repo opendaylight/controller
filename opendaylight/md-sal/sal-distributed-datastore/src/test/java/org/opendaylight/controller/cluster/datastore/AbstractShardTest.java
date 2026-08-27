@@ -36,7 +36,6 @@ import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -175,7 +174,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail(String.format("Expected last applied: %d, Actual: %d", expectedValue, lastApplied));
+        fail("Expected last applied: %d, Actual: %d".formatted(expectedValue, lastApplied));
     }
 
     protected DataTree createDelegatingMockDataTree() throws Exception {

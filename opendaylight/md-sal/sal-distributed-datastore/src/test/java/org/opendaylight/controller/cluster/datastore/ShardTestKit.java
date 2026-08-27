@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.apache.pekko.actor.ActorRef.noSender;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
@@ -96,13 +96,11 @@ public class ShardTestKit extends TestKit {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        if (lastResponse instanceof Throwable) {
-            throw (AssertionError)new AssertionError(
-                    String.format("Unexpected error occurred from FindLeader for shard %s", shard.path()))
-                            .initCause((Throwable)lastResponse);
+        if (lastResponse instanceof Throwable cause) {
+            fail("Unexpected error occurred from FindLeader for shard " + shard.path(), cause);
+        } else {
+            fail("Unexpected leader %s found for shard %s".formatted(lastResponse, shard.path()));
         }
-
-        fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));
     }
 
     public @NonNull ShardTestConnection connect(final TestActorRef<Shard> shard, final ClientIdentifier clientId) {

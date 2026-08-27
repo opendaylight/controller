@@ -280,7 +280,7 @@ public class MessageSlicer implements AutoCloseable {
             state.reset();
             sendTo.tell(getNextSliceMessage(state), ActorRef.noSender());
         } else {
-            String message = String.format("Maximum slicing retries reached for identifier %s - failing the message",
+            String message = "Maximum slicing retries reached for identifier %s - failing the message".formatted(
                     state.getIdentifier());
             LOG.warn(message);
             fail(state, new RuntimeException(message));
@@ -293,13 +293,13 @@ public class MessageSlicer implements AutoCloseable {
     }
 
     private void stateRemoved(final RemovalNotification<Identifier, SlicedMessageState<ActorRef>> notification) {
-        final SlicedMessageState<ActorRef> state = notification.getValue();
+        final var state = notification.getValue();
         state.close();
         if (notification.wasEvicted()) {
             LOG.warn("{}: SlicedMessageState for {} was expired from the cache", logContext, notification.getKey());
-            state.getOnFailureCallback().accept(new RuntimeException(String.format(
-                    "The slicing state for message identifier %s was expired due to inactivity from the assembling "
-                     + "component on the other end", state.getIdentifier())));
+            state.getOnFailureCallback().accept(new RuntimeException("""
+                    The slicing state for message identifier %s was expired due to inactivity from the assembling \
+                     component on the other end""".formatted(state.getIdentifier())));
         } else {
             LOG.debug("{}: SlicedMessageState for {} was removed from the cache due to {}", logContext,
                     notification.getKey(), notification.getCause());
