@@ -59,8 +59,8 @@ import org.slf4j.LoggerFactory;
  *                 performance must not come at the price of correctness. Any optimizations need to be carefully
  *                 analyzed for correctness and performance impact.
  *
- * <p>TRADE-OFFS: part of the functionality runs in application threads without switching contexts, which makes it ideal
- *                for performing work and charging applications for it. That has two positive effects:
+ * <p>TRADE-OFFS: part of the functionality runs in application threads without switching contexts, which makes it is
+ *                ideal for performing work and charging applications for it. That has two positive effects:
  *                - CPU usage is distributed across applications, minimizing work done in the actor thread
  *                - CPU usage provides back-pressure towards the application.
  */
