@@ -15,7 +15,6 @@ import com.google.common.primitives.UnsignedLong;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -116,9 +115,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             tx = createTransaction(request, id);
             transactions.put(id, tx);
         } else if (!(request instanceof IncrementTransactionSequenceRequest)) {
-            final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
-            if (maybeReplay.isPresent()) {
-                final TransactionSuccess<?> replay = maybeReplay.orElseThrow();
+            final var replay = tx.replaySequence(request.getSequence());
+            if (replay != null) {
                 LOG.debug("{}: envelope {} replaying response {}", persistenceId, envelope, replay);
                 return replay;
             }
