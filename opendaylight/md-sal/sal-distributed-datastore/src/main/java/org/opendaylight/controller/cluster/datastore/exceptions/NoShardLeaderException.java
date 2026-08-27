@@ -24,8 +24,8 @@ public final class NoShardLeaderException extends RuntimeException {
     }
 
     public NoShardLeaderException(final String message, final String shardName) {
-        super(String.format("%sShard %s currently has no leader. Try again later.",
-                Strings.isNullOrEmpty(message) ? "" : message + ". ", shardName));
+        super("%sShard %s currently has no leader. Try again later.".formatted(
+            Strings.isNullOrEmpty(message) ? "" : message + ". ", shardName));
     }
 
     public NoShardLeaderException(final ShardIdentifier shardId) {

@@ -83,8 +83,8 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
             // Client has sent a request sequence, which has already been purged. This is a hard error, which should
             // never occur. Throwing an IllegalArgumentException will cause it to be wrapped in a
             // RuntimeRequestException (which is not retriable) and report it back to the client.
-            throw new IllegalArgumentException(String.format("Invalid purged sequence %s (last purged is %s)",
-                sequence, lastPurgedSequence));
+            throw new IllegalArgumentException(
+                "Invalid purged sequence %s (last purged is %s)".formatted(sequence, lastPurgedSequence));
         }
 
         // At this point we have established that the requested sequence lies in the open interval

@@ -23,6 +23,6 @@ public class AssemblerClosedException extends MessageSliceException {
      * @param identifier the identifier whose state was closed
      */
     public AssemblerClosedException(final Identifier identifier) {
-        super(String.format("Message assembler for %s has already been closed", identifier), false);
+        super("Message assembler for %s has already been closed".formatted(identifier), false);
     }
 }

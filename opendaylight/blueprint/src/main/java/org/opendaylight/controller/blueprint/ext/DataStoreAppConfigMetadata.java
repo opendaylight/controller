@@ -96,15 +96,15 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         try {
             Class<?> bindingClass = container.getBundleContext().getBundle().loadClass(appConfigBindingClassName);
             if (!ChildOf.class.isAssignableFrom(bindingClass)) {
-                throw new ComponentDefinitionException(String.format(
-                        "%s: Specified app config binding class %s does not extend %s",
+                throw new ComponentDefinitionException(
+                    "%s: Specified app config binding class %s does not extend %s".formatted(
                         logName(), appConfigBindingClassName, ChildOf.class.getName()));
             }
 
             appConfigBindingClass = (Class<DataObject>) bindingClass;
         } catch (final ClassNotFoundException e) {
-            throw new ComponentDefinitionException(String.format("%s: Error loading app config binding class %s",
-                    logName(), appConfigBindingClassName), e);
+            throw new ComponentDefinitionException(
+                "%s: Error loading app config binding class %s".formatted( logName(), appConfigBindingClassName), e);
         }
 
         bindingContext = BindingContext.create(logName(), appConfigBindingClass, appConfigListKeyValue);
