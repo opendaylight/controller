@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -75,7 +73,10 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     AbstractClientHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier identifier) {
         this.client = requireNonNull(client);
         this.identifier = requireNonNull(identifier);
-        checkArgument(identifier.getCookie() == 0);
+        final var cookie = identifier.getCookie();
+        if (cookie != 0)  {
+            throw new IllegalArgumentException("Bad cookie " + cookie);
+        }
     }
 
     final State state() {
@@ -83,15 +84,19 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     final void updateState(final State expected, final State next) {
-        final boolean success = STATE_UPDATER.compareAndSet(this, expected, next);
-        checkState(success, "Race condition detected, state changed from %s to %s", expected, state);
+        if (!STATE_UPDATER.compareAndSet(this, expected, next)) {
+            throw new IllegalStateException(
+                "Race condition detected, state changed from %s to %s".formatted(expected, state));
+        }
         LOG.debug("Client history {} changed state from {} to {}", this, expected, next);
     }
 
     final synchronized void doClose() {
-        final State local = state;
+        final var local = state;
         if (local != State.CLOSED) {
-            checkState(local == State.IDLE, "Local history %s has an open transaction", this);
+            if (local != State.IDLE) {
+                throw new IllegalStateException("Local history %s has an open transaction".formatted(this));
+            }
             histories.values().forEach(ProxyHistory::close);
             updateState(local, State.CLOSED);
         }
@@ -280,7 +285,10 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
 
         final var previous = readyTransactions.putIfAbsent(txId, cohort);
-        checkState(previous == null, "Duplicate cohort %s for transaction %s, already have %s", cohort, txId, previous);
+        if (previous != null) {
+            throw new IllegalStateException(
+                "Duplicate cohort %s for transaction %s, already have %s".formatted(cohort, txId, previous));
+        }
 
         LOG.debug("Local history {} readied transaction {}", this, txId);
         return cohort;
