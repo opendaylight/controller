@@ -172,8 +172,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     @Override
     protected final AbstractDataStoreClientBehavior onCommand(final Object command) {
-        if (command instanceof GetClientRequest request) {
-            request.getReplyTo().tell(new Status.Success(this), ActorRef.noSender());
+        if (command instanceof GetClientRequest(var replyTo)) {
+            replyTo.tell(new Status.Success(this), ActorRef.noSender());
         } else {
             LOG.warn("{}: ignoring unhandled command {}", persistenceId(), command);
         }

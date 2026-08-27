@@ -10,20 +10,14 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Request the ClientIdentifier from a particular actor. Response is an instance of {@link DataStoreClient}.
- *
- * @author Robert Varga
  */
-final class GetClientRequest {
-    private final ActorRef replyTo;
-
-    GetClientRequest(final ActorRef replyTo) {
-        this.replyTo = requireNonNull(replyTo);
-    }
-
-    ActorRef getReplyTo() {
-        return replyTo;
+@NonNullByDefault
+record GetClientRequest(ActorRef replyTo) {
+    GetClientRequest {
+        requireNonNull(replyTo);
     }
 }
