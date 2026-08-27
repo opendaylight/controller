@@ -8,8 +8,11 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.util.concurrent.FluentFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -19,18 +22,24 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * An implementation of {@link DOMStoreReadTransaction} backed by a {@link ClientSnapshot}. Used for standalone
  * transactions.
- *
- * @author Robert Varga
  */
 final class ClientBackedReadTransaction extends ClientBackedTransaction<ClientSnapshot>
         implements DOMStoreReadTransaction {
-    private static final AtomicReferenceFieldUpdater<ClientBackedReadTransaction, ClientBackedTransactionChain>
-        PARENT_UPDATER = AtomicReferenceFieldUpdater.newUpdater(ClientBackedReadTransaction.class,
-            ClientBackedTransactionChain.class, "parent");
+    private static final VarHandle VH;
 
-    @SuppressWarnings("unused")
-    private volatile ClientBackedTransactionChain parent;
+    static {
+        try {
+            VH = MethodHandles.lookup()
+                .findVarHandle(ClientBackedReadTransaction.class, "parent", ClientBackedTransactionChain.class);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
+    private volatile @Nullable ClientBackedTransactionChain parent;
+
+    @NonNullByDefault
     ClientBackedReadTransaction(final ClientSnapshot delegate, final @Nullable ClientBackedTransactionChain parent,
             final @Nullable Throwable allocationContext) {
         super(delegate, allocationContext);
@@ -51,7 +60,7 @@ final class ClientBackedReadTransaction extends ClientBackedTransaction<ClientSn
     public void close() {
         super.close();
 
-        final ClientBackedTransactionChain local = PARENT_UPDATER.getAndSet(this, null);
+        final var local = (ClientBackedTransactionChain) VH.getAndSet(this, null);
         if (local != null) {
             local.snapshotClosed(delegate());
         }
