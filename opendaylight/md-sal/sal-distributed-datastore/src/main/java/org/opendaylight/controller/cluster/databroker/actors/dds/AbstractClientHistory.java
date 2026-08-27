@@ -92,13 +92,16 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     final synchronized void doClose() {
-        final var local = state;
-        if (local != State.CLOSED) {
-            if (local != State.IDLE) {
-                throw new IllegalStateException("Local history %s has an open transaction".formatted(this));
+        switch (state) {
+            case null -> throw new NullPointerException();
+            case IDLE -> {
+                histories.values().forEach(ProxyHistory::close);
+                updateState(State.IDLE, State.CLOSED);
             }
-            histories.values().forEach(ProxyHistory::close);
-            updateState(local, State.CLOSED);
+            case TX_OPEN -> throw new IllegalStateException("Local history %s has an open transaction".formatted(this));
+            case CLOSED -> {
+                // no-op
+            }
         }
     }
 
