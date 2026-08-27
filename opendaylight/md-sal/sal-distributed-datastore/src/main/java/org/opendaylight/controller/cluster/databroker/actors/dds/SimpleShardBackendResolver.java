@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.CompletionStage;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -22,13 +23,11 @@ import org.slf4j.LoggerFactory;
  * {@link ModuleShardBackendResolver}, this resolver is used in situations where the client corresponds exactly to one
  * backend shard, e.g. there is only one fixed cookie assigned and the operation path is not consulted at all. This
  * class is thread-safe.
- *
- * @author Robert Varga
  */
 final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardBackendResolver.class);
 
-    private final String shardName;
+    private final @NonNull String shardName;
 
     private volatile ResolvingBackendInfo state;
 
@@ -39,24 +38,24 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
         this.shardName = requireNonNull(shardName);
     }
 
-    private CompletionStage<ShardBackendInfo> getBackendInfo(final long cookie) {
+    private @NonNull CompletionStage<ShardBackendInfo> getBackendInfo(final long cookie) {
         checkArgument(cookie == 0);
 
-        final ResolvingBackendInfo existing = state;
+        final var existing = state;
         if (existing != null) {
             return existing.stage();
         }
 
         synchronized (this) {
-            final ResolvingBackendInfo recheck = state;
+            final var recheck = state;
             if (recheck != null) {
                 return recheck.stage();
             }
 
-            final ResolvingBackendInfo newState = resolveBackendInfo(shardName, 0);
+            final var newState = resolveBackendInfo(shardName, 0);
             state = newState;
 
-            final CompletionStage<ShardBackendInfo> stage = newState.stage();
+            final var stage = newState.stage();
             stage.whenComplete((info, failure) -> {
                 if (failure != null) {
                     synchronized (SimpleShardBackendResolver.this) {
@@ -80,7 +79,7 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     public CompletionStage<? extends ShardBackendInfo> refreshBackendInfo(final Long cookie,
             final ShardBackendInfo staleInfo) {
 
-        final ResolvingBackendInfo existing = state;
+        final var existing = state;
         if (existing != null) {
             if (!staleInfo.equals(existing.result())) {
                 return existing.stage();
@@ -98,7 +97,7 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     }
 
     @Override
-    public String resolveCookieName(Long cookie) {
+    public String resolveCookieName(final Long cookie) {
         return shardName;
     }
 }
