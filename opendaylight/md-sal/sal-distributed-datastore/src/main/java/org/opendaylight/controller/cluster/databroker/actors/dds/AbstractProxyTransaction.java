@@ -22,7 +22,6 @@ import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.checkerframework.checker.lock.qual.Holding;
@@ -209,12 +208,13 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProxyTransaction.class);
     private static final VarHandle SEALED_VH;
-    private static final AtomicReferenceFieldUpdater<AbstractProxyTransaction, State> STATE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractProxyTransaction.class, State.class, "state");
+    private static final VarHandle STATE_VH;
 
     static {
+        final var lookup = MethodHandles.lookup();
         try {
-            SEALED_VH = MethodHandles.lookup().findVarHandle(AbstractProxyTransaction.class, "sealed", boolean.class);
+            SEALED_VH = lookup.findVarHandle(AbstractProxyTransaction.class, "sealed", boolean.class);
+            STATE_VH = lookup.findVarHandle(AbstractProxyTransaction.class, "state", State.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -385,7 +385,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     private boolean sealState() {
         parent.onTransactionSealed(this);
         // Transition internal state to sealed and detect presence of a successor
-        return STATE_UPDATER.compareAndSet(this, SingletonState.OPEN, SingletonState.SEALED);
+        return casState(SingletonState.OPEN, SingletonState.SEALED);
+    }
+
+    private boolean casState(final State expected, final State updated) {
+        return STATE_VH.compareAndSet(this, expected, updated);
     }
 
     /**
@@ -493,7 +497,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED)) {
+            if (casState(SingletonState.SEALED, SingletonState.FLUSHED)) {
                 final var ret = SettableFuture.<Boolean>create();
                 sendRequest(verifyNotNull(commitRequest(false)), resp -> {
                     switch (resp) {
@@ -529,7 +533,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED)) {
+            if (casState(SingletonState.SEALED, SingletonState.FLUSHED)) {
                 final var req = verifyNotNull(commitRequest(true));
 
                 sendRequest(req, resp -> {
@@ -623,7 +627,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         final var prev = state;
         if (prev instanceof SuccessorState successor) {
             successor.setDone();
-        } else if (!STATE_UPDATER.compareAndSet(this, prev, SingletonState.DONE)) {
+        } else if (!casState(prev, SingletonState.DONE)) {
             LOG.warn("{}: moved from state {} while we were purging it", this, prev);
         }
 
@@ -644,7 +648,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // At this point canCommit/directCommit are blocked, we assert a new successor state, retrieving the previous
         // state. This method is called with the queue still unlocked.
         final var nextState = new SuccessorState();
-        final var prevState = STATE_UPDATER.getAndSet(this, nextState);
+        final var prevState = (State) STATE_VH.getAndSet(this, nextState);
 
         LOG.debug("Start reconnect of proxy {} previous state {}", this, prevState);
         if (prevState instanceof SuccessorState successor) {
