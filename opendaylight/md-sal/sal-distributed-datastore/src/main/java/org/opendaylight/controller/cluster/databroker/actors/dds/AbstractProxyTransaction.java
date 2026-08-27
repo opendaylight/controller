@@ -481,12 +481,6 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), callback);
     }
 
-    /**
-     * Commit this transaction, possibly in a coordinated fashion.
-     *
-     * @param coordinated True if this transaction should be coordinated across multiple participants.
-     * @return Future completion
-     */
     final ListenableFuture<Boolean> directCommit() {
         checkReadWrite();
         checkSealed();
@@ -494,21 +488,21 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final SettableFuture<Boolean> ret = SettableFuture.create();
-                sendRequest(verifyNotNull(commitRequest(false)), t -> {
-                    if (t instanceof TransactionCommitSuccess) {
-                        ret.set(Boolean.TRUE);
-                    } else if (t instanceof RequestFailure) {
-                        final Throwable cause = ((RequestFailure<?, ?>) t).getCause().unwrap();
-                        if (cause instanceof ClosedTransactionException) {
-                            // This is okay, as it indicates the transaction has been completed. It can happen
-                            // when we lose connectivity with the backend after it has received the request.
-                            ret.set(Boolean.TRUE);
-                        } else {
-                            ret.setException(cause);
+                final var ret = SettableFuture.<Boolean>create();
+                sendRequest(verifyNotNull(commitRequest(false)), resp -> {
+                    switch (resp) {
+                        case TransactionCommitSuccess unused -> ret.set(Boolean.TRUE);
+                        case RequestFailure<?, ?> failure -> {
+                            final var cause = failure.getCause().unwrap();
+                            if (cause instanceof ClosedTransactionException) {
+                                // This is okay, as it indicates the transaction has been completed. It can happen when
+                                // we lose connectivity with the backend after it has received the request.
+                                ret.set(Boolean.TRUE);
+                            } else {
+                                ret.setException(cause);
+                            }
                         }
-                    } else {
-                        ret.setException(unhandledResponseException(t));
+                        default -> ret.setException(unhandledResponseException(resp));
                     }
 
                     // This is a terminal request, hence we do not need to record it
