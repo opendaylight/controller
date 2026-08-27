@@ -185,8 +185,9 @@ public class SlicedMessageState<T> implements AutoCloseable {
         byte[] nextSlice = new byte[size];
         int numRead = messageInputStream.read(nextSlice);
         if (numRead != size) {
-            throw new IOException(String.format(
-                    "The # of bytes read from the input stream, %d, does not match the expected # %d", numRead, size));
+            throw new IOException(
+                "The # of bytes read from the input stream, %d, does not match the expected # %d".formatted(
+                    numRead, size));
         }
 
         lastSliceHashCode = currentSliceHashCode;

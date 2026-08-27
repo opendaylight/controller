@@ -469,8 +469,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         }
 
         if (notInitialized != null) {
-            getSender().tell(new Status.Failure(new IllegalStateException(String.format(
-                    "%d shard(s) %s are not initialized", notInitialized.size(), notInitialized))), self());
+            getSender().tell(new Status.Failure(new IllegalStateException(
+                    "%d shard(s) %s are not initialized".formatted(notInitialized.size(), notInitialized))), self());
             return;
         }
 
@@ -492,7 +492,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             String shardName = createShard.getModuleShardConfig().getShardName();
             if (localShards.containsKey(shardName)) {
                 LOG.debug("{}: Shard {} already exists", name(), shardName);
-                reply = new Status.Success(String.format("Shard with name %s already exists", shardName));
+                reply = new Status.Success("Shard with name %s already exists".formatted(shardName));
             } else {
                 doCreateShard(createShard);
                 reply = new Status.Success(null);
@@ -762,8 +762,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     private static NotInitializedException createNotInitializedException(final ShardIdentifier shardId) {
-        return new NotInitializedException(String.format(
-                "Found primary shard %s but it's not initialized yet. Please try again later", shardId));
+        return new NotInitializedException(
+            "Found primary shard %s but it's not initialized yet. Please try again later".formatted(shardId));
     }
 
     @VisibleForTesting
@@ -999,8 +999,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         LOG.debug("{}: No shard found for {}", name(), shardName);
 
-        getSender().tell(new PrimaryNotFoundException(
-                String.format("No primary shard found for %s.", shardName)), self());
+        getSender().tell(new PrimaryNotFoundException("No primary shard found for %s.".formatted(shardName)), self());
     }
 
     private void findPrimary(final String shardName, final FindPrimaryResponseHandler handler) {
@@ -1107,7 +1106,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         if (shardReplicaOperationsInProgress.contains(shardName)) {
             LOG.debug("{}: A shard replica operation for {} is already in progress", name(), shardName);
             sender.tell(new Status.Failure(new IllegalStateException(
-                String.format("A shard replica operation for %s is already in progress", shardName))), self());
+                "A shard replica operation for %s is already in progress".formatted(shardName))), self());
             return true;
         }
 
@@ -1156,7 +1155,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     private void sendLocalReplicaAlreadyExistsReply(final String shardName, final ActorRef sender) {
         LOG.debug("{}: Local shard {} already exists", name(), shardName);
         sender.tell(new Status.Failure(new AlreadyExistsException(
-            String.format("Local shard %s already exists", shardName))), self());
+            "Local shard %s already exists".formatted(shardName))), self());
     }
 
     private void addShard(final String shardName, final RemotePrimaryShardFound response, final ActorRef sender) {
@@ -1407,7 +1406,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                 .whenCompleteAsync((response, failure) -> {
                     if (failure != null) {
                         sender.tell(new Status.Failure(new RuntimeException(
-                                String.format("Failed to access local shard %s", shardName), failure)), self());
+                            "Failed to access local shard " + shardName, failure)), self());
                         return;
                     }
 
@@ -1450,7 +1449,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                     LOG.debug("{}: Received failure from FindLocalShard for shard {}", name(), shardName,
                         failure);
                     sender.tell(new Status.Failure(new RuntimeException(
-                        String.format("Failed to find local shard %s", shardName), failure)), self());
+                        "Failed to find local shard " + shardName, failure)), self());
                     return;
                 }
 
@@ -1460,13 +1459,13 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                     case LocalShardNotFound msg -> {
                         LOG.debug("{}: Local shard {} does not exist", name(), shardName);
                         sender.tell(new Status.Failure(new IllegalArgumentException(
-                            String.format("Local shard %s does not exist", shardName))), self());
+                            "Local shard %s does not exist".formatted(shardName))), self());
                     }
                     default -> {
                         LOG.debug("{}: Failed to find local shard {}: received response: {}", name(), shardName,
                             response);
                         sender.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
-                            : new RuntimeException(String.format("Failed to find local shard %s: received response: %s",
+                            : new RuntimeException("Failed to find local shard %s: received response: %s".formatted(
                                 shardName, response))), self());
                     }
                 }
@@ -1505,9 +1504,9 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                     LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", name(), shardName);
                     sender.tell(new Status.Success(null), self());
                 } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
-                    sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
-                        "The requested voting state change for shard %s is invalid. At least one member "
-                            + "must be voting", shardId.getShardName()))), self());
+                    sender.tell(new Status.Failure(new IllegalArgumentException(
+                        "The requested voting state change for shard %s is invalid. At least one member must be voting"
+                            .formatted(shardId.getShardName()))), self());
                 } else {
                     LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
                         name(), shardName, replyMsg.getStatus());
@@ -1651,7 +1650,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         public void onFailure(final Throwable failure) {
             LOG.debug("{}: Received failure from FindPrimary for shard {}", persistenceId, shardName, failure);
             targetActor.tell(new Status.Failure(new RuntimeException(
-                    String.format("Failed to find leader for shard %s", shardName), failure)), shardManagerActor);
+                "Failed to find leader for shard %s".formatted(shardName), failure)), shardManagerActor);
         }
 
         @Override
@@ -1659,8 +1658,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             LOG.debug("{}: Failed to find leader for shard {}: received response: {}", persistenceId, shardName,
                 response);
             targetActor.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
-                    : new RuntimeException(String.format("Failed to find leader for shard %s: received response: %s",
-                        shardName, response))), shardManagerActor);
+                : new RuntimeException("Failed to find leader for shard %s: received response: %s".formatted(
+                    shardName, response))), shardManagerActor);
         }
     }
 

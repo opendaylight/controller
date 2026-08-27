@@ -130,7 +130,8 @@ public class DatastoreContextIntrospector {
         final String methodName = method.getName();
         if (Boolean.class.equals(method.getReturnType()) && methodName.startsWith("is")) {
             return WordUtils.uncapitalize(methodName.substring(2));
-        } else if (methodName.startsWith("get")) {
+        }
+        if (methodName.startsWith("get")) {
             return WordUtils.uncapitalize(methodName.substring(3));
         }
         return null;
@@ -201,9 +202,8 @@ public class DatastoreContextIntrospector {
             }
         }
 
-        throw new IllegalArgumentException(String.format(
-                "Getter method for constructor property %s not found for YANG type %s",
-                propertyName, type));
+        throw new IllegalArgumentException(
+            "Getter method for constructor property %s not found for YANG type %s".formatted(propertyName, type));
     }
 
     private @GuardedBy("this") DatastoreContext context;
@@ -332,8 +332,7 @@ public class DatastoreContextIntrospector {
                 return false;
             }
 
-            LOG.debug("Converted value for property {}: {} ({})",
-                    key, value, value.getClass().getSimpleName());
+            LOG.debug("Converted value for property {}: {} ({})", key, value, value.getClass().getSimpleName());
 
             // Call the setter method on the Builder instance.
             final Method setter = BUILDER_SETTERS.get(key);
@@ -413,14 +412,14 @@ public class DatastoreContextIntrospector {
 
         final Constructor<?> ctor = CONSTRUCTORS.get(toType);
         if (ctor == null) {
-            if (fromValue instanceof String) {
-                final Function<String, Object> factory = UINT_FACTORIES.get(toType);
+            if (fromValue instanceof String str) {
+                final var factory = UINT_FACTORIES.get(toType);
                 if (factory != null) {
-                    return factory.apply((String) fromValue);
+                    return factory.apply(str);
                 }
             }
 
-            throw new IllegalArgumentException(String.format("Constructor not found for type %s", toType));
+            throw new IllegalArgumentException("Constructor not found for type " + toType);
         }
 
         LOG.trace("Found {}", ctor);

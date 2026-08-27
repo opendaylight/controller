@@ -180,9 +180,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             } else if (command instanceof Abort) {
                 onAbort(((Abort)command).getTxId());
             } else {
-                getSender().tell(new Status.Failure(new IllegalArgumentException(String.format(
-                        "Unexpected message %s in cohort behavior %s", command.getClass(),
-                        getClass().getSimpleName()))), self());
+                getSender().tell(new Status.Failure(new IllegalArgumentException(
+                    "Unexpected message %s in cohort behavior %s".formatted(
+                        command.getClass(), getClass().getSimpleName()))),
+                    self());
             }
         }
 

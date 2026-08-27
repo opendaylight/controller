@@ -126,18 +126,18 @@ abstract sealed class BindingContext {
         // The binding class corresponds to a yang list.
         // FIXME: support empty keys?
         if (appConfigListKeyValue == null || appConfigListKeyValue.isEmpty()) {
-            throw new ComponentDefinitionException(String.format(
-                "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
-                logName, klass.getName(), DataStoreAppConfigMetadata.LIST_KEY_VALUE));
+            throw new ComponentDefinitionException(
+                "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified".formatted(
+                    logName, klass.getName(), DataStoreAppConfigMetadata.LIST_KEY_VALUE));
         }
 
         try {
             return ListBindingContext.newInstance((BindingClass) bindingClass, appConfigListKeyValue);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
             | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            throw new ComponentDefinitionException(String.format(
-                "%s: Error initializing for app config list binding class %s",
-                logName, klass.getName()), e);
+            throw new ComponentDefinitionException(
+                "%s: Error initializing for app config list binding class %s".formatted(
+                    logName, klass.getName()), e);
         }
     }
 
