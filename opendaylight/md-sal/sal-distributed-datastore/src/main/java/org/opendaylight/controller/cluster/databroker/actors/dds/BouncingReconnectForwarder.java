@@ -17,7 +17,6 @@ import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
 import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,23 +71,18 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
     }
 
     private ProxyReconnectCohort findCohort(final ConnectionEntry entry) throws CohortNotFoundException {
-        final Request<? , ?> request = entry.getRequest();
+        final var request = entry.getRequest();
+        final var historyId = switch (request) {
+            case LocalHistoryRequest<?> req -> req.getTarget();
+            case TransactionRequest<?> req -> req.getTarget().getHistoryId();
+            default -> throw new IllegalArgumentException("Unhandled request " + request);
+        };
 
-        final LocalHistoryIdentifier historyId;
-        if (request instanceof TransactionRequest) {
-            historyId = ((TransactionRequest<?>) request).getTarget().getHistoryId();
-        } else if (request instanceof LocalHistoryRequest) {
-            historyId = ((LocalHistoryRequest<?>) request).getTarget();
-        } else {
-            throw new IllegalArgumentException("Unhandled request " + request);
-        }
-
-        final ProxyReconnectCohort cohort = cohorts.get(historyId);
+        final var cohort = cohorts.get(historyId);
         if (cohort == null) {
             LOG.warn("Cohort for request {} not found, aborting it", request);
             throw new CohortNotFoundException(historyId);
         }
-
         return cohort;
     }
 }
