@@ -84,9 +84,10 @@ public class AssembledMessageState implements AutoCloseable {
     public boolean addSlice(final int sliceIndex, final byte[] data, final int lastSliceHashCode)
             throws MessageSliceException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("{}: addSlice: identifier: {}, sliceIndex: {}, lastSliceIndex: {}, assembledSize: {}, "
-                    + "sliceHashCode: {}, lastSliceHashCode: {}", logContext, identifier, sliceIndex,
-                    lastSliceIndexReceived, assembledSize, lastSliceHashCode, lastSliceHashCodeReceived);
+            LOG.debug("""
+                {}: addSlice: identifier: {}, sliceIndex: {}, lastSliceIndex: {}, assembledSize: {}, sliceHashCode: \
+                {}, lastSliceHashCode: {}""", logContext, identifier, sliceIndex, lastSliceIndexReceived, assembledSize,
+                lastSliceHashCode, lastSliceHashCodeReceived);
         }
 
         try {
@@ -104,8 +105,8 @@ public class AssembledMessageState implements AutoCloseable {
             }
         } catch (IOException e) {
             close();
-            throw new MessageSliceException(String.format("Error writing data for slice %d of message %s",
-                    sliceIndex, identifier), e);
+            throw new MessageSliceException(
+                "Error writing data for slice %d of message %s".formatted(sliceIndex, identifier), e);
         }
 
         return sealed;
@@ -131,22 +132,22 @@ public class AssembledMessageState implements AutoCloseable {
         }
 
         if (sealed) {
-            throw new AssemblerSealedException(String.format(
-                    "Received slice index for message %s but all %d expected slices have already already received.",
-                    identifier, totalSlices));
+            throw new AssemblerSealedException(
+                "Received slice index for message %s but all %d expected slices have already already received."
+                    .formatted(identifier, totalSlices));
         }
 
         if (lastSliceIndexReceived + 1 != sliceIndex) {
             close();
-            throw new MessageSliceException(String.format("Expected sliceIndex %d but got %d for message %s",
+            throw new MessageSliceException("Expected sliceIndex %d but got %d for message %s".formatted(
                     lastSliceIndexReceived + 1, sliceIndex, identifier), true);
         }
 
         if (lastSliceHashCode != lastSliceHashCodeReceived) {
             close();
-            throw new MessageSliceException(String.format("The hash code of the recorded last slice (%d) does not "
-                    + "match the senders last hash code (%d) for message %s", lastSliceHashCodeReceived,
-                    lastSliceHashCode, identifier), true);
+            throw new MessageSliceException("""
+                The hash code of the recorded last slice (%d) does not match the senders last hash code (%d) for \
+                message %s""".formatted(lastSliceHashCodeReceived, lastSliceHashCode, identifier), true);
         }
     }
 

@@ -151,7 +151,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     private static void checkCondition(final boolean expression, final String errorMessageFormat,
             final Object... formatArgs) throws ConfigXMLReaderException {
         if (!expression) {
-            throw new ConfigXMLReaderException(String.format(errorMessageFormat, formatArgs));
+            throw new ConfigXMLReaderException(errorMessageFormat.formatted(formatArgs));
         }
     }
 
@@ -168,7 +168,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         try {
             optionalURL = inputStreamProvider.getURL(appConfigFileName);
         } catch (final IOException e) {
-            String msg = String.format("%s: Could not getURL()", logName);
+            String msg = "%s: Could not getURL()".formatted(logName);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);
         }
@@ -185,7 +185,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
             return dataNode;
         } catch (final IOException | SAXException | XMLStreamException | URISyntaxException e) {
-            String msg = String.format("%s: Could not read/parse app config %s", logName, url);
+            String msg = "%s: Could not read/parse app config %s".formatted(logName, url);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);
         }

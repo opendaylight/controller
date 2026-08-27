@@ -127,7 +127,7 @@ public final class MessageAssembler implements AutoCloseable {
         } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             final MessageSliceException messageSliceEx = cause instanceof MessageSliceException sliceEx ? sliceEx
-                : new MessageSliceException(String.format("Error creating state for identifier %s", identifier), cause);
+                : new MessageSliceException("Error creating state for identifier " + identifier, cause);
 
             messageSlice.getReplyTo().tell(MessageSliceReply.failed(identifier, messageSliceEx, sendTo),
                     ActorRef.noSender());
@@ -142,9 +142,8 @@ public final class MessageAssembler implements AutoCloseable {
         }
 
         LOG.debug("{}: AssembledMessageState not found for {} - returning failed reply", logContext, identifier);
-        throw new MessageSliceException(String.format(
-                "No assembled state found for identifier %s and slice index %s", identifier,
-                messageSlice.getSliceIndex()), true);
+        throw new MessageSliceException("No assembled state found for identifier %s and slice index %s".formatted(
+            identifier, messageSlice.getSliceIndex()), true);
     }
 
     private void processMessageSliceForState(final MessageSlice messageSlice, final AssembledMessageState state,
@@ -188,8 +187,8 @@ public final class MessageAssembler implements AutoCloseable {
                 return in.readObject();
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new MessageSliceException(String.format("Error re-assembling bytes for identifier %s",
-                    state.getIdentifier()), e);
+            throw new MessageSliceException(
+                "Error re-assembling bytes for identifier %s".formatted(state.getIdentifier()), e);
         }
     }
 
