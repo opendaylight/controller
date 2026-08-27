@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Verify;
+import com.google.common.base.VerifyException;
 import java.util.ArrayDeque;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -68,10 +67,10 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         return history.persistenceId();
     }
 
-    final Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
+    final @Nullable TransactionSuccess<?> replaySequence(final long sequence) throws RequestException {
         // Fast path check: if the requested sequence is the next request, bail early
         if (expectedSequence == sequence) {
-            return Optional.empty();
+            return null;
         }
 
         // Check sequencing: we do not need to bother with future requests
@@ -93,21 +92,20 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         // machinery is asynchronous, hence a reply may be in the works and not available.
 
         long replaySequence = firstReplaySequence;
-        for (Object replay : replayQueue) {
+        for (var replay : replayQueue) {
             if (replaySequence == sequence) {
-                if (replay instanceof RequestException) {
-                    throw (RequestException) replay;
-                }
-
-                Verify.verify(replay instanceof TransactionSuccess);
-                return Optional.of((TransactionSuccess<?>) replay);
+                return switch (replay) {
+                    case RequestException exception -> throw exception;
+                    case TransactionSuccess<?> success -> success;
+                    default -> throw new VerifyException("Unexpected " + replay);
+                };
             }
 
             replaySequence++;
         }
 
         // Not found
-        return Optional.empty();
+        return null;
     }
 
     final void purgeSequencesUpTo(final long sequence) {
@@ -120,7 +118,7 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
     @SuppressWarnings("checkstyle:IllegalCatch")
     final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        if (request instanceof final IncrementTransactionSequenceRequest incr) {
+        if (request instanceof IncrementTransactionSequenceRequest incr) {
             expectedSequence += incr.getIncrement();
 
             return recordSuccess(incr.getSequence(),
