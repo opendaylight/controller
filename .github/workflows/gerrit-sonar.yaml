@@ -60,7 +60,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:line-length
-    uses: lfreleng-actions/security-workflows/.github/workflows/sonarqube-cloud.yaml@5882f138dd24fcd6cb4ebc8bb3a68cee45a437a6 # v0.3.0
+    uses: lfreleng-actions/security-workflows/.github/workflows/sonarqube-cloud.yaml@d42518f4ad6d71408c9f05ab2d135a9a86bcb548 # v0.3.1
     with:
       # Gerrit dispatches carry a refspec and check out the change;
       # the weekly schedule leaves it empty and takes the branch.
@@ -78,16 +78,8 @@ jobs:
       mvn_phases: >-
         clean
         install
-        jacoco:report
-        -Djacoco.dataFile=${GITHUB_WORKSPACE}/target/jacoco.exec
       mvn_params: >-
-        -Dodl.jacoco.aggregateFile=${GITHUB_WORKSPACE}/target/jacoco.exec
         -Dskip.karaf.featureTest=true
-      # The scan runs its own Maven invocation, so it needs the
-      # same coverage coordinates the build was given.
-      maven_args: >-
-        -Dodl.jacoco.aggregateFile=${GITHUB_WORKSPACE}/target/jacoco.exec
-        -Djacoco.dataFile=${GITHUB_WORKSPACE}/target/jacoco.exec
       sonar_project_key: "opendaylight_controller"
       sonar_organization: "opendaylight"
     secrets:
