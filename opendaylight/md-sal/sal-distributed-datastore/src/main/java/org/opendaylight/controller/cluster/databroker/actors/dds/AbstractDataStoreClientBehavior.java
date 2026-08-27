@@ -213,7 +213,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
             // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
             //         requests will be immediately sent to it and requests being sent concurrently will get
             //         forwarded once they hit the new connection.
-            return BouncingReconnectForwarder.forCohorts(newConn, cohorts);
+            return new BouncingReconnectForwarder(newConn, cohorts);
         } finally {
             try {
                 // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.

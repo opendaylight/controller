@@ -7,13 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
-import org.eclipse.jdt.annotation.NonNull;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
@@ -25,10 +22,13 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Cohort aware forwarder, which forwards the request to the cohort, giving it a reference to the successor
-// connection
+/**
+ * A Cohort-aaware forwarder, which forwards the request to the cohort, giving it a reference to the successor
+ * connection.
+ */
 final class BouncingReconnectForwarder extends ReconnectForwarder {
     private static final class CohortNotFoundException extends RequestException {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         CohortNotFoundException(final LocalHistoryIdentifier historyId) {
@@ -45,16 +45,12 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
 
     private final Map<LocalHistoryIdentifier, ProxyReconnectCohort> cohorts;
 
-    private BouncingReconnectForwarder(final ConnectedClientConnection<?> successor,
-            final Map<LocalHistoryIdentifier, ProxyReconnectCohort> cohorts) {
-        super(successor);
-        this.cohorts = requireNonNull(cohorts);
-    }
-
-    static @NonNull ReconnectForwarder forCohorts(final ConnectedClientConnection<?> successor,
+    BouncingReconnectForwarder(final ConnectedClientConnection<?> successor,
             final Collection<HistoryReconnectCohort> cohorts) {
-        return new BouncingReconnectForwarder(successor, Maps.uniqueIndex(Collections2.transform(cohorts,
-            HistoryReconnectCohort::getProxy), ProxyReconnectCohort::getIdentifier));
+        super(successor);
+        this.cohorts = cohorts.stream()
+            .map(HistoryReconnectCohort::getProxy)
+            .collect(Collectors.toUnmodifiableMap(ProxyReconnectCohort::getIdentifier, Function.identity()));
     }
 
     @Override
