@@ -295,14 +295,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void replayEntry(final ConnectionEntry entry, final Consumer<ConnectionEntry> replayTo)
                 throws RequestException {
-            final Request<?, ?> request = entry.getRequest();
-            if (request instanceof TransactionRequest) {
-                lookupProxy(request).replayRequest((TransactionRequest<?>) request, entry.getCallback(),
-                    entry.getEnqueuedTicks());
-            } else if (request instanceof LocalHistoryRequest) {
-                replayTo.accept(entry);
-            } else {
-                throw new IllegalArgumentException("Unhandled request " + request);
+            final var request = entry.getRequest();
+            switch (request) {
+                case LocalHistoryRequest<?> unused -> replayTo.accept(entry);
+                case TransactionRequest<?> req ->
+                    lookupProxy(req).replayRequest(req, entry.getCallback(), entry.getEnqueuedTicks());
+                default -> throw new IllegalArgumentException("Unhandled request " + request);
             }
         }
 
