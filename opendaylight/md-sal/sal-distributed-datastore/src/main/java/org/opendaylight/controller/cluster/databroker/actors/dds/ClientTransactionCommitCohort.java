@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
+import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.common.Empty;
 
 final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohort {
-    private final Collection<AbstractProxyTransaction> proxies;
+    private final List<AbstractProxyTransaction> proxies;
 
     ClientTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId,
             final Collection<AbstractProxyTransaction> proxies) {
         super(parent, txId);
-        this.proxies = ImmutableList.copyOf(proxies);
+        this.proxies = List.copyOf(proxies);
     }
 
     @Override
@@ -29,8 +29,8 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
         /*
          * Issue the request to commit for all participants. We will track the results and report them.
          */
-        final VotingFuture<Boolean> ret = new VotingFuture<>(Boolean.TRUE, proxies.size());
-        for (AbstractProxyTransaction proxy : proxies) {
+        final var ret = new VotingFuture<>(Boolean.TRUE, proxies.size());
+        for (var proxy : proxies) {
             proxy.canCommit(ret);
         }
 
@@ -45,7 +45,7 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
     @Override
     public ListenableFuture<Empty> preCommit() {
         final var ret = new VotingFuture<>(Empty.value(), proxies.size());
-        for (AbstractProxyTransaction proxy : proxies) {
+        for (var proxy : proxies) {
             proxy.preCommit(ret);
         }
 
@@ -55,7 +55,7 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
     @Override
     public ListenableFuture<CommitInfo> commit() {
         final var ret = new VotingFuture<>(CommitInfo.empty(), proxies.size());
-        for (AbstractProxyTransaction proxy : proxies) {
+        for (var proxy : proxies) {
             proxy.doCommit(ret);
         }
 
@@ -65,7 +65,7 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
     @Override
     public ListenableFuture<Empty> abort() {
         final var ret = new VotingFuture<>(Empty.value(), proxies.size());
-        for (AbstractProxyTransaction proxy : proxies) {
+        for (var proxy : proxies) {
             proxy.abort(ret);
         }
 
