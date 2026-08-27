@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -116,8 +115,9 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
      * to the problem of state transfer, but the user will observe it only if the race condition is hit.
      */
-    private static class SuccessorState extends State {
+    private static final class SuccessorState extends State {
         private final CountDownLatch latch = new CountDownLatch(1);
+
         private AbstractProxyTransaction successor;
         private State prevState;
 
@@ -147,12 +147,14 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             return verifyNotNull(prevState, "Attempted to access previous state, which was not set");
         }
 
-        void setPrevState(final State prevState) {
-            verify(this.prevState == null, "Attempted to set previous state to %s when we already have %s", prevState,
-                    this.prevState);
-            this.prevState = requireNonNull(prevState);
+        void setPrevState(final State newPrevState) {
+            if (prevState != null) {
+                throw new VerifyException(
+                    "Attempted to set previous state to %s when we already have %s".formatted(newPrevState, prevState));
+            }
+            prevState = requireNonNull(newPrevState);
             // We cannot have duplicate successor states, so this check is sufficient
-            done = DONE.equals(prevState);
+            done = DONE.equals(newPrevState);
         }
 
         // To be called from safe contexts, where successor is known to be completed
@@ -160,10 +162,12 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             return verifyNotNull(successor);
         }
 
-        void setSuccessor(final AbstractProxyTransaction successor) {
-            verify(this.successor == null, "Attempted to set successor to %s when we already have %s", successor,
-                    this.successor);
-            this.successor = requireNonNull(successor);
+        void setSuccessor(final AbstractProxyTransaction newSuccessor) {
+            if (successor != null) {
+                throw new VerifyException(
+                    "Attempted to set successor to %s when we already have %s".formatted(newSuccessor, successor));
+            }
+            successor = requireNonNull(newSuccessor);
         }
 
         boolean isDone() {
