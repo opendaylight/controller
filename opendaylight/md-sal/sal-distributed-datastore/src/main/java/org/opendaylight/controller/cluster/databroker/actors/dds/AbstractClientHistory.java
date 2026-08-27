@@ -14,7 +14,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -42,8 +41,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract base class for client view of a history. This class has two implementations, one for normal local histories
  * and the other for single transactions.
- *
- * @author Robert Varga
  */
 public abstract class AbstractClientHistory extends LocalAbortable implements Identifiable<LocalHistoryIdentifier> {
     enum State {
@@ -58,12 +55,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private static final AtomicReferenceFieldUpdater<AbstractClientHistory, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
 
-    private final @GuardedBy("this") Map<TransactionIdentifier, AbstractClientHandle<?>> openTransactions =
+    private final @GuardedBy("this") HashMap<TransactionIdentifier, AbstractClientHandle<?>> openTransactions =
         new HashMap<>();
-    private final @GuardedBy("this") Map<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions =
+    private final @GuardedBy("this") HashMap<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions =
         new HashMap<>();
 
-    private final @GuardedBy("lock") Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
+    private final @GuardedBy("lock") ConcurrentHashMap<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
 
     private final @NonNull AbstractDataStoreClientBehavior client;
@@ -128,12 +125,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     @Override
     final void localAbort(final Throwable cause) {
-        final State oldState = STATE_UPDATER.getAndSet(this, State.CLOSED);
+        final var oldState = STATE_UPDATER.getAndSet(this, State.CLOSED);
         if (oldState != State.CLOSED) {
             LOG.debug("Force-closing history {}", getIdentifier(), cause);
 
             synchronized (this) {
-                for (AbstractClientHandle<?> t : openTransactions.values()) {
+                for (var t : openTransactions.values()) {
                     t.localAbort(cause);
                 }
                 openTransactions.clear();
@@ -277,12 +274,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      */
     synchronized AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
             final AbstractTransactionCommitCohort cohort) {
-        final TransactionIdentifier txId = tx.getIdentifier();
+        final var txId = tx.getIdentifier();
         if (openTransactions.remove(txId) == null) {
             LOG.warn("Transaction {} not recorded, proceeding with readiness", txId);
         }
 
-        final AbstractTransactionCommitCohort previous = readyTransactions.putIfAbsent(txId, cohort);
+        final var previous = readyTransactions.putIfAbsent(txId, cohort);
         checkState(previous == null, "Duplicate cohort %s for transaction %s, already have %s", cohort, txId, previous);
 
         LOG.debug("Local history {} readied transaction {}", this, txId);
@@ -354,7 +351,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             @Override
             public void close() {
                 LOG.debug("Client history {} finishing reconnect to {}", AbstractClientHistory.this, newConn);
-                final ProxyHistory newProxy = proxy.finishReconnect();
+                final var newProxy = proxy.finishReconnect();
                 if (!histories.replace(newConn.cookie(), oldProxy, newProxy)) {
                     LOG.warn("Failed to replace proxy {} with {} in {}", oldProxy, newProxy,
                         AbstractClientHistory.this);
