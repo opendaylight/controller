@@ -19,7 +19,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
@@ -216,7 +215,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     private static final State DONE = new State("DONE");
 
     // Touched from client actor thread only
-    private final Deque<Object> successfulRequests = new ArrayDeque<>();
+    private final ArrayDeque<Object> successfulRequests = new ArrayDeque<>();
     private final ProxyHistory parent;
 
     // Accessed from user thread only, which may not access this object concurrently
