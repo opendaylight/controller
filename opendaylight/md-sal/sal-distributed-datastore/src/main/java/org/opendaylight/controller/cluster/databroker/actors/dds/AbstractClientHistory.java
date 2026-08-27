@@ -10,11 +10,13 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
@@ -48,10 +50,17 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHistory.class);
-    private static final AtomicLongFieldUpdater<AbstractClientHistory> NEXT_TX_UPDATER =
-            AtomicLongFieldUpdater.newUpdater(AbstractClientHistory.class, "nextTx");
+    private static final VarHandle NEXT_TX_VH;
     private static final AtomicReferenceFieldUpdater<AbstractClientHistory, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
+
+    static {
+        try {
+            NEXT_TX_VH = MethodHandles.lookup().findVarHandle(AbstractClientHistory.class, "nextTx", long.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private final @GuardedBy("this") HashMap<TransactionIdentifier, AbstractClientHandle<?>> openTransactions =
         new HashMap<>();
@@ -64,8 +73,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private final @NonNull AbstractDataStoreClientBehavior client;
     private final @NonNull LocalHistoryIdentifier identifier;
 
-    // Used via NEXT_TX_UPDATER
-    @SuppressWarnings("unused")
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
     private volatile long nextTx = 0;
 
     private volatile State state = State.IDLE;
@@ -116,7 +124,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     final long nextTx() {
-        return NEXT_TX_UPDATER.getAndIncrement(this);
+        return (long) NEXT_TX_VH.getAndAdd(this, 1L);
     }
 
     final Long resolveShardForPath(final YangInstanceIdentifier path) {
