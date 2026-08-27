@@ -104,11 +104,10 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
     @Override
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        if (request instanceof AbortLocalTransactionRequest req) {
-            enqueueAbort(req, callback, enqueuedTicks);
-        } else {
+        if (!(request instanceof AbortLocalTransactionRequest req)) {
             throw unhandledRequest(request);
         }
+        enqueueAbort(req, callback, enqueuedTicks);
     }
 
     @Override
@@ -191,7 +190,7 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
                          final Consumer<Response<?, ?>> callback) {
         switch (request) {
             case CommitLocalTransactionRequest req -> {
-                final DataTreeModification mod = req.getModification();
+                final var mod = req.getModification();
 
                 LOG.debug("Applying modification {} to successor {}", mod, successor);
                 mod.applyToCursor(new AbstractDataTreeModificationCursor() {
@@ -212,7 +211,7 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
                 });
 
                 successor.sealOnly();
-                final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
+                final var successorReq = successor.commitRequest(req.isCoordinated());
                 successor.sendRequest(successorReq, callback);
             }
             case AbortLocalTransactionRequest req -> {
