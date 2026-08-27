@@ -793,9 +793,9 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     @Holding("this")
     abstract @Nullable ModifyTransactionRequest flushState();
 
-    abstract TransactionRequest<?> abortRequest();
+    abstract @NonNull TransactionRequest<?> abortRequest();
 
-    abstract TransactionRequest<?> commitRequest(boolean coordinated);
+    abstract @NonNull TransactionRequest<?> commitRequest(boolean coordinated);
 
     /**
      * Replay a request originating in this proxy to a successor remote proxy.
