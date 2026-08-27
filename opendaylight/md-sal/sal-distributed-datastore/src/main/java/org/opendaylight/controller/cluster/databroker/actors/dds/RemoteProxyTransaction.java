@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
@@ -25,7 +26,6 @@ import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSucc
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
-import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
@@ -262,7 +262,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         return builder.build();
     }
 
-    private ModifyTransactionRequest readyRequest() {
+    private @NonNull ModifyTransactionRequest readyRequest() {
         ensureInitializedBuilder();
         builder.setReady();
         builderBusy = false;
@@ -340,47 +340,46 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isPresent()) {
-            // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
-            // until we know what we are going to do.
-            if (markSealed()) {
-                if (!sealOnly()) {
-                    LOG.debug("Proxy {} has a successor, which should receive seal through a separate request", this);
-                }
-            }
+        final var maybeProto = req.getPersistenceProtocol();
+        if (maybeProto.isEmpty()) {
+            return;
+        }
 
-            final TransactionRequest<?> tmp;
-            switch (maybeProto.orElseThrow()) {
-                case null -> throw new NullPointerException();
-                case ABORT -> {
-                    tmp = abortRequest();
-                    sendRequest(tmp, resp -> {
-                        completeModify(tmp, resp);
-                        callback.accept(resp);
-                    });
-                }
-                case SIMPLE -> {
-                    tmp = commitRequest(false);
-                    sendRequest(tmp, resp -> {
-                        completeModify(tmp, resp);
-                        callback.accept(resp);
-                    });
-                }
-                case THREE_PHASE -> {
-                    tmp = commitRequest(true);
-                    sendRequest(tmp, resp -> {
-                        recordSuccessfulRequest(tmp);
-                        callback.accept(resp);
-                    });
-                }
-                case READY -> {
-                    tmp = readyRequest();
-                    sendRequest(tmp, resp -> {
-                        recordSuccessfulRequest(tmp);
-                        callback.accept(resp);
-                    });
-                }
+        // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions until we
+        // know what we are going to do.
+        if (markSealed() && !sealOnly()) {
+            LOG.debug("Proxy {} has a successor, which should receive seal through a separate request", this);
+        }
+
+        switch (maybeProto.orElseThrow()) {
+            case null -> throw new NullPointerException();
+            case ABORT -> {
+                final var tmp = abortRequest();
+                sendRequest(tmp, resp -> {
+                    completeModify(tmp, resp);
+                    callback.accept(resp);
+                });
+            }
+            case SIMPLE -> {
+                final var tmp = commitRequest(false);
+                sendRequest(tmp, resp -> {
+                    completeModify(tmp, resp);
+                    callback.accept(resp);
+                });
+            }
+            case THREE_PHASE -> {
+                final var tmp = commitRequest(true);
+                sendRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
+                    callback.accept(resp);
+                });
+            }
+            case READY -> {
+                final var tmp = readyRequest();
+                sendRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
+                    callback.accept(resp);
+                });
             }
         }
     }
@@ -483,44 +482,45 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         req.getModifications().forEach(this::appendModification);
 
         final var maybeProto = req.getPersistenceProtocol();
-        if (maybeProto.isPresent()) {
-            // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
-            // until we know what we are going to do.
-            if (markSealed()) {
-                verify(sealOnly(), "Attempted to replay seal on %s", this);
-            }
+        if (maybeProto.isEmpty()) {
+            return;
+        }
 
-            final TransactionRequest<?> tmp;
-            switch (maybeProto.orElseThrow()) {
-                case null -> throw new NullPointerException();
-                case ABORT -> {
-                    tmp = abortRequest();
-                    enqueueRequest(tmp, resp -> {
-                        completeModify(tmp, resp);
-                        cb.accept(resp);
-                    }, enqueuedTicks);
-                }
-                case SIMPLE -> {
-                    tmp = commitRequest(false);
-                    enqueueRequest(tmp, resp -> {
-                        completeModify(tmp, resp);
-                        cb.accept(resp);
-                    }, enqueuedTicks);
-                }
-                case THREE_PHASE -> {
-                    tmp = commitRequest(true);
-                    enqueueRequest(tmp, resp -> {
-                        recordSuccessfulRequest(tmp);
-                        cb.accept(resp);
-                    }, enqueuedTicks);
-                }
-                case READY -> {
-                    tmp = readyRequest();
-                    enqueueRequest(tmp, resp -> {
-                        recordSuccessfulRequest(tmp);
-                        cb.accept(resp);
-                    }, enqueuedTicks);
-                }
+        // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions until we
+        // know what we are going to do.
+        if (markSealed()) {
+            verify(sealOnly(), "Attempted to replay seal on %s", this);
+        }
+
+        switch (maybeProto.orElseThrow()) {
+            case null -> throw new NullPointerException();
+            case ABORT -> {
+                final var tmp = abortRequest();
+                enqueueRequest(tmp, resp -> {
+                    completeModify(tmp, resp);
+                    cb.accept(resp);
+                }, enqueuedTicks);
+            }
+            case SIMPLE -> {
+                final var tmp = commitRequest(false);
+                enqueueRequest(tmp, resp -> {
+                    completeModify(tmp, resp);
+                    cb.accept(resp);
+                }, enqueuedTicks);
+            }
+            case THREE_PHASE -> {
+                final var tmp = commitRequest(true);
+                enqueueRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
+                    cb.accept(resp);
+                }, enqueuedTicks);
+            }
+            case READY -> {
+                final var tmp = readyRequest();
+                enqueueRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
+                    cb.accept(resp);
+                }, enqueuedTicks);
             }
         }
     }
