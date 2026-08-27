@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstract superclass of both ClientSnapshot and ClientTransaction. Provided for convenience.
- *
- * @author Robert Varga
  */
 @Beta
 public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> extends LocalAbortable
@@ -36,6 +34,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      * Our state consist of the the proxy map, hence we just subclass ConcurrentHashMap directly.
      */
     private static final class State<T> extends ConcurrentHashMap<Long, T> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
     }
 
@@ -77,7 +76,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     private boolean commonAbort() {
-        final Map<Long, T> toClose = ensureClosed();
+        final var toClose = ensureClosed();
         if (toClose == null) {
             return false;
         }
@@ -103,7 +102,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     final @Nullable Map<Long, T> ensureClosed() {
         // volatile read and a conditional CAS. This ends up being better in the typical case when we are invoked more
         // than once (see ClientBackedTransaction) than performing a STATE_UPDATER.getAndSet().
-        final State<T> local = state;
+        final var local = state;
         return local != null && STATE_UPDATER.compareAndSet(this, local, null) ? local : null;
     }
 
@@ -127,14 +126,16 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     abstract @NonNull T createProxy(@NonNull Long shard);
 
     private State<T> getState() {
-        final State<T> local = state;
+        final var local = state;
         checkState(local != null, "Transaction %s is closed", transactionId);
         return local;
     }
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", transactionId).add("state", state)
-                .toString();
+        return MoreObjects.toStringHelper(this).omitNullValues()
+            .add("identifier", transactionId)
+            .add("state", state)
+            .toString();
     }
 }
