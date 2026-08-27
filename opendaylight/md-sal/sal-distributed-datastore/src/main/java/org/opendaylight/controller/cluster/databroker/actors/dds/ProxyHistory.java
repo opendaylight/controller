@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,8 +50,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Per-connection representation of a local history. This class handles state replication across a single connection.
- *
- * @author Robert Varga
  */
 abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private abstract static class AbstractLocal extends ProxyHistory {
@@ -88,7 +84,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         private volatile LocalReadWriteProxyTransaction lastSealed;
 
         Local(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
+                final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
             super(parent, connection, identifier, dataTree);
         }
 
@@ -339,7 +335,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private final @NonNull AbstractClientConnection<ShardBackendInfo> connection;
     private final @NonNull AbstractClientHistory parent;
 
-    private final @GuardedBy("lock") Map<TransactionIdentifier, AbstractProxyTransaction> proxies =
+    private final @GuardedBy("lock") LinkedHashMap<TransactionIdentifier, AbstractProxyTransaction> proxies =
         new LinkedHashMap<>();
     private @GuardedBy("lock") ProxyHistory successor;
 
@@ -371,15 +367,14 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     static ProxyHistory createClient(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
-        final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        final var dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
         return dataTree.isPresent() ? new Local(parent, connection, identifier, dataTree.orElseThrow())
              : new Remote(parent, connection, identifier);
     }
 
     static ProxyHistory createSingle(final AbstractClientHistory parent,
-            final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier) {
-        final Optional<ReadOnlyDataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+            final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
+        final var dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
         return dataTree.isPresent() ? new LocalSingle(parent, connection, identifier, dataTree.orElseThrow())
              : new RemoteSingle(parent, connection, identifier);
     }
@@ -505,9 +500,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         LOG.debug("Proxy {} skipping transactions {}", this, txIds);
         connection.enqueueRequest(new SkipTransactionsRequest(new TransactionIdentifier(identifier,
-            txIds.get(0).longValue()), 0, localActor(),txIds.subList(1, txIds.size())), resp -> {
-                LOG.debug("Proxy {} confirmed transaction skip", this);
-            }, connection.currentTime());
+            txIds.get(0).longValue()), 0, localActor(),txIds.subList(1, txIds.size())),
+            resp -> LOG.debug("Proxy {} confirmed transaction skip", this),
+            connection.currentTime());
     }
 
     final void abortTransaction(final AbstractProxyTransaction tx) {
