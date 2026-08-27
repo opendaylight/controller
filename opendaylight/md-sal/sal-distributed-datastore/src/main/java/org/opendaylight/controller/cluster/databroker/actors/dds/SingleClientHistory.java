@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An {@link AbstractClientHistory} which handles free-standing transactions.
- *
- * @author Robert Varga
  */
 final class SingleClientHistory extends AbstractClientHistory {
     private static final Logger LOG = LoggerFactory.getLogger(SingleClientHistory.class);
@@ -27,17 +25,15 @@ final class SingleClientHistory extends AbstractClientHistory {
 
     @Override
     ClientSnapshot doCreateSnapshot() {
-        final TransactionIdentifier txId = new TransactionIdentifier(getIdentifier(), nextTx());
+        final var txId = new TransactionIdentifier(getIdentifier(), nextTx());
         LOG.debug("{}: creating a new snapshot {}", this, txId);
-
         return new ClientSnapshot(this, txId);
     }
 
     @Override
     ClientTransaction doCreateTransaction() {
-        final TransactionIdentifier txId = new TransactionIdentifier(getIdentifier(), nextTx());
+        final var txId = new TransactionIdentifier(getIdentifier(), nextTx());
         LOG.debug("{}: creating a new transaction {}", this, txId);
-
         return new ClientTransaction(this, txId);
     }
 
