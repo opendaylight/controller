@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
  * A box {@link RuntimeException} thrown by {@link FailedDataTreeModification} from its user-facing methods.
  */
 final class FailedDataTreeModificationException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     FailedDataTreeModificationException(final Exception cause) {
