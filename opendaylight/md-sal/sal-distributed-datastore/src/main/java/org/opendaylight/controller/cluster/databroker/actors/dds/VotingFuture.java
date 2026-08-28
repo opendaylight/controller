@@ -8,14 +8,15 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.VerifyException;
 import com.google.common.util.concurrent.AbstractFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 
@@ -30,21 +31,27 @@ import org.checkerframework.checker.lock.qual.Holding;
  *
  * @param <T> Type of value returned on success
  */
-class VotingFuture<T> extends AbstractFuture<T> {
-    @SuppressWarnings("rawtypes")
-    private static final AtomicIntegerFieldUpdater<VotingFuture> VOTES_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(VotingFuture.class, "neededVotes");
+final class VotingFuture<T> extends AbstractFuture<T> {
+    private static final VarHandle VH;
 
-    private final T result;
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(VotingFuture.class, "neededVotes", int.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private final @GuardedBy("failures") Collection<Throwable> failures = new ArrayList<>(0);
-    @SuppressWarnings("unused")
+    private final T result;
+
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
     private volatile int neededVotes;
 
     VotingFuture(final T result, final int requiredVotes) {
         this.result = requireNonNull(result);
         checkArgument(requiredVotes > 0);
-        this.neededVotes = requiredVotes;
+        neededVotes = requiredVotes;
 
     }
 
@@ -66,24 +73,25 @@ class VotingFuture<T> extends AbstractFuture<T> {
     }
 
     private boolean castVote() {
-        final int votes = VOTES_UPDATER.decrementAndGet(this);
-        verify(votes >= 0);
-        return votes == 0;
+        final int prevNeeded = (int) VH.getAndAdd(this, -1);
+        if (prevNeeded < 1) {
+            throw new VerifyException("neededVotes underflow");
+        }
+        return prevNeeded == 1;
     }
 
     @Holding("failures")
     private void resolveResult() {
-        final Iterator<Throwable> it = failures.iterator();
+        final var it = failures.iterator();
         if (!it.hasNext()) {
             set(result);
             return;
         }
 
-        final Throwable t = it.next();
+        final var t = it.next();
         while (it.hasNext()) {
             t.addSuppressed(it.next());
         }
-
         setException(t);
     }
 }
