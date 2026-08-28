@@ -15,11 +15,12 @@ import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -74,8 +75,16 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     private static final class Local extends AbstractLocal {
-        private static final AtomicReferenceFieldUpdater<Local, LocalReadWriteProxyTransaction> LAST_SEALED_UPDATER =
-                AtomicReferenceFieldUpdater.newUpdater(Local.class, LocalReadWriteProxyTransaction.class, "lastSealed");
+        private static final VarHandle VH;
+
+        static {
+            try {
+                VH = MethodHandles.lookup()
+                    .findVarHandle(Local.class, "lastSealed", LocalReadWriteProxyTransaction.class);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
 
         // Tracks the last open and last sealed transaction. We need to track both in case the user ends up aborting
         // the open one and attempts to create a new transaction again.
@@ -132,7 +141,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                     // no-op
                 }
                 case LocalReadWriteProxyTransaction rw -> {
-                    if (LAST_SEALED_UPDATER.compareAndSet(this, rw, null)) {
+                    if (VH.compareAndSet(this, rw, null)) {
                         LOG.debug("Completed last sealed transaction {}", tx);
                     }
                 }
