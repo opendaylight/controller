@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 
 /**
  * Utility methods for dealing with datastore root {@link ContainerNode} with respect to module shards.
@@ -81,7 +81,7 @@ public final class RootScatterGather {
             Futures.allAsList(readFutures.collect(ImmutableList.toImmutableList())), input -> {
                 try {
                     return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), input,
-                        new InMemoryDataTreeFactory(), actorUtils.getSchemaContext(),
+                        ReferenceDataTreeFactoryModule.provideDataTreeFactory(), actorUtils.getSchemaContext(),
                         actorUtils.getDatastoreContext().getLogicalStoreType());
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
