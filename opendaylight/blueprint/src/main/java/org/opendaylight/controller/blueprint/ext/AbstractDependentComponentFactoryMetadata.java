@@ -9,6 +9,7 @@ package org.opendaylight.controller.blueprint.ext;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import org.apache.aries.blueprint.di.ExecutionContext;
 import org.apache.aries.blueprint.di.Recipe;
 import org.apache.aries.blueprint.ext.DependentComponentFactoryMetadata;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.osgi.framework.ServiceReference;
