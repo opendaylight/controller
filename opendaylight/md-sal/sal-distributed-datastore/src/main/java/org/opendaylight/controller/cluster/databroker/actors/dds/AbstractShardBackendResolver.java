@@ -195,12 +195,11 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
         }
 
         LOG.debug("Resolved backend information to {}", response);
-        if (response instanceof ConnectClientSuccess success) {
-            future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
-                success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
-                success.getMaxMessages()));
-        } else {
+        if (!(response instanceof ConnectClientSuccess success)) {
             throw new IllegalArgumentException("Unhandled response " + response);
         }
+        future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
+            success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
+            success.getMaxMessages()));
     }
 }
