@@ -21,9 +21,9 @@ module org.opendaylight.raft.spi {
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
+    requires static com.google.errorprone.annotations;
     requires static javax.inject;
     requires static org.kohsuke.metainf_services;
-    requires static org.checkerframework.checker.qual;
     requires static org.osgi.annotation.bundle;
     requires static org.osgi.service.component.annotations;
 }
