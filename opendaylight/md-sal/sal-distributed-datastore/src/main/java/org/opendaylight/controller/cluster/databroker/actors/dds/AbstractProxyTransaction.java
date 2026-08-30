@@ -16,6 +16,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.ArrayDeque;
@@ -25,7 +26,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -795,7 +795,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     abstract FluentFuture<Optional<NormalizedNode>> doRead(YangInstanceIdentifier path);
 
-    @Holding("this")
+    @GuardedBy("this")
     abstract @Nullable ModifyTransactionRequest flushState();
 
     abstract @NonNull TransactionRequest<?> abortRequest();

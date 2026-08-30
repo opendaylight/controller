@@ -9,11 +9,10 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.WeakHashMap;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
@@ -34,8 +33,8 @@ import org.slf4j.LoggerFactory;
 final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
     private static final Logger LOG = LoggerFactory.getLogger(ClientBackedTransactionChain.class);
 
-    private final @GuardedBy("this") Map<AbstractClientHandle<?>, Boolean> openSnapshots = new WeakHashMap<>();
-
+    @GuardedBy("this")
+    private final WeakHashMap<AbstractClientHandle<?>, Boolean> openSnapshots = new WeakHashMap<>();
     private final ClientLocalHistory history;
     private final boolean debugAllocation;
 

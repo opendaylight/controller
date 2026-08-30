@@ -14,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -25,8 +26,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -233,7 +232,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             return identifier;
         }
 
-        @Holding("lock")
+        @GuardedBy("lock")
         @Override
         void replayRequests(final Collection<ConnectionEntry> previousEntries) {
             // First look for our Create message
@@ -283,7 +282,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             throw new VerifyException("Unexpected request " + req);
         }
 
-        @Holding("lock")
+        @GuardedBy("lock")
         @Override
         ProxyHistory finishReconnect() {
             final var ret = verifyNotNull(successor);
@@ -344,9 +343,10 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private final @NonNull AbstractClientConnection<ShardBackendInfo> connection;
     private final @NonNull AbstractClientHistory parent;
 
-    private final @GuardedBy("lock") LinkedHashMap<TransactionIdentifier, AbstractProxyTransaction> proxies =
-        new LinkedHashMap<>();
-    private @GuardedBy("lock") ProxyHistory successor;
+    @GuardedBy("lock")
+    private final LinkedHashMap<TransactionIdentifier, AbstractProxyTransaction> proxies = new LinkedHashMap<>();
+    @GuardedBy("lock")
+    private ProxyHistory successor;
 
     // List of transaction identifiers which were allocated by our parent history, but did not touch our shard. Each of
     // these represents a hole in otherwise-contiguous allocation of transactionIds. These holes are problematic, as
@@ -365,7 +365,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     // FIXME: default value deserves some explanation -- this affects depth of an RB Tree on the receiving end.
     private static final int PURGE_SKIPPED_TXID_THRESHOLD = 256;
 
-    private volatile @GuardedBy("lock") List<TransactionIdentifier> skippedTransactions;
+    @GuardedBy("lock")
+    private volatile List<TransactionIdentifier> skippedTransactions;
 
     private ProxyHistory(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
@@ -454,7 +455,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     private void skipIfNeeded(final List<TransactionIdentifier> current) {
         if (current.size() >= PURGE_SKIPPED_TXID_THRESHOLD) {
             skippedTransactions = null;
@@ -498,7 +499,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     private void doSkipTransactions(final List<TransactionIdentifier> toSkip) {
         final var txIds = toSkip.stream()
             .mapToLong(TransactionIdentifier::getTransactionId)
@@ -573,13 +574,13 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         connection.sendRequest(request, callback);
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     @SuppressWarnings("checkstyle:hiddenField")
     abstract @NonNull AbstractProxyTransaction doCreateTransactionProxy(
             AbstractClientConnection<ShardBackendInfo> connection, TransactionIdentifier txId, boolean snapshotOnly,
             boolean isDone);
 
-    @Holding("lock")
+    @GuardedBy("lock")
     @SuppressWarnings("checkstyle:hiddenField")
     abstract ProxyHistory createSuccessor(AbstractClientConnection<ShardBackendInfo> connection);
 
@@ -618,17 +619,17 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         LOG.debug("Proxy {} purge completed with {}", this, response);
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     void onTransactionAborted(final AbstractProxyTransaction tx) {
         // No-op for most implementations
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     void onTransactionCompleted(final AbstractProxyTransaction tx) {
         // No-op for most implementations
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     void onTransactionSealed(final AbstractProxyTransaction tx) {
         // No-op on most implementations
     }

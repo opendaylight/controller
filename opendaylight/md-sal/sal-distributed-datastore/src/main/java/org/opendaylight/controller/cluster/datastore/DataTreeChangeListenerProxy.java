@@ -11,12 +11,12 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.util.concurrent.Executor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.dispatch.OnComplete;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -37,12 +37,14 @@ import org.slf4j.LoggerFactory;
  */
 final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDataTreeChangeListener> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
+
     private final ActorRef dataChangeListenerActor;
     private final ActorUtils actorUtils;
     private final YangInstanceIdentifier registeredPath;
     private final boolean clustered;
 
-    private @GuardedBy("this") ActorSelection listenerRegistrationActor;
+    @GuardedBy("this")
+    private ActorSelection listenerRegistrationActor;
 
     @VisibleForTesting
     private DataTreeChangeListenerProxy(final ActorUtils actorUtils, final DOMDataTreeChangeListener listener,

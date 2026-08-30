@@ -12,13 +12,12 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.VerifyException;
 import com.google.common.util.concurrent.AbstractFuture;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 
 /**
  * An {@link AbstractFuture} implementation which requires a certain number of votes before it completes. If all votes
@@ -42,7 +41,8 @@ final class VotingFuture<T> extends AbstractFuture<T> {
         }
     }
 
-    private final @GuardedBy("failures") Collection<Throwable> failures = new ArrayList<>(0);
+    @GuardedBy("failures")
+    private final Collection<Throwable> failures = new ArrayList<>(0);
     private final T result;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "https://github.com/spotbugs/spotbugs/issues/2749")
@@ -80,7 +80,7 @@ final class VotingFuture<T> extends AbstractFuture<T> {
         return prevNeeded == 1;
     }
 
-    @Holding("failures")
+    @GuardedBy("failures")
     private void resolveResult() {
         final var it = failures.iterator();
         if (!it.hasNext()) {

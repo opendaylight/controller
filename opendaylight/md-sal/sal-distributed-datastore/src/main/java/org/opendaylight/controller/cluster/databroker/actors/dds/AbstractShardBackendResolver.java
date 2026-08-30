@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -20,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -55,7 +55,8 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
     static final class ResolvingBackendInfo {
         private final @NonNull CompletionStage<ShardBackendInfo> stage;
 
-        private @GuardedBy("this") ShardBackendInfo result;
+        @GuardedBy("this")
+        private ShardBackendInfo result;
 
         private ResolvingBackendInfo(final CompletionStage<ShardBackendInfo> stage) {
             this.stage = requireNonNull(stage);

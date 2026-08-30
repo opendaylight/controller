@@ -12,9 +12,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.nio.file.Path;
 import java.util.Map;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -51,8 +51,10 @@ public final class OSGiDistributedDataStore {
         private final AbstractDataStore datastore;
         private final String serviceType;
 
-        private @GuardedBy("this") ComponentInstance<OSGiDOMStore> component;
-        private @GuardedBy("this") boolean stopped;
+        @GuardedBy("this")
+        private ComponentInstance<OSGiDOMStore> component;
+        @GuardedBy("this")
+        private boolean stopped;
 
         DatastoreState(final DatastoreContextIntrospector introspector, final LogicalDatastoreType datastoreType,
                 final AbstractDataStore datastore, final String serviceType) {
