@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.yangtools.binding.runtime.api.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactorySupplier;
 import org.opendaylight.yangtools.yang.data.util.codec.TypeAwareCodec;
@@ -118,6 +119,11 @@ public final class DefaultInstanceIdentifierSupport implements InstanceIdentifie
 
         @Override
         public LeafEffectiveStatement asEffectiveStatement() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public QNameModule currentModule() {
             throw new UnsupportedOperationException();
         }
     }
