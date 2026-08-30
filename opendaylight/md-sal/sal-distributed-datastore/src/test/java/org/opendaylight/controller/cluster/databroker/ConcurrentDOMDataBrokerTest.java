@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -46,6 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
@@ -64,9 +66,13 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
+import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMStore;
+import org.opendaylight.mdsal.dom.store.inmemory.testlib.TestDOMStoreFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 /**
  * Unit tests for DOMConcurrentDataCommitCoordinator.
@@ -74,26 +80,37 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
  * @author Thomas Pantelis
  */
 public class ConcurrentDOMDataBrokerTest {
+    private static final TestDOMStoreFactory DOM_STORE_FACTORY =
+        TestDOMStoreFactory.builder(ReferenceDataTreeFactoryModule.provideDataTreeFactory()).build();
 
+    // FIXME: use @Mock
     private final DOMDataTreeWriteTransaction transaction = mock(DOMDataTreeWriteTransaction.class);
     private final DOMStoreThreePhaseCommitCohort mockCohort = mock(DOMStoreThreePhaseCommitCohort.class);
-    private final ThreadPoolExecutor futureExecutor =
-            new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<>());
-    private ConcurrentDOMDataBroker coordinator;
+    private final EffectiveModelContext modelContext = TestModel.createTestContext();
+
+    private InMemoryDOMStore imds;
+    private ThreadPoolExecutor futureExecutor;
+    private ConcurrentDOMDataBroker dataBroker;
 
     @Before
     public void setup() {
         doReturn("tx").when(transaction).getIdentifier();
-
-        DOMStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
-
-        coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store),
-                futureExecutor);
+        imds = DOM_STORE_FACTORY.newDirectDOMStore("OPER", DataTreeConfiguration.DEFAULT_OPERATIONAL, modelContext);
+        futureExecutor = new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<>());
+        dataBroker = new ConcurrentDOMDataBroker(Map.of(LogicalDatastoreType.OPERATIONAL, imds), futureExecutor);
     }
 
     @After
     public void tearDown() {
-        futureExecutor.shutdownNow();
+        if (dataBroker != null) {
+            dataBroker.close();
+        }
+        if (futureExecutor != null) {
+            futureExecutor.shutdownNow();
+        }
+        if (imds != null) {
+            imds.close();
+        }
     }
 
     @Test
@@ -126,7 +143,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(immediateNullFluentFuture()).when(mockCohort).preCommit();
         doReturn(immediateNullFluentFuture()).when(mockCohort).commit();
 
-        ListenableFuture<? extends CommitInfo> future = coordinator.commit(transaction, mockCohort);
+        ListenableFuture<? extends CommitInfo> future = dataBroker.commit(transaction, mockCohort);
 
         final CountDownLatch doneLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
@@ -165,7 +182,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFuture(Boolean.FALSE)).when(mockCohort).canCommit();
         doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        assertFailure(coordinator.commit(transaction, mockCohort), null, mockCohort);
+        assertFailure(dataBroker.commit(transaction, mockCohort), null, mockCohort);
     }
 
     private static void assertFailure(final ListenableFuture<?> future, final Exception expCause,
@@ -190,7 +207,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).canCommit();
         doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
+        assertFailure(dataBroker.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
@@ -200,7 +217,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).preCommit();
         doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
+        assertFailure(dataBroker.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
@@ -211,7 +228,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort).commit();
         doReturn(immediateNullFluentFuture()).when(mockCohort).abort();
 
-        assertFailure(coordinator.commit(transaction, mockCohort), cause, mockCohort);
+        assertFailure(dataBroker.commit(transaction, mockCohort), cause, mockCohort);
     }
 
     @Test
@@ -221,7 +238,7 @@ public class ConcurrentDOMDataBrokerTest {
         final Exception abortCause = new IllegalStateException("abort error");
         doReturn(Futures.immediateFailedFuture(abortCause)).when(mockCohort).abort();
 
-        assertFailure(coordinator.commit(transaction, mockCohort), canCommitCause, mockCohort);
+        assertFailure(dataBroker.commit(transaction, mockCohort), canCommitCause, mockCohort);
     }
 
     @Test
