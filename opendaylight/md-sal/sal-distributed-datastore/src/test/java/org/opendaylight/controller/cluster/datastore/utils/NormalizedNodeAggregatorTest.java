@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration.DEFAULT_CONFIGURATION;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
+import org.opendaylight.mdsal.dom.store.inmemory.testlib.TestDOMStoreFactory;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -28,11 +29,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 class NormalizedNodeAggregatorTest {
+    private static final DataTreeFactory DATA_TREE_FACTORY = ReferenceDataTreeFactoryModule.provideDataTreeFactory();
+    private static final TestDOMStoreFactory DOM_STORE_FACTORY = TestDOMStoreFactory.builder(DATA_TREE_FACTORY).build();
+
     @Test
     void testAggregate() throws Exception {
         final var modelContext = SchemaContextHelper.full();
@@ -41,9 +45,8 @@ class NormalizedNodeAggregatorTest {
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
             .build();
 
-        final var normalizedNode = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(),
-            ReferenceDataTreeFactoryModule.provideDataTreeFactory()
-                .create(DataTreeConfiguration.DEFAULT_CONFIGURATION, modelContext),
+        final var normalizedNode = NormalizedNodeAggregator.aggregate(
+            YangInstanceIdentifier.of(), DATA_TREE_FACTORY.create(DEFAULT_CONFIGURATION, modelContext),
             List.of(
                 Optional.<NormalizedNode>of(getRootNode(expectedNode1, modelContext)),
                 Optional.<NormalizedNode>of(getRootNode(expectedNode2, modelContext))))
@@ -61,10 +64,9 @@ class NormalizedNodeAggregatorTest {
     }
 
     private static NormalizedNode getRootNode(final NormalizedNode moduleNode,
-            final EffectiveModelContext schemaContext) throws ExecutionException, InterruptedException {
-        try (var store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
-            store.onModelContextUpdated(schemaContext);
-
+            final EffectiveModelContext modelContext) throws ExecutionException, InterruptedException {
+        try (var store = DOM_STORE_FACTORY.newDOMStore("test", DEFAULT_CONFIGURATION, modelContext,
+                Executors.newSingleThreadExecutor())) {
             var writeTransaction = store.newWriteOnlyTransaction();
 
             writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.name().getNodeType()), moduleNode);
