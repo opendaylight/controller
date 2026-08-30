@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.io.CountingOutputStream;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,8 +19,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -175,8 +174,10 @@ public class FileBackedOutputStream extends OutputStream {
     private final TempFileCreator fileCreator;
     private final int threshold;
 
-    private @GuardedBy("this") State state = new OpenMemory(new MemoryStream());
-    private @GuardedBy("this") SizedStreamSource source;
+    @GuardedBy("this")
+    private State state = new OpenMemory(new MemoryStream());
+    @GuardedBy("this")
+    private SizedStreamSource source;
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
@@ -280,7 +281,7 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private @NonNull OutputStream ensureCapacity(final int len) throws IOException {
         return switch (state) {
             case Closed closed -> throw new IOException("Stream already closed");
@@ -293,7 +294,7 @@ public class FileBackedOutputStream extends OutputStream {
         };
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private @NonNull CountingOutputStream switchToFile(final MemoryStream oldOut, final int newLength)
             throws IOException {
         final var file = new TransientFile(fileCreator.newTempFile());
