@@ -37,6 +37,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.pekko.actor.ActorSystem;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
@@ -78,10 +79,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractDistributedDataStoreIntegrationTest extends AbstractTest {
+    private static final @NonNull DataTreeFactory DATA_TREE_FACTORY =
+        ReferenceDataTreeFactoryModule.provideDataTreeFactory();
+
     protected final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
             .shardHeartbeatIntervalInMillis(100);
 
@@ -774,7 +779,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest extends Abstra
             CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000)),
                 CarsModel.newCarEntry("sportage", Uint64.valueOf(30000))));
 
-        DataTree dataTree = new InMemoryDataTreeFactory().create(
+        DataTree dataTree = DATA_TREE_FACTORY.create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
         NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
@@ -783,8 +788,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest extends Abstra
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
             List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null);
 
-        dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SchemaContextHelper.full());
+        dataTree = DATA_TREE_FACTORY.create(DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
 
         final NormalizedNode peopleNode = PeopleModel.create();
         AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);

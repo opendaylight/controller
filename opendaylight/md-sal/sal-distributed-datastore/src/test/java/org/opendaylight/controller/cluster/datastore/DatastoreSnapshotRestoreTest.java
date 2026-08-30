@@ -36,9 +36,8 @@ import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 
 /**
  * Unit tests for DatastoreSnapshotRestore.
@@ -129,10 +128,10 @@ class DatastoreSnapshotRestoreTest {
     }
 
     private static Snapshot newSnapshot(final YangInstanceIdentifier path, final NormalizedNode node) throws Exception {
-        DataTree dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SchemaContextHelper.full());
+        var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, path, node);
-        NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
+        var root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
         return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                 List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null);

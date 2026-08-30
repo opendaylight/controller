@@ -106,14 +106,12 @@ import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.collection.Set;
 import scala.concurrent.Await;
@@ -1104,8 +1102,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Setup a saved snapshot on the leader. The follower will startup with no data and the leader should
         // install a snapshot to sync the follower.
 
-        DataTree tree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
-            SchemaContextHelper.full());
+        var tree = ReferenceDataTreeFactoryModule.provideDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_CONFIGURATION, SchemaContextHelper.full());
 
         final var carsNode = CarsModel.newCarsNode(CarsModel.newCarsMapNode(CarsModel.newCarEntry(
             "optima", Uint64.valueOf(20000))));
@@ -1137,9 +1135,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerDatastoreContextBuilder.maximumMessageSliceSize(100);
         initDatastoresWithCars("testLargeReadReplySlicing");
 
-        final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+        final var rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
-        final NormalizedNode carsNode = CarsModel.create();
+        final var carsNode = CarsModel.create();
         rwTx.write(CarsModel.BASE_PATH, carsNode);
 
         verifyNode(rwTx, CarsModel.BASE_PATH, carsNode);
@@ -1215,7 +1213,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             followerDatastoreContextBuilder.snapshotOnRootOverwrite(true));
 
         leaderTestKit.waitForMembersUp("member-2");
-        final ContainerNode rootNode = ImmutableNodes.newContainerBuilder()
+        final var rootNode = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))
                 .withChild(CarsModel.create())
                 .build();
