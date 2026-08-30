@@ -27,12 +27,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 
 public class CommitTransactionPayloadTest extends AbstractTest {
@@ -42,7 +40,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     private static DataTreeCandidateNode findNode(final Collection<DataTreeCandidateNode> nodes,
             final PathArgument arg) {
-        for (DataTreeCandidateNode node : nodes) {
+        for (var node : nodes) {
             if (arg.equals(node.name())) {
                 return node;
             }
@@ -53,14 +51,14 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     private static void assertChildrenEquals(final Collection<DataTreeCandidateNode> expected,
             final Collection<DataTreeCandidateNode> actual) {
         // Make sure all expected nodes are there
-        for (DataTreeCandidateNode exp : expected) {
-            final DataTreeCandidateNode act = findNode(actual, exp.name());
+        for (var exp : expected) {
+            final var act = findNode(actual, exp.name());
             assertNotNull("missing expected child", act);
             assertCandidateNodeEquals(exp, act);
         }
         // Make sure no nodes are present which are not in the expected set
-        for (DataTreeCandidateNode act : actual) {
-            final DataTreeCandidateNode exp = findNode(expected, act.name());
+        for (var act : actual) {
+            final var exp = findNode(expected, act.name());
             assertNull("unexpected child", exp);
         }
     }
@@ -104,79 +102,80 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     @Test
     public void testCandidateSerialization() throws IOException {
-        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        final var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertEquals("payload size", 156, payload.size());
         assertEquals("serialized size", 242, SerializationUtils.serialize(payload).length);
     }
 
     @Test
     public void testCandidateSerDes() throws IOException {
-        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        final var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testPayloadSerDes() throws IOException {
-        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        final var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate());
     }
 
     @Test
     public void testLeafSetEntryNodeCandidate() throws Exception {
-        NodeWithValue<String> entryPathArg = new NodeWithValue<>(LEAF_SET, "one");
-        YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
+        var entryPathArg = new NodeWithValue<>(LEAF_SET, "one");
+        var leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
                 .node(entryPathArg).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, ImmutableNodes.leafSetEntry(entryPathArg));
-        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testLeafSetNodeCandidate() throws Exception {
-        YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
+        var leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, ImmutableNodes.newSystemLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
             .withChild(ImmutableNodes.leafSetEntry(LEAF_SET, "one"))
             .build());
-        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testOrderedLeafSetNodeCandidate() throws Exception {
-        YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
+        var leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, ImmutableNodes.newUserLeafSetBuilder()
             .withNodeIdentifier(new NodeIdentifier(LEAF_SET))
             .withChild(ImmutableNodes.leafSetEntry(LEAF_SET, "one"))
             .build());
-        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testLeafNodeCandidate() throws Exception {
-        YangInstanceIdentifier leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
+        var leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
                 .node(TestModel.DESC_QNAME).build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafPath,
             ImmutableNodes.leafNode(TestModel.DESC_QNAME, "test"));
-        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testUnmodifiedRootCandidate() throws Exception {
-        final DataTree dataTree = new InMemoryDataTreeFactory().create(
-            DataTreeConfiguration.DEFAULT_CONFIGURATION, SchemaContextHelper.select(SchemaContextHelper.CARS_YANG));
+        final var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
+                SchemaContextHelper.select(SchemaContextHelper.CARS_YANG));
 
-        DataTreeModification modification = dataTree.takeSnapshot().newModification();
+        var modification = dataTree.takeSnapshot().newModification();
         modification.ready();
         candidate = dataTree.prepare(modification);
 
-        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        var payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 }

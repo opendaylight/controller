@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 
 class ConnectClientSuccessTest extends AbstractRequestSuccessTest<ConnectClientSuccess> {
-    private static final DataTree TREE = new InMemoryDataTreeFactory().create(
-        DataTreeConfiguration.DEFAULT_OPERATIONAL);
+    private static final DataTree TREE = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+        .create(DataTreeConfiguration.DEFAULT_OPERATIONAL);
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
     private static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
     private static final ActorSelection ACTOR_SELECTION =  ActorSelection.apply(ACTOR_REF, "foo");

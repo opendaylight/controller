@@ -25,7 +25,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +54,6 @@ import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -68,7 +66,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 /**
@@ -77,7 +75,7 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
  * @author Thomas Pantelis
  */
 public abstract class AbstractShardTest extends AbstractActorTest {
-    protected static final EffectiveModelContext SCHEMA_CONTEXT = TestModel.createTestContext();
+    protected static final EffectiveModelContext MODEL_CONTEXT = TestModel.createTestContext();
 
     protected static final AtomicInteger SHARD_NUM = new AtomicInteger();
     protected static final int HEARTBEAT_MILLIS = 100;
@@ -108,7 +106,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     protected Shard.Builder newShardBuilder() {
         return Shard.builder().id(shardID).datastoreContext(newDatastoreContext())
-            .schemaContextProvider(() -> SCHEMA_CONTEXT);
+            .schemaContextProvider(() -> MODEL_CONTEXT);
     }
 
     final ActorRef testRecovery(final Set<Integer> listEntryKeys) throws Exception {
@@ -143,9 +141,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         for (final Object entry: (Iterable<?>) outerList.body()) {
             assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                     entry instanceof MapEntryNode);
-            final MapEntryNode mapEntry = (MapEntryNode)entry;
-            final Optional<DataContainerChild> idLeaf =
-                    mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
+            final var mapEntry = (MapEntryNode) entry;
+            final var idLeaf = mapEntry.findChildByArg(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             final Object value = idLeaf.orElseThrow().body();
             assertTrue("Unexpected value for leaf " + TestModel.ID_QNAME.getLocalName() + ": " + value,
@@ -178,8 +175,9 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected DataTree createDelegatingMockDataTree() throws Exception {
-        final DataTree actual = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION);
-        final DataTree mock = mock(DataTree.class);
+        final var actual = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_CONFIGURATION);
+        final var mock = mock(DataTree.class);
 
         doAnswer(invocation -> {
             actual.validate(invocation.getArgument(0));
@@ -207,8 +205,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected CommitCohort mockShardDataTreeCohort() {
-        CommitCohort cohort = mock(CommitCohort.class);
-        DataTreeCandidate candidate = mockCandidate("candidate");
+        var cohort = mock(CommitCohort.class);
+        var candidate = mockCandidate("candidate");
         successfulCanCommit(cohort);
         successfulPreCommit(cohort, candidate);
         successfulCommit(cohort);
@@ -240,8 +238,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     final DataTree setupWithSnapshot() throws DataValidationFailedException, IOException {
-        final var testStore = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SCHEMA_CONTEXT);
+        final var testStore = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, MODEL_CONTEXT);
 
         writeToStore(testStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
@@ -272,8 +270,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static DataTreeCandidateTip mockCandidate(final String name) {
-        final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
-        final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
+        final var mockCandidate = mock(DataTreeCandidateTip.class, name);
+        final var mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).modificationType();
         doReturn(ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
@@ -284,8 +282,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     static DataTreeCandidateTip mockUnmodifiedCandidate(final String name) {
-        final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
-        final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
+        final var mockCandidate = mock(DataTreeCandidateTip.class, name);
+        final var mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.UNMODIFIED).when(mockCandidateNode).modificationType();
         doReturn(YangInstanceIdentifier.of()).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
@@ -296,7 +294,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             throws DataValidationFailedException {
         modification.ready();
         store.validate(modification);
-        final DataTreeCandidate candidate = store.prepare(modification);
+        final var candidate = store.prepare(modification);
         store.commit(candidate);
         return candidate;
     }
