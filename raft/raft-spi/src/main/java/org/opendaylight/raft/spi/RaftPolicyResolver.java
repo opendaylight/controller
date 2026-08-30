@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface RaftPolicyResolver {
-   /**
+    /**
      * {@return the {@link RaftPolicy} corresponding to a symbolic name, or emptyif not present}
      * @param symbolicName the symbolic name
      */

@@ -41,7 +41,7 @@ public interface ClientActorConfig {
     /**
      * Returns the timer interval whereby, on expiration after response inactivity from the back-end, the connection to
      * the back-end is torn down and reconnection is attempted.
-
+     *
      * @return timer interval in nanoseconds.
      */
     long getBackendAlivenessTimerInterval();

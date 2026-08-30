@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Introspects on a DatastoreContext instance to set its properties via reflection.
- * i
+ *
  * @author Thomas Pantelis
  */
 public class DatastoreContextIntrospector {
