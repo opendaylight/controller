@@ -119,6 +119,7 @@ public interface EntryJournal extends AutoCloseable {
 
         /**
          * {@return the next {@link JournalEntry}, or {@code null}}
+         *
          * @throws IOException if an I/O error occurs
          */
         @Nullable JournalEntry nextEntry() throws IOException;

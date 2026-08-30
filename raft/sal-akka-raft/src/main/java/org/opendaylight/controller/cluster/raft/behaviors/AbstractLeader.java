@@ -464,6 +464,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     /**
      * Removes and returns the ClientRequestTracker for the specified log index.
+     *
      * @param logIndex the log index
      * @return the ClientRequestTracker or null if none available
      */

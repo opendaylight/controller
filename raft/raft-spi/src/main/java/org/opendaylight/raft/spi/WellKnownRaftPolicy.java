@@ -49,6 +49,7 @@ public enum WellKnownRaftPolicy implements RaftPolicy {
 
     /**
      * {@return the WellKnownRaftPolicy corresponding to a symbolic name, or {@code null}}
+     *
      * @param symbolicName the symbolic name
      */
     public static @Nullable WellKnownRaftPolicy forSymbolicName(final String symbolicName) {

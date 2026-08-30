@@ -31,6 +31,7 @@ public class TestShardManager extends ShardManager {
 
     /**
      * Plug into shard actor creation to replace info with our testing one.
+     *
      * @param info shard info.
      * @return actor for replaced shard info.
      */

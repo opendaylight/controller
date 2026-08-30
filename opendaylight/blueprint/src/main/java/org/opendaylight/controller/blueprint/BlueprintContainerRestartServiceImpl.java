@@ -141,6 +141,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     /**
      * Recursively quiesce and destroy the bundles one by one in order to maintain synchronicity and ordering.
+     *
      * @param remainingBundlesToDestroy the list of remaining bundles to destroy.
      * @param createContainerCallback a {@link Runnable} to {@code run()} when the recursive function is completed.
      */
