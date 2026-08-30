@@ -24,15 +24,12 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public class ShardRecoveryCoordinatorTest extends AbstractTest {
@@ -84,12 +81,10 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private DataTreeCandidate createCar() throws DataValidationFailedException {
-        final DataTree dataTree = new InMemoryDataTreeFactory().create(
-            DataTreeConfiguration.DEFAULT_OPERATIONAL, carsSchemaContext);
-
-        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
-
-        final DataTreeModification modification = snapshot.newModification();
+        final var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, carsSchemaContext);
+        final var snapshot = dataTree.takeSnapshot();
+        final var modification = snapshot.newModification();
 
         modification.merge(CarsModel.BASE_PATH, CarsModel.create());
         modification.ready();
@@ -97,7 +92,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private Optional<NormalizedNode> readCars(final ShardDataTree shardDataTree) {
-        final DataTree dataTree = shardDataTree.getDataTree();
+        final var dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setEffectiveModelContext(peopleSchemaContext);
 
@@ -105,7 +100,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private Optional<NormalizedNode> readPeople(final ShardDataTree shardDataTree) {
-        final DataTree dataTree = shardDataTree.getDataTree();
+        final var dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setEffectiveModelContext(peopleSchemaContext);
 
@@ -113,13 +108,13 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private static ShardSnapshotState createSnapshot() throws DataValidationFailedException {
-        final DataTree dataTree = new InMemoryDataTreeFactory().create(
-            DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
-                SchemaContextHelper.PEOPLE_YANG));
+        final var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
+                SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
 
-        DataTreeSnapshot snapshot = dataTree.takeSnapshot();
+        var snapshot = dataTree.takeSnapshot();
 
-        DataTreeModification modification = snapshot.newModification();
+        var modification = snapshot.newModification();
 
         modification.merge(CarsModel.BASE_PATH, CarsModel.create());
         modification.merge(PeopleModel.BASE_PATH, PeopleModel.create());
