@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +24,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -80,9 +79,11 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
     private final @NonNull ClientActorContext context;
     private final @NonNull Long cookie;
     private final String backendName;
-    private final @GuardedBy("lock") TransmitQueue queue;
+    @GuardedBy("lock")
+    private final TransmitQueue queue;
 
-    private @GuardedBy("lock") boolean haveTimer;
+    @GuardedBy("lock")
+    private boolean haveTimer;
 
     /**
      * Time reference when we saw any activity from the backend.
@@ -209,7 +210,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         }
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     private void commonEnqueue(final ConnectionEntry entry, final long now) {
         final RequestException maybePoison = poisoned;
         if (maybePoison != null) {
@@ -234,7 +235,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         return queue.drain();
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     final void finishReplay(final ReconnectForwarder forwarder) {
         setForwarder(forwarder);
 
@@ -254,12 +255,12 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         lock.unlock();
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     final void setForwarder(final ReconnectForwarder forwarder) {
         queue.setForwarder(forwarder, currentTime());
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current,
             RequestException runtimeRequestException);
 
@@ -298,7 +299,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
      *
      * @param delay Delay, in nanoseconds
      */
-    @Holding("lock")
+    @GuardedBy("lock")
     private void scheduleTimer(final long delay) {
         if (haveTimer) {
             LOG.debug("{}: timer already scheduled on {}", context.persistenceId(), this);
@@ -396,7 +397,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
      * - if there is a timeout to schedule, return a non-empty optional
      * - if this connections has timed out, return null
      */
-    @Holding("lock")
+    @GuardedBy("lock")
     private OptionalLong lockedCheckTimeout(final long now) {
         if (queue.isEmpty()) {
             LOG.debug("{}: connection {} is empty", context.persistenceId(), this);
@@ -469,7 +470,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         }
     }
 
-    @Holding("lock")
+    @GuardedBy("lock")
     private List<ConnectionEntry> lockedPoison(final RequestException cause) {
         poisoned = enrichPoison(cause);
         return queue.poison();
