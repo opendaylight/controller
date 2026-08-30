@@ -70,14 +70,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -493,8 +492,8 @@ public class ShardDataTreeTest extends AbstractTest {
         //        write(foo=1)
         //        write(foo=2)
         //        merge(foo=3)
-        final DataTree dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            fullSchema);
+        final var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, fullSchema);
         DataTreeModification mod = dataTree.takeSnapshot().newModification();
         mod.write(CarsModel.BASE_PATH, ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))

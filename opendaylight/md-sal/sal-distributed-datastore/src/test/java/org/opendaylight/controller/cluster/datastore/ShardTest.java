@@ -115,7 +115,6 @@ import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
@@ -124,7 +123,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.SchemaValidationFailedException;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 
 public class ShardTest extends AbstractShardTest {
     @Test
@@ -247,8 +246,8 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testApplySnapshot() throws Exception {
-        final var store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SCHEMA_CONTEXT);
+        final var store = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, MODEL_CONTEXT);
 
         final var container = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
@@ -279,11 +278,11 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        final DataTree store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SCHEMA_CONTEXT);
+        final var store = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, MODEL_CONTEXT);
 
-        final DataTreeModification writeMod = store.takeSnapshot().newModification();
-        final ContainerNode node = TestModel.EMPTY_TEST;
+        final var writeMod = store.takeSnapshot().newModification();
+        final var node = TestModel.EMPTY_TEST;
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
@@ -300,11 +299,11 @@ public class ShardTest extends AbstractShardTest {
         final var path = stateDir().resolve("shards").resolve(memberId);
 
         // Set up the InMemorySnapshotStore.
-        final DataTree source = setupWithSnapshot();
+        final var source = setupWithSnapshot();
 
         // Set up the segmented journal
         try (var journal = new EntryJournalV1(memberId, path, CompressionType.NONE, true)) {
-            final DataTreeModification writeMod = source.takeSnapshot().newModification();
+            final var writeMod = source.takeSnapshot().newModification();
             writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
             writeMod.ready();
 
@@ -1544,17 +1543,17 @@ public class ShardTest extends AbstractShardTest {
      */
     @Test
     public void testInMemoryDataTreeRestore() throws DataValidationFailedException {
-        final DataTree store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
-            SCHEMA_CONTEXT);
+        final var store = ReferenceDataTreeFactoryModule.provideDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, MODEL_CONTEXT);
 
-        final DataTreeModification putTransaction = store.takeSnapshot().newModification();
+        final var putTransaction = store.takeSnapshot().newModification();
         putTransaction.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
         commitTransaction(store, putTransaction);
 
 
-        final NormalizedNode expected = readStore(store, YangInstanceIdentifier.of());
+        final var expected = readStore(store, YangInstanceIdentifier.of());
 
-        final DataTreeModification writeTransaction = store.takeSnapshot().newModification();
+        final var writeTransaction = store.takeSnapshot().newModification();
 
         writeTransaction.delete(YangInstanceIdentifier.of());
         writeTransaction.write(YangInstanceIdentifier.of(), expected);
@@ -1567,25 +1566,25 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testRecoveryApplicable() {
 
-        final DatastoreContext persistentContext = DatastoreContext.newBuilder()
+        final var persistentContext = DatastoreContext.newBuilder()
                 .shardJournalRecoveryLogBatchSize(3)
                 .shardSnapshotBatchCount(5000)
                 .persistent(true)
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
                 .build();
 
-        final Props persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
+        final var persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext)
+                .schemaContextProvider(() -> MODEL_CONTEXT).props(stateDir());
 
-        final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder()
+        final var nonPersistentContext = DatastoreContext.newBuilder()
                 .shardJournalRecoveryLogBatchSize(3)
                 .shardSnapshotBatchCount(5000)
                 .persistent(false)
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
                 .build();
 
-        final Props nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
+        final var nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext)
+                .schemaContextProvider(() -> MODEL_CONTEXT).props(stateDir());
 
         final TestActorRef<Shard> shard1 = actorFactory.createTestActor(persistentProps, "testPersistence1");
 
@@ -1624,14 +1623,13 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        final ActorRef listener = getSystem().actorOf(MessageCollectorActor.props());
+        final var listener = getSystem().actorOf(MessageCollectorActor.props());
 
         shard.tell(new RegisterRoleChangeListener(), listener);
 
         MessageCollectorActor.expectFirstMatching(listener, RegisterRoleChangeListenerReply.class);
 
-        ShardLeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
-            ShardLeaderStateChanged.class);
+        var leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener, ShardLeaderStateChanged.class);
         final var dataTree = leaderStateChanged.localShardDataTree();
         assertNotNull("getLocalShardDataTree present", dataTree);
         assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(), dataTree);
@@ -1670,8 +1668,8 @@ public class ShardTest extends AbstractShardTest {
         dataStoreContextBuilder.shardElectionTimeoutFactor(1000)
             .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName());
 
-        final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-        final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
+        final var listener = new MockDataTreeChangeListener(1);
+        final var dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
             TestModel.TEST_PATH), actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
         setupWithSnapshot();
@@ -1700,8 +1698,8 @@ public class ShardTest extends AbstractShardTest {
         dataStoreContextBuilder.shardElectionTimeoutFactor(1000)
             .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName());
 
-        final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(0);
-        final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
+        final var listener = new MockDataTreeChangeListener(0);
+        final var dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
             TestModel.TEST_PATH), actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
         setupWithSnapshot();
@@ -1731,10 +1729,10 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataTreeChangeListenerRegistration() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final String testName = "testClusteredDataTreeChangeListenerRegistration";
-        final ShardIdentifier followerShardID = ShardIdentifier.create("inventory",
+        final var followerShardID = ShardIdentifier.create("inventory",
             MemberName.forName(actorFactory.generateActorId(testName + "-follower")), "config");
 
-        final ShardIdentifier leaderShardID = ShardIdentifier.create("inventory",
+        final var leaderShardID = ShardIdentifier.create("inventory",
             MemberName.forName(actorFactory.generateActorId(testName + "-leader")), "config");
 
         final TestActorRef<Shard> followerShard = actorFactory
@@ -1742,22 +1740,22 @@ public class ShardTest extends AbstractShardTest {
                     .datastoreContext(dataStoreContextBuilder.shardElectionTimeoutFactor(1000).build())
                     .peerAddresses(Collections.singletonMap(leaderShardID.toString(),
                         "pekko://test/user/" + leaderShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir())
+                    .schemaContextProvider(() -> MODEL_CONTEXT).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), followerShardID.toString());
 
         final TestActorRef<Shard> leaderShard = actorFactory
                 .createTestActor(Shard.builder().id(leaderShardID).datastoreContext(newDatastoreContext())
                     .peerAddresses(Collections.singletonMap(followerShardID.toString(),
                         "pekko://test/user/" + followerShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir())
+                    .schemaContextProvider(() -> MODEL_CONTEXT).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
         leaderShard.tell(TimeoutNow.INSTANCE, noSender());
         final String leaderPath = ShardTestKit.waitUntilLeader(followerShard);
         assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
-        final YangInstanceIdentifier path = TestModel.TEST_PATH;
-        final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
+        final var path = TestModel.TEST_PATH;
+        final var listener = new MockDataTreeChangeListener(1);
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, path),
             actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
@@ -1776,7 +1774,7 @@ public class ShardTest extends AbstractShardTest {
         final TestActorRef<MessageCollectorActor> parent = actorFactory.createTestActor(MessageCollectorActor.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        final ActorRef shard = parent.underlyingActor().context().actorOf(
+        final var shard = parent.underlyingActor().context().actorOf(
                 newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testServerRemoved");
 
