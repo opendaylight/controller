@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -52,20 +51,6 @@ public final class RootScatterGather {
 
     private RootScatterGather() {
         // Hidden on purpose
-    }
-
-    /**
-     * Check whether a {@link NormalizedNode} represents a root container and return it cast to {@link ContainerNode}.
-     *
-     * @param node a normalized node
-     * @return {@code node} cast to ContainerNode
-     * @throws NullPointerException if {@code node} is null
-     * @throws IllegalArgumentException if {@code node} is not a {@link ContainerNode}
-     */
-    public static @NonNull ContainerNode castRootNode(final NormalizedNode node) {
-        final var nonnull = requireNonNull(node);
-        checkArgument(nonnull instanceof ContainerNode, "Invalid root data %s", nonnull);
-        return (ContainerNode) nonnull;
     }
 
     /**
