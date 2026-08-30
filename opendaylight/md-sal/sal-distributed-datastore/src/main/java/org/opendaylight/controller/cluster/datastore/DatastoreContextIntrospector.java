@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,7 +20,6 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,7 +28,6 @@ import java.util.function.Function;
 import javax.management.ConstructorParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties;
@@ -49,11 +48,8 @@ public class DatastoreContextIntrospector {
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextIntrospector.class);
 
     private static final Map<String, Entry<Class<?>, Method>> DATA_STORE_PROP_INFO = new HashMap<>();
-
     private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = new HashMap<>();
-
     private static final Map<Class<?>, Method> YANG_TYPE_GETTERS = new HashMap<>();
-
     private static final Map<String, Method> BUILDER_SETTERS = new HashMap<>();
 
     private static final ImmutableMap<Class<?>, Function<String, Object>> UINT_FACTORIES =
@@ -206,14 +202,16 @@ public class DatastoreContextIntrospector {
             "Getter method for constructor property %s not found for YANG type %s".formatted(propertyName, type));
     }
 
-    private @GuardedBy("this") DatastoreContext context;
-    private @GuardedBy("this") Map<String, Object> currentProperties;
+    @GuardedBy("this")
+    private DatastoreContext context;
+    @GuardedBy("this")
+    private Map<String, Object> currentProperties;
 
     public DatastoreContextIntrospector(final DatastoreContext context,
             final DataStorePropertiesContainer defaultPropsContainer) {
 
-        final Builder builder = DatastoreContext.newBuilderFrom(context);
-        for (Entry<String, Entry<Class<?>, Method>> entry: DATA_STORE_PROP_INFO.entrySet()) {
+        final var builder = DatastoreContext.newBuilderFrom(context);
+        for (var entry : DATA_STORE_PROP_INFO.entrySet()) {
             Object value;
             try {
                 value = entry.getValue().getValue().invoke(defaultPropsContainer);
@@ -243,13 +241,13 @@ public class DatastoreContextIntrospector {
             return context;
         }
 
-        final Builder builder = DatastoreContext.newBuilderFrom(context);
-        final String dataStoreTypePrefix = context.getDataStoreName() + '.';
-        final String shardNamePrefix = forShardName + '.';
+        final var builder = DatastoreContext.newBuilderFrom(context);
+        final var dataStoreTypePrefix = context.getDataStoreName() + '.';
+        final var shardNamePrefix = forShardName + '.';
 
-        final List<String> keys = getSortedKeysByDatastoreType(currentProperties.keySet(), dataStoreTypePrefix);
+        final var keys = getSortedKeysByDatastoreType(currentProperties.keySet(), dataStoreTypePrefix);
 
-        for (String key: keys) {
+        for (var key: keys) {
             final Object value = currentProperties.get(key);
             if (key.startsWith(dataStoreTypePrefix)) {
                 key = key.replaceFirst(dataStoreTypePrefix, "");
@@ -279,17 +277,14 @@ public class DatastoreContextIntrospector {
 
         LOG.debug("In update: properties: {}", properties);
 
-        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.<String, Object>builder();
-
-        final Builder builder = DatastoreContext.newBuilderFrom(context);
-
-        final String dataStoreTypePrefix = context.getDataStoreName() + '.';
-
-        final List<String> keys = getSortedKeysByDatastoreType(properties.keySet(), dataStoreTypePrefix);
+        final var mapBuilder = ImmutableMap.<String, Object>builder();
+        final var builder = DatastoreContext.newBuilderFrom(context);
+        final var dataStoreTypePrefix = context.getDataStoreName() + '.';
+        final var keys = getSortedKeysByDatastoreType(properties.keySet(), dataStoreTypePrefix);
 
         boolean updated = false;
-        for (String key: keys) {
-            final Object value = properties.get(key);
+        for (var key : keys) {
+            final var value = properties.get(key);
             mapBuilder.put(key, value);
 
             // If the key is prefixed with the data store type, strip it off.
@@ -365,13 +360,13 @@ public class DatastoreContextIntrospector {
 
     private Object convertValue(final String name, final Object from)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        final Entry<Class<?>, Method> propertyInfo = DATA_STORE_PROP_INFO.get(name);
+        final var propertyInfo = DATA_STORE_PROP_INFO.get(name);
         if (propertyInfo == null) {
             LOG.debug("Property not found for {}", name);
             return null;
         }
 
-        final Class<?> propertyType = propertyInfo.getKey();
+        final var propertyType = propertyInfo.getKey();
 
         LOG.debug("Type for property {}: {}, converting value {} ({})",
                 name, propertyType.getSimpleName(), from, from.getClass().getSimpleName());
@@ -410,7 +405,7 @@ public class DatastoreContextIntrospector {
             return fromValue;
         }
 
-        final Constructor<?> ctor = CONSTRUCTORS.get(toType);
+        final var ctor = CONSTRUCTORS.get(toType);
         if (ctor == null) {
             if (fromValue instanceof String str) {
                 final var factory = UINT_FACTORIES.get(toType);

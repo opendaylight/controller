@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -20,8 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
@@ -62,12 +61,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
     }
 
-    private final @GuardedBy("this") HashMap<TransactionIdentifier, AbstractClientHandle<?>> openTransactions =
-        new HashMap<>();
-    private final @GuardedBy("this") HashMap<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions =
-        new HashMap<>();
-
-    private final @GuardedBy("lock") ConcurrentHashMap<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
+    @GuardedBy("this")
+    private final HashMap<TransactionIdentifier, AbstractClientHandle<?>> openTransactions = new HashMap<>();
+    @GuardedBy("this")
+    private final HashMap<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions = new HashMap<>();
+    @GuardedBy("this")
+    private final ConcurrentHashMap<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
 
     private final @NonNull AbstractDataStoreClientBehavior client;
@@ -161,7 +160,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @param shard Shard cookie
      * @throws InversibleLockException if the shard is being reconnected
      */
-    @Holding("lock")
+    @GuardedBy("lock")
     private @NonNull ProxyHistory createHistoryProxy(final Long shard) {
         final var connection = client.getConnection(shard);
         final var proxyId = new LocalHistoryIdentifier(identifier.getClientId(), identifier.getHistoryId(), shard);
@@ -254,10 +253,10 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         }
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     abstract @NonNull ClientSnapshot doCreateSnapshot();
 
-    @Holding("this")
+    @GuardedBy("this")
     abstract ClientTransaction doCreateTransaction();
 
     /**

@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RegisterCohort;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RemoveCohort;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
@@ -33,7 +33,8 @@ final class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> e
     private final ActorRef actor;
     private final ActorUtils actorUtils;
 
-    private @GuardedBy("this") ActorRef cohortRegistry;
+    @GuardedBy("this")
+    private ActorRef cohortRegistry;
 
     DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
             final C cohort) {

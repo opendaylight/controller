@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.dispatch.OnComplete;
-import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -71,7 +70,8 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
     private final ActorUtils actorUtils;
 
-    private @GuardedBy("this") State state;
+    @GuardedBy("this")
+    private State state;
 
     RootDataTreeChangeListenerProxy(final ActorUtils actorUtils, final @NonNull L listener,
             final Set<String> shardNames) {
@@ -112,7 +112,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private void localShardsResolved(final ResolveShards current, final String shardName, final Throwable failure,
             final ActorRef shard) {
         final Object result = failure != null ? failure : verifyNotNull(shard);
@@ -129,7 +129,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private void reportFailure(final Map<String, Object> localShards) {
         for (var entry : Maps.filterValues(localShards, Throwable.class::isInstance).entrySet()) {
             final var cause = (Throwable) entry.getValue();
@@ -139,7 +139,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         state = Terminated.INSTANCE;
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private void subscribeToShards(final Map<String, Object> localShards) {
         // Safety check before we start doing anything
         for (var entry : localShards.entrySet()) {
@@ -180,7 +180,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         }
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private void onSuccessfulSubscription(final Subscribed current, final String shardName,
             final RegisterDataTreeNotificationListenerReply reply) {
         final var regActor = actorUtils.actorSelection(reply.getListenerRegistrationPath());
@@ -188,7 +188,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         current.subscriptions.add(regActor);
     }
 
-    @Holding("this")
+    @GuardedBy("this")
     private void terminate(final Subscribed current) {
         // Terminate the listener
         current.dtclActor.tell(PoisonPill.getInstance(), ActorRef.noSender());

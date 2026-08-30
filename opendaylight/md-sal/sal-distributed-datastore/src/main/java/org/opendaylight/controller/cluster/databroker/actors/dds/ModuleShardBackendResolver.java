@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Verify.verifyNotNull;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +19,6 @@ import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
-import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -44,8 +44,8 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private final ConcurrentHashMap<Long, ResolvingBackendInfo> backends = new ConcurrentHashMap<>();
     private final Future<Registration> shardAvailabilityChangesRegFuture;
 
-    private @GuardedBy("this") long nextShard = 1;
-
+    @GuardedBy("this")
+    private long nextShard = 1;
     private volatile ImmutableBiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
