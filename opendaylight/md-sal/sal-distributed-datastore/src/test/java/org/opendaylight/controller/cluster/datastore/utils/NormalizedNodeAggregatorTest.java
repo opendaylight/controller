@@ -7,101 +7,84 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
-public class NormalizedNodeAggregatorTest {
-
+class NormalizedNodeAggregatorTest {
     @Test
-    public void testAggregate() throws InterruptedException, ExecutionException, DataValidationFailedException {
-        EffectiveModelContext schemaContext = SchemaContextHelper.full();
+    void testAggregate() throws Exception {
+        final var modelContext = SchemaContextHelper.full();
         final var expectedNode1 = TestModel.EMPTY_TEST;
         final var expectedNode2 = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
             .build();
 
-        Optional<NormalizedNode> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(),
-            List.of(
-                Optional.<NormalizedNode>of(getRootNode(expectedNode1, schemaContext)),
-                Optional.<NormalizedNode>of(getRootNode(expectedNode2, schemaContext))),
-            schemaContext, LogicalDatastoreType.CONFIGURATION);
+        final var normalizedNode = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), List.of(
+            Optional.<NormalizedNode>of(getRootNode(expectedNode1, modelContext)),
+            Optional.<NormalizedNode>of(getRootNode(expectedNode2, modelContext))),
+            ReferenceDataTreeFactoryModule.provideDataTreeFactory(), modelContext, LogicalDatastoreType.CONFIGURATION)
+            .orElseThrow();
+        final var collection = assertInstanceOf(ContainerNode.class, normalizedNode).body();
 
-
-        NormalizedNode normalizedNode = optional.orElseThrow();
-
-        assertTrue("Expect value to be a Collection", normalizedNode.body() instanceof Collection);
-
-        @SuppressWarnings("unchecked")
-        Collection<NormalizedNode> collection = (Collection<NormalizedNode>) normalizedNode.body();
-
-        for (NormalizedNode node : collection) {
-            assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
+        for (var node : collection) {
+            assertInstanceOf(ContainerNode.class, node);
         }
 
-        assertTrue("Child with QName = " + TestModel.TEST_QNAME + " not found",
-                findChildWithQName(collection, TestModel.TEST_QNAME) != null);
-
-        assertEquals(expectedNode1, findChildWithQName(collection, TestModel.TEST_QNAME));
-
-        assertTrue("Child with QName = " + CarsModel.BASE_QNAME + " not found",
-                findChildWithQName(collection, CarsModel.BASE_QNAME) != null);
-
-        assertEquals(expectedNode2, findChildWithQName(collection, CarsModel.BASE_QNAME));
-
+        assertNotNull(findChild(collection, TestModel.TEST_QNAME));
+        assertEquals(expectedNode1, findChild(collection, TestModel.TEST_QNAME));
+        assertNotNull(findChild(collection, CarsModel.BASE_QNAME));
+        assertEquals(expectedNode2, findChild(collection, CarsModel.BASE_QNAME));
     }
 
-    public static NormalizedNode getRootNode(final NormalizedNode moduleNode,
+    private static NormalizedNode getRootNode(final NormalizedNode moduleNode,
             final EffectiveModelContext schemaContext) throws ExecutionException, InterruptedException {
-        try (InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
+        try (var store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
             store.onModelContextUpdated(schemaContext);
 
-            DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
+            var writeTransaction = store.newWriteOnlyTransaction();
 
             writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.name().getNodeType()), moduleNode);
 
-            DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
+            var ready = writeTransaction.ready();
 
             ready.canCommit().get();
             ready.preCommit().get();
             ready.commit().get();
 
-            DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
+            var readTransaction = store.newReadOnlyTransaction();
 
             return readTransaction.read(YangInstanceIdentifier.of()).get().orElseThrow();
         }
     }
 
-    public static NormalizedNode findChildWithQName(final Collection<NormalizedNode> collection,
-            final QName qname) {
-        for (NormalizedNode node : collection) {
+    private static DataContainerChild findChild(final Collection<DataContainerChild> collection, final QName qname) {
+        for (var node : collection) {
             if (node.name().getNodeType().equals(qname)) {
                 return node;
             }
         }
-
         return null;
     }
 }

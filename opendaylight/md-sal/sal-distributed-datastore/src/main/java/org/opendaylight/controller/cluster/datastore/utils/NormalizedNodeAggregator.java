@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Optional;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public final class NormalizedNodeAggregator {
@@ -25,32 +25,32 @@ public final class NormalizedNodeAggregator {
     private final List<Optional<NormalizedNode>> nodes;
     private final DataTree dataTree;
 
-    private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext modelContext,
-            final LogicalDatastoreType logicalDatastoreType) {
+    private NormalizedNodeAggregator(final DataTree dataTree, final YangInstanceIdentifier rootIdentifier,
+            final List<Optional<NormalizedNode>> nodes) {
+        this.dataTree = requireNonNull(dataTree);
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
-        dataTree = new InMemoryDataTreeFactory().create(
-            switch (logicalDatastoreType) {
-                case CONFIGURATION -> DataTreeConfiguration.DEFAULT_CONFIGURATION;
-                case OPERATIONAL -> DataTreeConfiguration.DEFAULT_OPERATIONAL;
-            }, modelContext);
     }
 
     /**
      * Combine data from all the nodes in the list into a tree with root as rootIdentifier.
      */
     public static Optional<NormalizedNode> aggregate(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext schemaContext,
-            final LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
-        return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
+            final List<Optional<NormalizedNode>> nodes, final DataTreeFactory dataTreeFactory,
+            final EffectiveModelContext modelContext, final LogicalDatastoreType logicalDatastoreType)
+                throws DataValidationFailedException {
+        return new NormalizedNodeAggregator(dataTreeFactory.create(
+            switch (logicalDatastoreType) {
+                case CONFIGURATION -> DataTreeConfiguration.DEFAULT_CONFIGURATION;
+                case OPERATIONAL -> DataTreeConfiguration.DEFAULT_OPERATIONAL;
+            }, modelContext), rootIdentifier, nodes).aggregate();
     }
 
     private Optional<NormalizedNode> aggregate() throws DataValidationFailedException {
-        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        final var mod = dataTree.takeSnapshot().newModification();
         boolean nodePresent = false;
 
-        for (final Optional<NormalizedNode> node : nodes) {
+        for (var node : nodes) {
             if (node.isPresent()) {
                 mod.merge(rootIdentifier, node.orElseThrow());
                 nodePresent = true;
@@ -61,10 +61,9 @@ public final class NormalizedNodeAggregator {
             return Optional.empty();
         }
 
-
         mod.ready();
         dataTree.validate(mod);
-        final DataTreeCandidate candidate = dataTree.prepare(mod);
+        final var candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);
 
         return dataTree.takeSnapshot().readNode(rootIdentifier);
