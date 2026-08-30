@@ -19,7 +19,6 @@ import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.DataRoot;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
-import org.opendaylight.yangtools.binding.contract.Naming;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -80,8 +79,8 @@ abstract sealed class BindingContext {
                            InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the YANG list key type is string.
             @SuppressWarnings("unchecked")
-            final var keyInstance = (K) bindingClass.clazz().getMethod(Naming.KEY_AWARE_KEY_NAME)
-                .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
+            final var keyInstance = (K) bindingClass.clazz().getMethod("key").getReturnType()
+                .getConstructor(String.class).newInstance(listKeyValue);
 
             return new ListBindingContext(bindingClass,
                 DataObjectIdentifier.builder(bindingClass.clazz(), keyInstance).build(), listKeyValue);
