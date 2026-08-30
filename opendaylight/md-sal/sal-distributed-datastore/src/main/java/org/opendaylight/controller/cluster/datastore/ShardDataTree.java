@@ -90,7 +90,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -172,9 +172,8 @@ public class ShardDataTree {
     }
 
     private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
-        return new InMemoryDataTreeFactory().create(DataTreeConfiguration.getDefault(treeType).toBuilder()
-            .setRootPath(root)
-            .build());
+        return ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+            .create(DataTreeConfiguration.getDefault(treeType).toBuilder().setRootPath(root).build());
     }
 
     @VisibleForTesting
