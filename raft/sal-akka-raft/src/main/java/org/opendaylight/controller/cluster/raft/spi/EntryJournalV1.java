@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -120,7 +121,8 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     private static final class FileJournalEntry extends JournalEntry {
         private final Path file;
 
-        FileJournalEntry(long index, long term, CompressionType compression, final Path file) throws IOException {
+        FileJournalEntry(final long index, final long term, final CompressionType compression, final Path file)
+                throws IOException {
             super(index, term, compression);
             this.file = requireNonNull(file);
         }
@@ -131,7 +133,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         }
 
         @Override
-        protected ToStringHelper addToStringAttributes(ToStringHelper helper) {
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
             return helper.add("file", file);
         }
     }
@@ -142,7 +144,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     private static final class InlineJournalEntry extends JournalEntry {
         private final ByteBuf buf;
 
-        InlineJournalEntry(long index, long term, CompressionType compression, ByteBuf buf) {
+        InlineJournalEntry(final long index, final long term, final CompressionType compression, final ByteBuf buf) {
             super(index, term, compression);
             this.buf = requireNonNull(buf);
         }
@@ -459,7 +461,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
             }
 
             @Override
-            public void resetToRead(long nextJournalIndex) throws IOException {
+            public void resetToRead(final long nextJournalIndex) throws IOException {
                 if (nextJournalIndex < 1) {
                     throw new IOException("newJournalIndex needs to be positive, not " + nextJournalIndex);
                 }
@@ -472,6 +474,9 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         return entryJournal.writer().nextIndex();
     }
 
+    @SuppressFBWarnings(
+        value = "DLS_DEAD_LOCAL_STORE",
+        justification = "https://github.com/spotbugs/spotbugs/issues/2878")
     @Override
     public long appendEntry(final LogEntry entry) throws IOException {
         final var writer = entryJournal.writer();
@@ -492,7 +497,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
                 yield bodySize;
             }
             // Internal error, modeled for non-nullness
-            case NoResult no -> throw new IOException("Failed to write entry");
+            case NoResult unused -> throw new IOException("Failed to write entry");
         };
 
         // FIXME: defer flush
@@ -521,7 +526,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     }
 
     @Override
-    public void discardTail(long firstRemovedIndex) throws IOException {
+    public void discardTail(final long firstRemovedIndex) throws IOException {
         if (firstRemovedIndex < FIRST_JOURNAL_INDEX) {
             throw new IOException("Bad journal index " + firstRemovedIndex);
         }

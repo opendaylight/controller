@@ -380,8 +380,8 @@ public abstract class RaftActor extends AbstractUntypedActor {
             case GetSnapshot msg ->
                 getSender().tell(new GetSnapshotReply(memberId(), getSnapshot()), ActorRef.noSender());
             case InitiateCaptureSnapshot msg -> captureSnapshot();
-            case BecomeFollower(var newTerm) -> switchBehavior(Follower::new, newTerm);
-            case BecomeLeader(var newTerm) -> switchBehavior(Leader::new, newTerm);
+            case BecomeFollower msg -> switchBehavior(Follower::new, msg.newTerm());
+            case BecomeLeader msg -> switchBehavior(Leader::new, msg.newTerm());
             case LeaderTransitioning leaderTransitioning -> onLeaderTransitioning(leaderTransitioning);
             case Shutdown msg -> onShutDown();
             // FIXME: remove this as it should be either an explicit command or executeInSelf()

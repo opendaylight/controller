@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -447,6 +448,9 @@ public final class SnapshotManager {
      */
     @NonNullByDefault
     @VisibleForTesting
+    @SuppressFBWarnings(
+        value = "DLS_DEAD_LOCAL_STORE",
+        justification = "https://github.com/spotbugs/spotbugs/issues/2878")
     public void persist(final Snapshot.State snapshotState, final InstallableSnapshot installable) {
         if (!(task instanceof Capture(var lastJournalIndex, var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
@@ -549,6 +553,9 @@ public final class SnapshotManager {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings(
+        value = "DLS_DEAD_LOCAL_STORE",
+        justification = "https://github.com/spotbugs/spotbugs/issues/2878")
     private long commit(final Persist persist) {
         return switch (persist) {
             case PersistApply(var lastJournalIndex, var snapshot, var callback) -> {
