@@ -8,6 +8,8 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import java.util.List;
+import org.opendaylight.mdsal.binding.api.DataObjectDeleted;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
@@ -27,25 +29,14 @@ public final class CarDataTreeChangeListener implements DataTreeChangeListener<C
     public void onDataTreeChanged(final List<DataTreeModification<Cars>> changes) {
         if (LOG.isTraceEnabled()) {
             for (var change : changes) {
-                outputChanges(change);
-            }
-        }
-    }
-
-    private static void outputChanges(final DataTreeModification<Cars> change) {
-        final var rootNode = change.getRootNode();
-        final var modificationType = rootNode.modificationType();
-        final var rootIdentifier = change.getRootPath().path();
-        switch (modificationType) {
-            case WRITE, SUBTREE_MODIFIED -> {
-                LOG.trace("onDataTreeChanged - Cars config with path {} was added or changed from {} to {}",
-                    rootIdentifier, rootNode.dataBefore(), rootNode.dataAfter());
-            }
-            case DELETE -> {
-                LOG.trace("onDataTreeChanged - Cars config with path {} was deleted", rootIdentifier);
-            }
-            default -> {
-                LOG.trace("onDataTreeChanged called with unknown modificationType: {}", modificationType);
+                final var path = change.path();
+                switch (change.getRootNode()) {
+                    case DataObjectDeleted<Cars> unused ->
+                        LOG.trace("onDataTreeChanged - Cars config with path {} was deleted", path);
+                    case DataObjectModification.WithDataAfter<Cars> present ->
+                        LOG.trace("onDataTreeChanged - Cars config with path {} was added or changed from {} to {}",
+                            path, present.dataBefore(), present.dataAfter());
+                }
             }
         }
     }
