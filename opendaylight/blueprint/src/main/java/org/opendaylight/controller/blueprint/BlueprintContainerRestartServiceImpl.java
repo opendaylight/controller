@@ -9,7 +9,6 @@ package org.opendaylight.controller.blueprint;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -119,7 +118,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         final Runnable createContainerCallback = () -> createContainers(containerBundles);
 
         // Destroy the container down-top recursively and once done, restart the container top-down
-        destroyContainers(new ArrayDeque<>(Lists.reverse(containerBundles)), createContainerCallback);
+        destroyContainers(new ArrayDeque<>(containerBundles.reversed()), createContainerCallback);
 
 
         try {
