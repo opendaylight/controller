@@ -9,9 +9,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.opendaylight.mdsal</groupId>
+        <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>bundle-parent</artifactId>
-        <version>16.0.6</version>
+        <version>14.3.7</version>
         <relativePath/>
     </parent>
 
@@ -31,4 +31,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <scm>
+        <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+    </scm>
 </project>
