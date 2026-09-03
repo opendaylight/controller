@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.pekko.support;
 
+import com.google.common.annotations.Beta;
 import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A service that encapsulates a single {@link ActorSystem}.
  *
+ * @since 14.0.0
  * @author Thomas Pantelis
  */
 @NonNullByDefault
@@ -21,4 +23,10 @@ public interface ActorSystemInstance {
      * {@return the ActorSystem}
      */
     ActorSystem actorSystem();
+
+    /**
+     * {@return the TerminationMonitor}
+     */
+    @Beta
+    TerminationMonitor terminationMonitor();
 }

@@ -27,8 +27,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +70,7 @@ class BucketStoreTest {
     }
 
     private static ActorSystem system;
+    private static DefaultTerminationMonitor terminationMonitor;
 
     @TempDir
     private Path directory;
@@ -78,11 +79,12 @@ class BucketStoreTest {
     @BeforeAll
     static void beforeAll() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
-        system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
+        terminationMonitor = DefaultTerminationMonitor.createIn(system);
     }
 
     @AfterAll
     static void afterAll() {
+        terminationMonitor.close();
         TestKit.shutdownActorSystem(system);
     }
 
