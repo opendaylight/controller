@@ -26,16 +26,65 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.dagger</groupId>
+            <artifactId>dagger</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.guicedee.services</groupId>
+            <artifactId>javax.inject</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.annotation</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.kohsuke.metainf-services</groupId>
+            <artifactId>metainf-services</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-pekko</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>scala3-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>concepts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-testkit_3</artifactId>
         </dependency>
     </dependencies>
 </project>
