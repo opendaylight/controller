@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.pekko.support.spi;
+package org.opendaylight.controller.pekko.support.impl;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,7 +38,7 @@ import scala.jdk.javaapi.FutureConverters;
 /**
  * Abstract base class for {@link ActorSystemInstance} implementations.
  */
-public non-sealed class DefaultActorSystemInstance implements ActorSystemInstance.WithShutdown {
+public final class DefaultActorSystemInstance implements ActorSystemInstance.WithShutdown {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultActorSystemInstance.class);
     private static final VarHandle VH;
 
@@ -69,10 +69,9 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
      * @param callbacks lifecycle {@link Callbacks}
      * @param classLoader actor system class loader
      */
-    // FIXME: also 'Path persistenceRoot' and keep an incarnation number
     @NonNullByDefault
-    public DefaultActorSystemInstance(final String name, final Config config, final Callbacks callbacks,
-            final ClassLoader classLoader) {
+    DefaultActorSystemInstance(final String name, final Config config, final Callbacks callbacks,
+            final PekkoAccessibleClassLoader classLoader) {
         if (name.isBlank()) {
             throw new IllegalArgumentException("blank name");
         }
@@ -110,27 +109,27 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
     }
 
     @Override
-    public final ActorSystem actorSystem() {
+    public ActorSystem actorSystem() {
         return actorSystem;
     }
 
     @Override
-    public final String name() {
+    public String name() {
         return actorSystem.name();
     }
 
     @Override
-    public final Instant startTime() {
+    public Instant startTime() {
         return Instant.ofEpochMilli(actorSystem.startTime());
     }
 
     @Override
-    public final CompletionStage<?> whenTerminated() {
+    public CompletionStage<?> whenTerminated() {
         return whenTerminated;
     }
 
     @Override
-    public final ActorRef watchedActorOf(final String name, final Props props) {
+    public ActorRef watchedActorOf(final String name, final Props props) {
         return TerminationMonitor.watchActor(getTerminationMonitor(), actorSystem.actorOf(props, name));
     }
 
@@ -147,7 +146,7 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
     }
 
     @Override
-    public final CompletionStage<?> shutdown() {
+    public CompletionStage<?> shutdown() {
         final var localTM = (ActorRef) VH.getAndSet(this, null);
         if (localTM != null) {
             LOG.debug("Actor system '{}' shutting down", name());
@@ -162,7 +161,7 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
     }
 
     @Override
-    public final void shutdownAndWait(final Duration atMost) throws TimeoutException, InterruptedException {
+    public void shutdownAndWait(final Duration atMost) throws TimeoutException, InterruptedException {
         shutdownAndWait(DurationConverters.toScala(atMost));
     }
 
@@ -173,13 +172,13 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
      * @throws TimeoutException if the wait times out
      * @throws InterruptedException if the wait is interrupted
      */
-    protected final void shutdownAndWait(final scala.concurrent.duration.Duration atMost)
+    protected void shutdownAndWait(final scala.concurrent.duration.Duration atMost)
             throws TimeoutException, InterruptedException {
         Await.result(FutureConverters.asScala(shutdown()), atMost);
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         final var helper = MoreObjects.toStringHelper(this).add("name", name()).add("started", startTime());
         final var local = terminationMonitor();
         if (local != null) {
