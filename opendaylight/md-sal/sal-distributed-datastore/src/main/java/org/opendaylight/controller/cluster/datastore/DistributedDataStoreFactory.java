@@ -52,9 +52,10 @@ public final class DistributedDataStoreFactory {
         return dataStore;
     }
 
-    public static AbstractDataStore createInstance(final Path stateDir, final ActorSystemProvider actorSystemProvider,
-            final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
-            final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
+    public static ClientBackedDataStore createInstance(final Path stateDir,
+            final ActorSystemProvider actorSystemProvider, final DatastoreContext initialDatastoreContext,
+            final DatastoreContextIntrospector introspector, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final Configuration orgConfig) {
 
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
