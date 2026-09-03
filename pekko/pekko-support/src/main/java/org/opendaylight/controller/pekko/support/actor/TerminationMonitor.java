@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.pekko.support.impl;
+package org.opendaylight.controller.pekko.support.actor;
 
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -18,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class TerminationMonitorActor extends UntypedAbstractActor {
+public final class TerminationMonitor extends UntypedAbstractActor {
     @NonNullByDefault
     private record WatchActor(ActorRef actorRef) {
         WatchActor {
@@ -26,23 +25,26 @@ public final class TerminationMonitorActor extends UntypedAbstractActor {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitorActor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
 
     public static final @NonNull String ADDRESS = "termination-monitor";
 
-    public TerminationMonitorActor() {
+    public TerminationMonitor() {
         LOG.debug("Created TerminationMonitorActor");
     }
 
     @NonNullByDefault
-    public static void watchActor(final ActorRef monitorActor, final ActorRef actorRef) {
+    public static ActorRef watchActor(final ActorRef monitorActor, final ActorRef actorRef) {
         LOG.debug("Requesting monitoring of {}", actorRef);
         monitorActor.tell(new WatchActor(actorRef), ActorRef.noSender());
+        return actorRef;
     }
 
     @NonNullByDefault
-    public static void watchActor(final ActorSelection monitorActor, final ActorRef actorRef) {
-        LOG.debug("Requesting monitoring of {}", actorRef);
+    public static void watchActor(final ActorContext actorContext) {
+        final var actorRef = actorContext.self();
+        final var monitorActor = actorContext.system().actorSelection("user/" + ADDRESS);
+        LOG.debug("Requesting monitoring of {} from {}", actorRef, monitorActor);
         monitorActor.tell(new WatchActor(actorRef), ActorRef.noSender());
     }
 
