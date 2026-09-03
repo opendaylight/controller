@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.common.actor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
+import org.opendaylight.controller.pekko.support.actor.TerminationMonitorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
 
     protected AbstractUntypedActor() {
         LOG.debug("Actor created {}", self());
-        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
+        TerminationMonitorActor.watchActor(getContext());
     }
 
     @Override
@@ -32,16 +33,15 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
 
     @Override
     public final void executeInSelf(final Runnable runnable) {
-        final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
-        self().tell(message, ActorRef.noSender());
+        self().tell(new ExecuteInSelfMessage(runnable), ActorRef.noSender());
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
-                .matchAny(this::handleReceive)
-                .build();
+            .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
+            .matchAny(this::handleReceive)
+            .build();
     }
 
     /**
