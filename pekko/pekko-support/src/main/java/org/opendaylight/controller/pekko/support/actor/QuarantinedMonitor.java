@@ -18,7 +18,7 @@ import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.remote.AssociationErrorEvent;
 import org.apache.pekko.remote.RemotingLifecycleEvent;
 import org.apache.pekko.remote.artery.ThisActorSystemQuarantinedEvent;
-import org.opendaylight.controller.pekko.support.spi.DefaultActorSystemInstance.Callbacks;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance.Callbacks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
