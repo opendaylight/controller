@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_CONFIGURATION_READER;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
@@ -57,7 +56,6 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER,
                 context.getInitialSettleTimeoutMultiplier());
         assertEquals(DEFAULT_PERSISTENT, context.isPersistent());
-        assertEquals(DEFAULT_CONFIGURATION_READER, context.getConfigurationReader());
         assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS,
                 context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
@@ -133,7 +131,6 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER + 1,
                 context.getInitialSettleTimeoutMultiplier());
         assertEquals(!DEFAULT_PERSISTENT, context.isPersistent());
-        assertEquals(DEFAULT_CONFIGURATION_READER, context.getConfigurationReader());
         assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS + 1,
                 context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1,
