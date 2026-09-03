@@ -10,13 +10,11 @@ package org.opendaylight.controller.cluster.akka.osgi.impl;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.osgi.BundleDelegatingClassLoader;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
-import org.opendaylight.controller.cluster.ActorSystemProviderListener;
-import org.opendaylight.controller.cluster.akka.impl.ActorSystemProviderImpl;
+import org.opendaylight.controller.cluster.ActorSystemInstance;
+import org.opendaylight.controller.cluster.akka.impl.ActorSystemInstanceImpl;
 import org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.yangtools.concepts.AccessControllerCompat;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -28,17 +26,17 @@ import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
 @Component(immediate = true)
-public final class OSGiActorSystemProvider implements ActorSystemProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(OSGiActorSystemProvider.class);
+public final class OSGiActorSystemInstance implements ActorSystemInstance {
+    private static final Logger LOG = LoggerFactory.getLogger(OSGiActorSystemInstance.class);
 
-    private ActorSystemProviderImpl delegate;
+    private ActorSystemInstanceImpl delegate;
 
     @Activate
-    public OSGiActorSystemProvider(@Reference final AkkaConfigurationReader reader, final BundleContext bundleContext) {
+    public OSGiActorSystemInstance(@Reference final AkkaConfigurationReader reader, final BundleContext bundleContext) {
         LOG.info("Actor System provider starting");
         final var akkaConfig = AkkaConfigFactory.createAkkaConfig(reader);
         final var bundle = bundleContext.getBundle();
-        delegate = new ActorSystemProviderImpl(
+        delegate = new ActorSystemInstanceImpl(
             AccessControllerCompat.get(() ->
                 new BundleDelegatingClassLoader(bundle, Thread.currentThread().getContextClassLoader())),
             QuarantinedMonitorActorPropsFactory.createProps(bundleContext, akkaConfig), akkaConfig);
@@ -54,13 +52,7 @@ public final class OSGiActorSystemProvider implements ActorSystemProvider {
     }
 
     @Override
-    public ActorSystem getActorSystem() {
-        return delegate.getActorSystem();
-    }
-
-    @Override
-    public ObjectRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
-            final ActorSystemProviderListener listener) {
-        return delegate.registerActorSystemProviderListener(listener);
+    public ActorSystem actorSystem() {
+        return delegate.actorSystem();
     }
 }

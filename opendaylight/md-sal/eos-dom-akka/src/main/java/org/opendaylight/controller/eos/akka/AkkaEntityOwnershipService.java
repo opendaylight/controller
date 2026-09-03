@@ -28,7 +28,7 @@ import org.apache.pekko.actor.typed.javadsl.Adapter;
 import org.apache.pekko.actor.typed.javadsl.AskPattern;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.apache.pekko.cluster.typed.Cluster;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.eos.akka.bootstrap.EOSMain;
 import org.opendaylight.controller.eos.akka.bootstrap.command.BootstrapCommand;
 import org.opendaylight.controller.eos.akka.bootstrap.command.GetRunningContext;
@@ -142,10 +142,10 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     @Activate
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
         justification = "Non-final for testing 'this' reference is expected to be stable at registration time")
-    public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
+    public AkkaEntityOwnershipService(@Reference final ActorSystemInstance actorSystemInstance,
             @Reference final RpcProviderService rpcProvider, @Reference final BindingCodecTree codecTree)
             throws ExecutionException, InterruptedException {
-        this(actorProvider.getActorSystem(), codecTree);
+        this(actorSystemInstance.actorSystem(), codecTree);
 
         reg = rpcProvider.registerRpcImplementations(
             (GetEntity) this::getEntity,
