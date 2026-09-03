@@ -49,7 +49,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @Before
     public void setUp() {
-        system = ActorSystem.create("test", ConfigFactory.load().getConfig("unit-test"));
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("odl-cluster-data"));
 
         final DOMActionInstance emptyActionIdentifier = DOMActionInstance.of(
                 REMOTE_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of());
@@ -73,7 +73,10 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(system, true);
+        if (system != null) {
+            TestKit.shutdownActorSystem(system, true);
+            system = null;
+        }
     }
 
     @Test

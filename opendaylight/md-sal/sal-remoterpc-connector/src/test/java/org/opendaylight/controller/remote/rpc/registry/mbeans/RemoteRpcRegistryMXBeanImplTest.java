@@ -52,7 +52,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Before
     public void setUp() {
-        system = ActorSystem.create("test", ConfigFactory.load().getConfig("unit-test"));
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("odl-cluster-data"));
 
         final DOMRpcIdentifier emptyRpcIdentifier = DOMRpcIdentifier.create(
                 REMOTE_QNAME, YangInstanceIdentifier.of());
@@ -76,7 +76,10 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(system, true);
+        if (system != null) {
+            TestKit.shutdownActorSystem(system, true);
+            system = null;
+        }
     }
 
     @Test

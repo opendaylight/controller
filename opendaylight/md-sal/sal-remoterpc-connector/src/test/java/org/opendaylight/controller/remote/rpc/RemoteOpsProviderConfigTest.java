@@ -19,15 +19,16 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteOpsProviderConfigTest {
 
     @Test
     public void testConfigDefaults() {
-        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test").build();
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("odl-cluster-data").build();
 
         //Assert on configurations from common config
         assertFalse(config.isMetricCaptureEnabled()); //should be disabled by default
@@ -52,12 +53,12 @@ public class RemoteOpsProviderConfigTest {
     @Test
     public void testConfigCustomizations() {
 
-        AkkaConfigurationReader reader = new TestConfigReader();
+        ConfigurationReader reader = new TestConfigReader();
 
         final int expectedCapacity = 100;
         final var expectedTimeout = new FiniteDuration(10, TimeUnit.MILLISECONDS);
 
-        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test")
+        RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("odl-cluster-data")
                 .metricCaptureEnabled(true)//enable metric capture
                 .mailboxCapacity(expectedCapacity)
                 .mailboxPushTimeout("10ms")
@@ -70,17 +71,21 @@ public class RemoteOpsProviderConfigTest {
 
         //Now check this config inside an actor
         ActorSystem system = ActorSystem.create("unit-test", config.get());
-        TestActorRef<ConfigTestActor> configTestActorTestActorRef =
+        try {
+            TestActorRef<ConfigTestActor> configTestActorTestActorRef =
                 TestActorRef.create(system, Props.create(ConfigTestActor.class));
 
-        ConfigTestActor actor = configTestActorTestActorRef.underlyingActor();
-        Config actorConfig = actor.getConfig();
+            ConfigTestActor actor = configTestActorTestActorRef.underlyingActor();
+            Config actorConfig = actor.getConfig();
 
-        config = new RemoteOpsProviderConfig(actorConfig);
+            config = new RemoteOpsProviderConfig(actorConfig);
 
-        assertTrue(config.isMetricCaptureEnabled());
-        assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
-        assertEquals(expectedTimeout, config.getMailBoxPushTimeout());
+            assertTrue(config.isMetricCaptureEnabled());
+            assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
+            assertEquals(expectedTimeout, config.getMailBoxPushTimeout());
+        } finally {
+            TestKit.shutdownActorSystem(system, true);
+        }
     }
 
     public static class ConfigTestActor extends UntypedAbstractActor {
@@ -103,12 +108,10 @@ public class RemoteOpsProviderConfigTest {
         }
     }
 
-    public static class TestConfigReader implements AkkaConfigurationReader {
-
+    public static class TestConfigReader implements ConfigurationReader {
         @Override
         public Config read() {
             return ConfigFactory.parseResources("application.conf");
-
         }
     }
 }
