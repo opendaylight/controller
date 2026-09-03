@@ -21,7 +21,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
@@ -39,25 +38,7 @@ import scala.jdk.javaapi.FutureConverters;
 /**
  * Abstract base class for {@link ActorSystemInstance} implementations.
  */
-public non-sealed class DefaultActorSystemInstance implements ActorSystemInstance {
-    /**
-     * Callbacks invoked on lifecycle events.
-     */
-    @NonNullByDefault
-    public interface Callbacks {
-        /**
-         * Invoked when remoting was downed locally.
-         */
-        void onLocalDown();
-
-        /**
-         * Invoked when remoting was quarententined.
-         *
-         * @param quarantinedBy the address which caused the quarantine
-         */
-        void onRemoteQuarantined(Address quarantinedBy);
-    }
-
+public non-sealed class DefaultActorSystemInstance implements ActorSystemInstance.WithShutdown {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultActorSystemInstance.class);
     private static final VarHandle VH;
 
@@ -165,12 +146,7 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
         return (ActorRef) VH.getAcquire(this);
     }
 
-    /**
-     * Shut this instance down. This method is idempotent.
-     *
-     * @return a {@link CompletionStage} that completes when the shutdown is complete
-     */
-    @NonNullByDefault
+    @Override
     public final CompletionStage<?> shutdown() {
         final var localTM = (ActorRef) VH.getAndSet(this, null);
         if (localTM != null) {
@@ -185,13 +161,7 @@ public non-sealed class DefaultActorSystemInstance implements ActorSystemInstanc
         return whenTerminated;
     }
 
-    /**
-     * Shut this instance down and wait at most the specified Duration of time.
-     *
-     * @param atMost the Duration to wait
-     * @throws TimeoutException if the wait times out
-     * @throws InterruptedException if the wait is interrupted
-     */
+    @Override
     public final void shutdownAndWait(final Duration atMost) throws TimeoutException, InterruptedException {
         shutdownAndWait(DurationConverters.toScala(atMost));
     }
