@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -15,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.raft.spi.RaftPolicyResolver;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.osgi.OSGiBindingDOMCodecServices;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -30,12 +30,11 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
 
     private final AtomicReference<OSGiBindingDOMCodecServices> serializer = new AtomicReference<>();
 
-    @Reference
-    RaftPolicyResolver raftPolicyResolver;
-
     @Activate
-    void activate() {
-        serializer();
+    public OSGiDatastoreContextIntrospectorFactory(
+            final @Reference DataTreeFactory dataTreeFactory,
+            final @Reference RaftPolicyResolver raftPolicyResolver) {
+        super(dataTreeFactory, raftPolicyResolver);
         LOG.info("Datastore Context Introspector activated");
     }
 
@@ -43,11 +42,6 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
     @SuppressWarnings("static-method")
     void deactivate() {
         LOG.info("Datastore Context Introspector deactivated");
-    }
-
-    @Override
-    RaftPolicyResolver raftPolicyResolver() {
-        return verifyNotNull(raftPolicyResolver);
     }
 
     @Override
