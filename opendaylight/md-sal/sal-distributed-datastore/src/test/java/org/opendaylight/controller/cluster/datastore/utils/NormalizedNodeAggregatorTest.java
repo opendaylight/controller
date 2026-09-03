@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -29,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
@@ -41,10 +41,12 @@ class NormalizedNodeAggregatorTest {
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
             .build();
 
-        final var normalizedNode = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), List.of(
-            Optional.<NormalizedNode>of(getRootNode(expectedNode1, modelContext)),
-            Optional.<NormalizedNode>of(getRootNode(expectedNode2, modelContext))),
-            ReferenceDataTreeFactoryModule.provideDataTreeFactory(), modelContext, LogicalDatastoreType.CONFIGURATION)
+        final var normalizedNode = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(),
+            ReferenceDataTreeFactoryModule.provideDataTreeFactory()
+                .create(DataTreeConfiguration.DEFAULT_CONFIGURATION, modelContext),
+            List.of(
+                Optional.<NormalizedNode>of(getRootNode(expectedNode1, modelContext)),
+                Optional.<NormalizedNode>of(getRootNode(expectedNode2, modelContext))))
             .orElseThrow();
         final var collection = assertInstanceOf(ContainerNode.class, normalizedNode).body();
 
