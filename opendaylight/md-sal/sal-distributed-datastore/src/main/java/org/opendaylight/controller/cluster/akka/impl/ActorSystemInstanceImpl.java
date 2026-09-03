@@ -14,27 +14,22 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Terminated;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
-import org.opendaylight.controller.cluster.ActorSystemProviderListener;
+import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
 import org.opendaylight.controller.cluster.datastore.TerminationMonitor;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.util.ObjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseable {
+public class ActorSystemInstanceImpl implements ActorSystemInstance, AutoCloseable {
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
-    private static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActorSystemInstanceImpl.class);
 
     private final @NonNull ActorSystem actorSystem;
-    private final ObjectRegistry<ActorSystemProviderListener> listeners =
-        ObjectRegistry.createConcurrent("ActorSystemProvider listeners");
 
-    public ActorSystemProviderImpl(
+    public ActorSystemInstanceImpl(
             final ClassLoader classLoader, final Props quarantinedMonitorActorProps, final Config akkaConfig) {
         LOG.info("Creating new ActorSystem");
 
@@ -44,14 +39,8 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     }
 
     @Override
-    public ActorSystem getActorSystem() {
+    public final ActorSystem actorSystem() {
         return actorSystem;
-    }
-
-    @Override
-    public ObjectRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
-            final ActorSystemProviderListener listener) {
-        return listeners.register(listener);
     }
 
     public Future<Terminated> asyncClose() {

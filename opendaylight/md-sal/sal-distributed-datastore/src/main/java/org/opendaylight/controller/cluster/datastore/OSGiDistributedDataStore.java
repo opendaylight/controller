@@ -16,7 +16,7 @@ import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.nio.file.Path;
 import java.util.Map;
 import org.apache.pekko.actor.ActorSystem;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
@@ -116,7 +116,7 @@ public final class OSGiDistributedDataStore {
 
     @Activate
     public OSGiDistributedDataStore(@Reference final DOMSchemaService schemaService,
-            @Reference final ActorSystemProvider actorSystemProvider,
+            @Reference final ActorSystemInstance actorSystemInstance,
             @Reference final DatastoreContextIntrospectorFactory introspectorFactory,
             @Reference final DatastoreSnapshotRestore snapshotRestore,
             @Reference final ModuleShardConfigProvider configProvider,
@@ -124,7 +124,7 @@ public final class OSGiDistributedDataStore {
             final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
         this.datastoreFactory = requireNonNull(datastoreFactory);
 
-        final var actorSystem = actorSystemProvider.getActorSystem();
+        final var actorSystem = actorSystemInstance.actorSystem();
         configDatastore = createDatastore(STATE_DIR, schemaService, actorSystem, snapshotRestore,
             introspectorFactory, LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
         operDatastore = createDatastore(STATE_DIR, schemaService, actorSystem, snapshotRestore,
