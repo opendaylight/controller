@@ -18,7 +18,7 @@ import java.util.Map;
 import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
@@ -129,7 +129,7 @@ public final class OSGiDistributedDataStore {
     public OSGiDistributedDataStore(
             @Reference final DataTreeFactory dataTreeFactory,
             @Reference final DOMSchemaService schemaService,
-            @Reference final ActorSystemProvider actorSystemProvider,
+            @Reference final ActorSystemInstance actorSystemInstance,
             @Reference final DatastoreContextIntrospectorFactory introspectorFactory,
             @Reference final DatastoreSnapshotRestore snapshotRestore,
             @Reference final ModuleShardConfigProvider configProvider,
@@ -137,7 +137,7 @@ public final class OSGiDistributedDataStore {
             final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
         this.datastoreFactory = requireNonNull(datastoreFactory);
 
-        final var actorSystem = actorSystemProvider.getActorSystem();
+        final var actorSystem = actorSystemInstance.actorSystem();
         configDatastore = createDatastore(STATE_DIR, schemaService, actorSystem, snapshotRestore,
             introspectorFactory, DataTreeInvariants.ofDefault(dataTreeFactory, LogicalDatastoreType.CONFIGURATION),
             "distributed-config", properties, null);
