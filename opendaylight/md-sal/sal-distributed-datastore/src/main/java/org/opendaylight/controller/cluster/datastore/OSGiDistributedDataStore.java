@@ -16,6 +16,8 @@ import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.nio.file.Path;
 import java.util.Map;
 import org.apache.pekko.actor.ActorSystem;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -47,32 +49,34 @@ public final class OSGiDistributedDataStore {
      * to settle (which can take a long time).
      */
     private final class DatastoreState implements FutureCallback<Object> {
-        private final DatastoreContextIntrospector introspector;
-        private final LogicalDatastoreType datastoreType;
-        private final AbstractDataStore datastore;
-        private final String serviceType;
+        private final @NonNull DatastoreContextIntrospector introspector;
+        private final @NonNull DataTreeInvariants invariants;
+        private final @NonNull AbstractDataStore datastore;
+        private final @NonNull String serviceType;
 
         @GuardedBy("this")
         private ComponentInstance<OSGiDOMStore> component;
         @GuardedBy("this")
         private boolean stopped;
 
-        DatastoreState(final DatastoreContextIntrospector introspector, final LogicalDatastoreType datastoreType,
+        @NonNullByDefault
+        DatastoreState(final DatastoreContextIntrospector introspector, final DataTreeInvariants invariants,
                 final AbstractDataStore datastore, final String serviceType) {
             this.introspector = requireNonNull(introspector);
-            this.datastoreType = requireNonNull(datastoreType);
+            this.invariants = requireNonNull(invariants);
             this.datastore = requireNonNull(datastore);
             this.serviceType = requireNonNull(serviceType);
         }
 
         synchronized void updateProperties(final Map<String, Object> properties) {
             if (introspector.update(properties)) {
-                LOG.info("Distributed Datastore type {} updating context", datastoreType);
+                LOG.info("Distributed Datastore type {} updating context", datastoreType());
                 datastore.onDatastoreContextUpdated(introspector.newContextFactory());
             }
         }
 
         void stop() {
+            final var datastoreType = datastoreType();
             LOG.info("Distributed Datastore type {} stopping", datastoreType);
 
             synchronized (this) {
@@ -88,6 +92,7 @@ public final class OSGiDistributedDataStore {
 
         @Override
         public void onSuccess(final Object result) {
+            final var datastoreType = datastoreType();
             LOG.debug("Distributed Datastore type {} reached initial settle", datastoreType);
 
             synchronized (this) {
@@ -103,7 +108,12 @@ public final class OSGiDistributedDataStore {
 
         @Override
         public synchronized void onFailure(final Throwable cause) {
-            LOG.error("Distributed Datastore type {} failed to settle", datastoreType, cause);
+            LOG.error("Distributed Datastore type {} failed to settle", datastoreType(), cause);
+        }
+
+        @NonNullByDefault
+        private LogicalDatastoreType datastoreType() {
+            return invariants.type();
         }
     }
 

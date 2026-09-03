@@ -52,9 +52,22 @@ public final class DistributedDataStoreFactory {
         return dataStore;
     }
 
+<<<<<<< HEAD
     public static AbstractDataStore createInstance(final Path stateDir, final ActorSystem actorSystem,
             final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
             final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
+||||||| parent of ea24f2dec1 (Add DataTreeInvariants)
+    public static AbstractDataStore createInstance(final Path stateDir, final ActorSystemProvider actorSystemProvider,
+            final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
+            final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
+
+=======
+    public static ClientBackedDataStore createInstance(final Path stateDir,
+            final ActorSystemProvider actorSystemProvider, final DatastoreContext initialDatastoreContext,
+            final DatastoreContextIntrospector introspector, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final Configuration orgConfig) {
+
+>>>>>>> ea24f2dec1 (Add DataTreeInvariants)
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
 
