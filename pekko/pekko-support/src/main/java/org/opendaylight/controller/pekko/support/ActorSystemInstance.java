@@ -18,7 +18,7 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.pekko.support.spi.DefaultActorSystemInstance;
+import org.opendaylight.controller.pekko.support.impl.DefaultActorSystemInstance;
 
 /**
  * A service that encapsulates a single {@link ActorSystem}.
@@ -31,7 +31,7 @@ public sealed interface ActorSystemInstance {
     /**
      * An {@link ActorSystemInstance} exposing the ability to be shut down.
      */
-    sealed interface WithShutdown extends ActorSystemInstance permits DefaultActorSystemInstance {
+    sealed interface WithShutdown extends ActorSystemInstance, AutoCloseable permits DefaultActorSystemInstance {
         /**
          * Shut this instance down. This method is idempotent.
          *
@@ -47,6 +47,9 @@ public sealed interface ActorSystemInstance {
          * @throws InterruptedException if the wait is interrupted
          */
         void shutdownAndWait(Duration atMost) throws TimeoutException, InterruptedException;
+
+        @Override
+        void close() throws TimeoutException, InterruptedException;
     }
 
     /**
