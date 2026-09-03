@@ -11,28 +11,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.typesafe.config.ConfigFactory;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActorRef;
-import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BucketStoreTest {
+class BucketStoreTest extends UnitTestHarness {
     /**
      * Dummy class to eliminate rawtype warnings.
      *
@@ -69,31 +63,17 @@ class BucketStoreTest {
         }
     }
 
-    private static ActorSystem system;
-    private static DefaultTerminationMonitor terminationMonitor;
-
     @TempDir
     private Path directory;
     private BucketStoreActor<TestBucketData> store;
 
-    @BeforeAll
-    static void beforeAll() {
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
-        terminationMonitor = DefaultTerminationMonitor.createIn(system);
-    }
-
-    @AfterAll
-    static void afterAll() {
-        terminationMonitor.close();
-        TestKit.shutdownActorSystem(system);
-    }
-
     @BeforeEach
     void before() {
-        final var props = Props.create(TestingBucketStoreActor.class,
-            new RemoteOpsProviderConfig(system.settings().config()),
-            directory, "testing-store", new TestBucketData());
-        store = TestActorRef.<BucketStoreActor<TestBucketData>>create(system, props, "testStore").underlyingActor();
+        final var system = SYSTEM_INSTANCE.actorSystem();
+        store = TestActorRef.<BucketStoreActor<TestBucketData>>create(system,
+            Props.create(TestingBucketStoreActor.class, new RemoteOpsProviderConfig(system.settings().config()),
+                directory, "testing-store", new TestBucketData()),
+            "testStore").underlyingActor();
     }
 
     /**
@@ -101,7 +81,7 @@ class BucketStoreTest {
      */
     @Test
     void testReceiveUpdateRemoteBuckets() {
-        final var localAddress = system.provider().getDefaultAddress();
+        final var localAddress = SYSTEM_INSTANCE.actorSystem().provider().getDefaultAddress();
         final var localBucket = new BucketImpl<>(0L, new TestBucketData());
 
         final var a1 = new Address("tcp", "system1");
