@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.pekko.support.spi;
+package org.opendaylight.controller.pekko.support.impl;
 
 import static java.util.Objects.requireNonNull;
 
@@ -19,7 +19,6 @@ import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.pekko.support.TerminationMonitor;
-import org.opendaylight.controller.pekko.support.impl.TerminationMonitorActor;
 
 /**
  * Default implementation of {@link TerminationMonitor}.
@@ -27,12 +26,12 @@ import org.opendaylight.controller.pekko.support.impl.TerminationMonitorActor;
  * @since 14.0.0
  */
 @Beta
-public final class DefaultTerminationMonitor implements AutoCloseable, TerminationMonitor {
+public final class ActorTerminationMonitor implements AutoCloseable, TerminationMonitor {
     private static final VarHandle VH;
 
     static {
         try {
-            VH = MethodHandles.lookup().findVarHandle(DefaultTerminationMonitor.class, "monitorActor", ActorRef.class);
+            VH = MethodHandles.lookup().findVarHandle(ActorTerminationMonitor.class, "monitorActor", ActorRef.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -42,13 +41,13 @@ public final class DefaultTerminationMonitor implements AutoCloseable, Terminati
     private volatile ActorRef monitorActor;
 
     @NonNullByDefault
-    private DefaultTerminationMonitor(final ActorRef monitorActor) {
+    private ActorTerminationMonitor(final ActorRef monitorActor) {
         this.monitorActor = requireNonNull(monitorActor);
     }
 
     @NonNullByDefault
-    public static DefaultTerminationMonitor createIn(final ActorSystem actorSystem) {
-        return new DefaultTerminationMonitor(actorSystem.actorOf(Props.create(TerminationMonitorActor.class),
+    public static ActorTerminationMonitor createIn(final ActorSystem actorSystem) {
+        return new ActorTerminationMonitor(actorSystem.actorOf(Props.create(TerminationMonitorActor.class),
             TerminationMonitorActor.ADDRESS));
     }
 

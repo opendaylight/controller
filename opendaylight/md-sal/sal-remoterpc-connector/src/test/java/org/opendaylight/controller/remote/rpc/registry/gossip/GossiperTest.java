@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
-import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
@@ -29,11 +28,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 
-public class GossiperTest {
-    private static DefaultTerminationMonitor terminationMonitor;
+public class GossiperTest extends UnitTestHarness {
     private static ActorSystem system;
     private static Gossiper gossiper;
 
@@ -42,13 +39,16 @@ public class GossiperTest {
     @BeforeClass
     public static void setup() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
-        terminationMonitor = DefaultTerminationMonitor.createIn(system);
-        gossiper = createGossiper();
+        gossiper = TestActorRef.<Gossiper>create(system,
+            Gossiper.testProps(new RemoteOpsProviderConfig.Builder("unit-test")
+                .withConfigReader(ConfigFactory::load)
+                .build()), "testGossiper")
+            .underlyingActor();
     }
 
     @AfterClass
     public static void teardown() {
-        terminationMonitor.close();
+
         TestKit.shutdownActorSystem(system);
     }
 
@@ -97,20 +97,5 @@ public class GossiperTest {
         Address notSelf = new Address("tcp", "not-self");
         mockGossiper.receiveGossip(new GossipEnvelope(notSelf, notSelf, mock(Map.class)));
         verify(mockGossiper, times(0)).updateRemoteBuckets(anyMap());
-    }
-
-    /**
-     * Create Gossiper actor and return the underlying instance of Gossiper class.
-     *
-     * @return instance of Gossiper class
-     */
-    private static Gossiper createGossiper() {
-        final RemoteOpsProviderConfig config =
-                new RemoteOpsProviderConfig.Builder("unit-test")
-                        .withConfigReader(ConfigFactory::load).build();
-        final Props props = Gossiper.testProps(config);
-        final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");
-
-        return testRef.underlyingActor();
     }
 }

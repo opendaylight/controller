@@ -12,8 +12,8 @@ import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.pekko.support.impl.ActorTerminationMonitor;
 import org.opendaylight.controller.pekko.support.impl.TerminationMonitorActor;
-import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 
 /**
  * A utility for monitoring termination of actors.
@@ -22,7 +22,7 @@ import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
  */
 @Beta
 @NonNullByDefault
-public sealed interface TerminationMonitor permits DefaultTerminationMonitor {
+public sealed interface TerminationMonitor permits ActorTerminationMonitor {
     /**
      * Request a particular actor to be watched.
      *
