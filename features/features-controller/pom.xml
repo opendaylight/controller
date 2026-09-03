@@ -61,12 +61,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-broker-local</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-clustering-commons</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
