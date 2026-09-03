@@ -5,11 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-package org.opendaylight.controller.cluster.common.actor;
+package org.opendaylight.controller.pekko.support.spi;
 
 import com.typesafe.config.Config;
 
-public interface AkkaConfigurationReader {
+/**
+ * An intermediate interface providing Pekko configuration.
+ */
+public interface ConfigurationReader {
+    /**
+     * Read the configuration.
+     *
+     * @return the configuration
+     */
     Config read();
 }

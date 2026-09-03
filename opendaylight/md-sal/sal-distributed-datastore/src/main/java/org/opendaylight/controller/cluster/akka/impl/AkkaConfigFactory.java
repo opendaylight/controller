@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.akka.impl;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 
 public final class AkkaConfigFactory {
 
@@ -19,7 +19,7 @@ public final class AkkaConfigFactory {
 
     }
 
-    public static Config createAkkaConfig(final AkkaConfigurationReader reader) {
+    public static Config createAkkaConfig(final ConfigurationReader reader) {
         return ConfigFactory.load(reader.read()).getConfig(CONFIGURATION_NAME);
     }
 }

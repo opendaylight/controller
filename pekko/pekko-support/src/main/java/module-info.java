@@ -11,14 +11,21 @@
 module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support;
     exports org.opendaylight.controller.pekko.support.spi;
+    opens org.opendaylight.controller.pekko.support.actor to org.opendaylight.controller.repackaged.pekko;
+
+    provides org.opendaylight.controller.pekko.support.ActorSystemInstance.Creator
+        with org.opendaylight.controller.pekko.support.impl.ActorSystemInstanceCreator;
 
     requires transitive com.google.common;
     requires transitive org.opendaylight.controller.repackaged.pekko;
-    requires org.opendaylight.controller.scala3.library;
+    requires transitive org.opendaylight.controller.scala3.library;
+    requires transitive typesafe.config;
     requires org.slf4j;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
     requires static com.github.spotbugs.annotations;
+    requires static org.kohsuke.metainf_services;
     requires static org.osgi.annotation.bundle;
+    requires static org.osgi.service.component.annotations;
 }

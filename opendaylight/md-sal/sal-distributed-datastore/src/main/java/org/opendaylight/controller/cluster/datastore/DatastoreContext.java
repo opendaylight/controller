@@ -20,11 +20,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
+import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.RaftPolicy;
@@ -96,7 +96,7 @@ public class DatastoreContext implements ClientActorConfig {
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
     private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
-    private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
+    private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
     private LogicalDatastoreType logicalStoreType = LogicalDatastoreType.OPERATIONAL;
     private YangInstanceIdentifier storeRoot = YangInstanceIdentifier.of();
@@ -244,7 +244,7 @@ public class DatastoreContext implements ClientActorConfig {
         return snapshotOnRootOverwrite;
     }
 
-    public AkkaConfigurationReader getConfigurationReader() {
+    public ConfigurationReader getConfigurationReader() {
         return configurationReader;
     }
 
@@ -546,7 +546,7 @@ public class DatastoreContext implements ClientActorConfig {
             return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
-        public Builder configurationReader(final AkkaConfigurationReader configurationReader) {
+        public Builder configurationReader(final ConfigurationReader configurationReader) {
             datastoreContext.configurationReader = configurationReader;
             return this;
         }
