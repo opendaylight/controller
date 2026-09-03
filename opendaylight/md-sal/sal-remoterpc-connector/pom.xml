@@ -51,6 +51,10 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>pekko-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
