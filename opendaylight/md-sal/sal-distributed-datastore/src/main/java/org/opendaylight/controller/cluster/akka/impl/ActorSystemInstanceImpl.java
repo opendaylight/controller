@@ -16,7 +16,7 @@ import org.apache.pekko.actor.Terminated;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.ActorSystemInstance;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
-import org.opendaylight.controller.cluster.datastore.TerminationMonitor;
+import org.opendaylight.controller.cluster.common.actor.TerminationMonitorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -29,12 +29,12 @@ public class ActorSystemInstanceImpl implements ActorSystemInstance, AutoCloseab
 
     private final @NonNull ActorSystem actorSystem;
 
-    public ActorSystemInstanceImpl(
-            final ClassLoader classLoader, final Props quarantinedMonitorActorProps, final Config akkaConfig) {
+    public ActorSystemInstanceImpl(final ClassLoader classLoader, final Props quarantinedMonitorActorProps,
+            final Config akkaConfig) {
         LOG.info("Creating new ActorSystem");
 
         actorSystem = ActorSystem.create(ACTOR_SYSTEM_NAME, akkaConfig, classLoader);
-        actorSystem.actorOf(Props.create(TerminationMonitor.class), TerminationMonitor.ADDRESS);
+        actorSystem.actorOf(Props.create(TerminationMonitorActor.class), TerminationMonitorActor.ADDRESS);
         actorSystem.actorOf(quarantinedMonitorActorProps, QuarantinedMonitorActor.ADDRESS);
     }
 
