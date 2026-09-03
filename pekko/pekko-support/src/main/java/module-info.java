@@ -12,9 +12,11 @@ module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support;
 
     requires transitive org.opendaylight.controller.repackaged.pekko;
+    requires org.opendaylight.controller.scala3.library;
     requires org.slf4j;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
+    requires static com.github.spotbugs.annotations;
     requires static org.osgi.annotation.bundle;
 }

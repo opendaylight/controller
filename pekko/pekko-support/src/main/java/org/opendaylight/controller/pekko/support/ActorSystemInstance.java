@@ -21,4 +21,9 @@ public interface ActorSystemInstance {
      * {@return the ActorSystem}
      */
     ActorSystem actorSystem();
+
+    /**
+     * {@return the TerminationMonitor}
+     */
+    TerminationMonitor terminationMonitor();
 }
