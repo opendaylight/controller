@@ -46,19 +46,17 @@ import org.slf4j.LoggerFactory;
  */
 public class DatastoreContextIntrospector {
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextIntrospector.class);
+    private static final Map<Class<?>, Function<String, Object>> UINT_FACTORIES = Map.of(
+        Uint8.class, Uint8::valueOf,
+        Uint16.class, Uint16::valueOf,
+        Uint32.class, Uint32::valueOf,
+        Uint64.class, Uint64::valueOf);
 
+    // FIXME: these should be unmodifiable
     private static final Map<String, Entry<Class<?>, Method>> DATA_STORE_PROP_INFO = new HashMap<>();
     private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = new HashMap<>();
     private static final Map<Class<?>, Method> YANG_TYPE_GETTERS = new HashMap<>();
     private static final Map<String, Method> BUILDER_SETTERS = new HashMap<>();
-
-    private static final ImmutableMap<Class<?>, Function<String, Object>> UINT_FACTORIES =
-            ImmutableMap.<Class<?>, Function<String, Object>>builder()
-            .put(Uint8.class, Uint8::valueOf)
-            .put(Uint16.class, Uint16::valueOf)
-            .put(Uint32.class, Uint32::valueOf)
-            .put(Uint64.class, Uint64::valueOf)
-            .build();
 
     static {
         try {
