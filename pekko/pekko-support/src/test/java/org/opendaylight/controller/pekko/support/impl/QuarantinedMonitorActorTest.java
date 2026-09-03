@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.pekko.support.actor.QuarantinedMonitor;
-import org.opendaylight.controller.pekko.support.spi.DefaultActorSystemInstance;
 import scala.Option;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)

@@ -13,6 +13,9 @@ module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support.spi;
     opens org.opendaylight.controller.pekko.support.actor to org.opendaylight.controller.repackaged.pekko;
 
+    provides org.opendaylight.controller.pekko.support.ActorSystemInstance.Creator
+        with org.opendaylight.controller.pekko.support.impl.ActorSystemInstanceCreator;
+
     requires transitive com.google.common;
     requires transitive org.opendaylight.controller.repackaged.pekko;
     requires transitive org.opendaylight.controller.scala3.library;

@@ -7,14 +7,15 @@
  */
 package org.opendaylight.controller.pekko.support.impl;
 
-import static java.util.Objects.requireNonNull;
-
+import com.typesafe.config.Config;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.kohsuke.MetaInfServices;
 import org.opendaylight.controller.pekko.support.ActorSystemInstance;
-import org.opendaylight.controller.pekko.support.spi.ActorSystemInstanceCreator;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance.Callbacks;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance.WithShutdown;
 import org.opendaylight.controller.pekko.support.spi.PekkoAccessibleClasses;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -28,44 +29,38 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of {@link ActorSystemInstance.Creator}.
  */
+@Component
+@MetaInfServices
 @NonNullByDefault
-@MetaInfServices(ActorSystemInstance.Creator.class)
-@Component(service = ActorSystemInstance.Creator.class)
-public final class DefaultActorSystemInstanceCreator extends ActorSystemInstanceCreator {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultActorSystemInstanceCreator.class);
+public final class ActorSystemInstanceCreator implements ActorSystemInstance.Creator {
+    private static final Logger LOG = LoggerFactory.getLogger(ActorSystemInstanceCreator.class);
 
-    private final List<PekkoAccessibleClasses> accessibleClasses;
-    private final ClassLoader classLoader;
+    private final PekkoAccessibleClassLoader classLoader;
 
-    private DefaultActorSystemInstanceCreator(final ClassLoader classLoader,
-            final List<PekkoAccessibleClasses> accessibleClasses) {
-        // FIXME: construct from accessibleClasses only?
-        this.classLoader = requireNonNull(classLoader);
-        this.accessibleClasses = List.copyOf(accessibleClasses);
+    private ActorSystemInstanceCreator(final Stream<PekkoAccessibleClasses> accessibleClasses) {
+        classLoader = new PekkoAccessibleClassLoader(accessibleClasses);
     }
 
-    public DefaultActorSystemInstanceCreator() {
-        this(DefaultActorSystemInstanceCreator.class.getClassLoader(),
-            ServiceLoader.load(PekkoAccessibleClasses.class).stream().map(ServiceLoader.Provider::get).toList());
+    public ActorSystemInstanceCreator() {
+        this(ServiceLoader.load(PekkoAccessibleClasses.class).stream().map(ServiceLoader.Provider::get));
     }
 
     @Activate
-    public DefaultActorSystemInstanceCreator(
+    public ActorSystemInstanceCreator(
             final @Reference(
                 cardinality = ReferenceCardinality.AT_LEAST_ONE,
                 policyOption = ReferencePolicyOption.GREEDY) List<PekkoAccessibleClasses> accessibleClasses) {
-//        LOG.info("ActorSystemInstanceCreator-{} started", instanceNum);
-        // FIXME: delegating class loader
-        throw new UnsupportedOperationException();
+        this(accessibleClasses.stream());
+        LOG.info("ActorSystemInstanceCreator {} started", classLoader.getName());
     }
 
     @Deactivate
     void deactivate() {
-        LOG.info("ActorSystemInstanceCreator {} stopped", uuid);
+        LOG.info("ActorSystemInstanceCreator {} stopped", classLoader.getName());
     }
 
     @Override
-    protected ClassLoader classLoader() {
-        return classLoader;
+    public WithShutdown createInstance(final String name, final Config config, final Callbacks callbacks) {
+        return new DefaultActorSystemInstance(name, config, callbacks, classLoader);
     }
 }
