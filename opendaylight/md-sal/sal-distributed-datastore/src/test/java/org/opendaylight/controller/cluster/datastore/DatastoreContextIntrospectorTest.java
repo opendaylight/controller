@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DistributedDatastoreProviderData;
 import org.opendaylight.yangtools.binding.data.codec.dynamic.dagger.BindingDataCodecFactoryModule;
 import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
+import org.opendaylight.yangtools.yang.data.tree.dagger.ReferenceDataTreeFactoryModule;
 
 /**
  * Unit tests for DatastoreContextIntrospector.
@@ -37,7 +38,9 @@ import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
  */
 public class DatastoreContextIntrospectorTest {
     static final AbstractDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
-        new DefaultDatastoreContextIntrospectorFactory(new DefaultRaftPolicyResolver(),
+        new DefaultDatastoreContextIntrospectorFactory(
+            ReferenceDataTreeFactoryModule.provideDataTreeFactory(),
+            new DefaultRaftPolicyResolver(),
             BindingDataCodecFactoryModule.provideBindingDataCodecFactory()
                 .newBindingDataCodec(BindingRuntimeHelpers.createRuntimeContext(
                     List.of(DistributedDatastoreProviderData.META.moduleInfo())))

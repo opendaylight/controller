@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
@@ -31,6 +32,7 @@ import org.opendaylight.raft.spi.RaftPolicyResolver;
 import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +78,9 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
-    private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
-    private final RaftPolicyResolver raftPolicyResolver;
+    private final @NonNull DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private final @NonNull RaftPolicyResolver raftPolicyResolver;
+    private final @NonNull DataTreeFactory dataTreeFactory;
 
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
     private long operationTimeoutInMillis = DEFAULT_OPERATION_TIMEOUT_IN_MS;
@@ -107,7 +110,8 @@ public class DatastoreContext implements ClientActorConfig {
     private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
     private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
 
-    DatastoreContext(final RaftPolicyResolver raftPolicyResolver) {
+    DatastoreContext(final DataTreeFactory dataTreeFactory, final RaftPolicyResolver raftPolicyResolver) {
+        this.dataTreeFactory = requireNonNull(dataTreeFactory);
         this.raftPolicyResolver = requireNonNull(raftPolicyResolver);
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
         setSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT);
@@ -123,6 +127,7 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private DatastoreContext(final DatastoreContext other) {
+        dataTreeFactory = other.dataTreeFactory;
         raftPolicyResolver = other.raftPolicyResolver;
         shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
         operationTimeoutInMillis = other.operationTimeoutInMillis;
@@ -171,11 +176,14 @@ public class DatastoreContext implements ClientActorConfig {
 
     @VisibleForTesting
     public static final Builder newBuilder() {
-        return newBuilder(ServiceLoader.load(RaftPolicyResolver.class).findFirst().orElseThrow());
+        return newBuilder(
+            ServiceLoader.load(DataTreeFactory.class).findFirst().orElseThrow(),
+            ServiceLoader.load(RaftPolicyResolver.class).findFirst().orElseThrow());
     }
 
-    public static final Builder newBuilder(final RaftPolicyResolver raftPolicyResolver) {
-        return new Builder(new DatastoreContext(raftPolicyResolver));
+    public static final Builder newBuilder(final DataTreeFactory dataTreeFactory,
+            final RaftPolicyResolver raftPolicyResolver) {
+        return new Builder(new DatastoreContext(dataTreeFactory, raftPolicyResolver));
     }
 
     public static final Builder newBuilderFrom(final DatastoreContext context) {
