@@ -15,8 +15,9 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Terminated;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
-import org.opendaylight.controller.cluster.common.actor.TerminationMonitorActor;
 import org.opendaylight.controller.pekko.support.ActorSystemInstance;
+import org.opendaylight.controller.pekko.support.TerminationMonitor;
+import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -28,13 +29,14 @@ public class ActorSystemInstanceImpl implements ActorSystemInstance, AutoCloseab
     private static final Logger LOG = LoggerFactory.getLogger(ActorSystemInstanceImpl.class);
 
     private final @NonNull ActorSystem actorSystem;
+    private final @NonNull DefaultTerminationMonitor terminationMonitor;
 
     public ActorSystemInstanceImpl(final ClassLoader classLoader, final Props quarantinedMonitorActorProps,
             final Config akkaConfig) {
         LOG.info("Creating new ActorSystem");
 
         actorSystem = ActorSystem.create(ACTOR_SYSTEM_NAME, akkaConfig, classLoader);
-        actorSystem.actorOf(Props.create(TerminationMonitorActor.class), TerminationMonitorActor.ADDRESS);
+        terminationMonitor = DefaultTerminationMonitor.createIn(actorSystem);
         actorSystem.actorOf(quarantinedMonitorActorProps, QuarantinedMonitorActor.ADDRESS);
     }
 
@@ -43,8 +45,15 @@ public class ActorSystemInstanceImpl implements ActorSystemInstance, AutoCloseab
         return actorSystem;
     }
 
+    @Override
+    public final TerminationMonitor terminationMonitor() {
+        return terminationMonitor;
+    }
+
+    // FIXME: return a CompletionStage
     public Future<Terminated> asyncClose() {
         LOG.info("Shutting down ActorSystem");
+        terminationMonitor.close();
 
         actorSystem.getWhenTerminated().whenComplete((success, failure) -> {
             if (failure != null) {
