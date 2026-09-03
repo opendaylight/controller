@@ -37,7 +37,7 @@ public class OpsListenerTest {
 
     @BeforeClass
     public static void setup() {
-        SYSTEM = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
+        SYSTEM = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-data"));
     }
 
     @AfterClass

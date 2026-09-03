@@ -20,8 +20,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
-import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
@@ -66,7 +64,6 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
     public static final boolean DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE = false;
-    public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD = 0;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
@@ -96,7 +93,6 @@ public class DatastoreContext implements ClientActorConfig {
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
     private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
-    private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
     private LogicalDatastoreType logicalStoreType = LogicalDatastoreType.OPERATIONAL;
     private YangInstanceIdentifier storeRoot = YangInstanceIdentifier.of();
@@ -143,7 +139,6 @@ public class DatastoreContext implements ClientActorConfig {
         initialSettleTimeoutMultiplier = other.initialSettleTimeoutMultiplier;
         persistent = other.persistent;
         snapshotOnRootOverwrite = other.snapshotOnRootOverwrite;
-        configurationReader = other.configurationReader;
         dataStoreName = other.dataStoreName;
         logicalStoreType = other.logicalStoreType;
         storeRoot = other.storeRoot;
@@ -242,10 +237,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     public boolean isSnapshotOnRootOverwrite() {
         return snapshotOnRootOverwrite;
-    }
-
-    public AkkaConfigurationReader getConfigurationReader() {
-        return configurationReader;
     }
 
     public long getShardElectionTimeoutFactor() {
@@ -544,11 +535,6 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder shardLeaderElectionTimeoutInSeconds(final long timeout) {
             return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
-        }
-
-        public Builder configurationReader(final AkkaConfigurationReader configurationReader) {
-            datastoreContext.configurationReader = configurationReader;
-            return this;
         }
 
         public Builder persistent(final boolean persistent) {

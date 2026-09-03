@@ -5,16 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
-import org.opendaylight.controller.pekko.support.TerminationMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// FIXME: audit all users and route them through ActorSystemInstance.watchedActorOf()
 public abstract class AbstractUntypedActor extends AbstractActor implements ExecuteInSelfActor {
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
@@ -23,7 +22,6 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
 
     protected AbstractUntypedActor() {
         LOG.debug("Actor created {}", self());
-        TerminationMonitor.watchActorContext(getContext());
     }
 
     @Override
