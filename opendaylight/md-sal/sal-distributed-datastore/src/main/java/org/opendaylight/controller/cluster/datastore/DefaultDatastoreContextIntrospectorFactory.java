@@ -14,23 +14,18 @@ import javax.inject.Singleton;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.raft.spi.RaftPolicyResolver;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 
 @Singleton
 @NonNullByDefault
 public final class DefaultDatastoreContextIntrospectorFactory extends AbstractDatastoreContextIntrospectorFactory {
     private final BindingNormalizedNodeSerializer serializer;
-    private final RaftPolicyResolver raftPolicyResolver;
 
     @Inject
-    public DefaultDatastoreContextIntrospectorFactory(final RaftPolicyResolver raftPolicyResolver,
-            final BindingNormalizedNodeSerializer serializer) {
-        this.raftPolicyResolver = requireNonNull(raftPolicyResolver);
+    public DefaultDatastoreContextIntrospectorFactory(final DataTreeFactory dataTreeFactory,
+            final RaftPolicyResolver raftPolicyResolver, final BindingNormalizedNodeSerializer serializer) {
+        super(dataTreeFactory, raftPolicyResolver);
         this.serializer = requireNonNull(serializer);
-    }
-
-    @Override
-    RaftPolicyResolver raftPolicyResolver() {
-        return raftPolicyResolver;
     }
 
     @Override
