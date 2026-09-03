@@ -101,10 +101,6 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         return Props.create(Gossiper.class, config);
     }
 
-    static Props testProps(final RemoteOpsProviderConfig config) {
-        return Props.create(Gossiper.class, config, Boolean.FALSE);
-    }
-
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public ActorRef getSender() {

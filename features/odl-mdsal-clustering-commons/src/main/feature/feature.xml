@@ -15,5 +15,11 @@
         <feature version="[16,17)">odl-yangtools-binding-spec</feature>
         <feature version="[16,17)">odl-yangtools-codec</feature>
         <feature version="[16,17)">odl-yangtools-data</feature>
+        <configfile finalname="configuration/initial/pekko.conf">
+            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/pekkoconf
+        </configfile>
+        <configfile finalname="configuration/factory/pekko.conf" override="true">
+            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/factorypekkoconf
+        </configfile>
     </feature>
 </features>
