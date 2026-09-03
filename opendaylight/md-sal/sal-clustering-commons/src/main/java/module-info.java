@@ -19,8 +19,6 @@ module org.opendaylight.controller.cluster.common {
     exports org.opendaylight.controller.cluster.schema.provider;
     exports org.opendaylight.controller.cluster.schema.provider.impl;
 
-    opens org.opendaylight.controller.cluster.common.actor to org.opendaylight.controller.repackaged.pekko;
-
     requires transitive com.codahale.metrics;
     requires transitive com.google.common;
     requires transitive org.opendaylight.controller.pekko.support;
