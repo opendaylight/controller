@@ -8,11 +8,14 @@
  */
 package org.opendaylight.controller.pekko.support;
 
+import com.typesafe.config.Config;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.pekko.support.spi.DefaultActorSystemInstance;
@@ -24,7 +27,60 @@ import org.opendaylight.controller.pekko.support.spi.DefaultActorSystemInstance;
  * @author Thomas Pantelis
  */
 @NonNullByDefault
-public sealed interface ActorSystemInstance permits DefaultActorSystemInstance {
+public sealed interface ActorSystemInstance {
+    /**
+     * An {@link ActorSystemInstance} exposing the ability to be shut down.
+     */
+    sealed interface WithShutdown extends ActorSystemInstance permits DefaultActorSystemInstance {
+        /**
+         * Shut this instance down. This method is idempotent.
+         *
+         * @return a {@link CompletionStage} that completes when the shutdown is complete
+         */
+        CompletionStage<?> shutdown();
+
+        /**
+         * Shut this instance down and wait at most the specified Duration of time.
+         *
+         * @param atMost the Duration to wait
+         * @throws TimeoutException if the wait times out
+         * @throws InterruptedException if the wait is interrupted
+         */
+        void shutdownAndWait(Duration atMost) throws TimeoutException, InterruptedException;
+    }
+
+    /**
+     * Callbacks invoked on lifecycle events.
+     */
+    interface Callbacks {
+        /**
+         * Invoked when remoting was downed locally.
+         */
+        void onLocalDown();
+
+        /**
+         * Invoked when remoting was quarententined.
+         *
+         * @param quarantinedBy the address which caused the quarantine
+         */
+        void onRemoteQuarantined(Address quarantinedBy);
+    }
+
+    /**
+     * A factory component capable of creating {@link ActorSystemInstance}s.
+     */
+    interface Creator {
+        /**
+         * Create a new {@link ActorSystemInstance}.
+         *
+         * @param name the actor system name
+         * @param config the actor system configuration
+         * @param callbacks lifecycle {@link Callbacks}
+         * @return an {@link ActorSystemInstance} that needs to be shut down
+         */
+        ActorSystemInstance.WithShutdown createInstance(String name, Config config, Callbacks callbacks);
+    }
+
     /**
      * {@return the ActorSystem}
      */
