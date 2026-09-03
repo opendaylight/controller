@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.nio.file.Path;
 import java.util.Map;
+import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
@@ -135,10 +136,12 @@ public final class OSGiDistributedDataStore {
             @Reference(target = "(component.factory=" + OSGiDOMStore.FACTORY_NAME + ")")
             final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
         this.datastoreFactory = requireNonNull(datastoreFactory);
-        configDatastore = createDatastore(STATE_DIR, schemaService, actorSystemProvider, snapshotRestore,
+
+        final var actorSystem = actorSystemProvider.getActorSystem();
+        configDatastore = createDatastore(STATE_DIR, schemaService, actorSystem, snapshotRestore,
             introspectorFactory, DataTreeInvariants.ofDefault(dataTreeFactory, LogicalDatastoreType.CONFIGURATION),
             "distributed-config", properties, null);
-        operDatastore = createDatastore(STATE_DIR, schemaService, actorSystemProvider, snapshotRestore,
+        operDatastore = createDatastore(STATE_DIR, schemaService, actorSystem, snapshotRestore,
             introspectorFactory, DataTreeInvariants.ofDefault(dataTreeFactory, LogicalDatastoreType.OPERATIONAL),
             "distributed-operational", properties, new ConfigurationImpl(configProvider));
     }
@@ -159,13 +162,13 @@ public final class OSGiDistributedDataStore {
     }
 
     private DatastoreState createDatastore(final Path stateDir, final DOMSchemaService schemaService,
-            final ActorSystemProvider actorSystemProvider, final DatastoreSnapshotRestore snapshotRestore,
+            final ActorSystem actorSystem, final DatastoreSnapshotRestore snapshotRestore,
             final DatastoreContextIntrospectorFactory introspectorFactory, final DataTreeInvariants invariants,
             final String serviceType, final Map<String, Object> properties,final Configuration config) {
         final var datastoreType = invariants.type();
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final var introspector = introspectorFactory.newInstance(datastoreType, properties);
-        final var datastore = DistributedDataStoreFactory.createInstance(stateDir, actorSystemProvider,
+        final var datastore = DistributedDataStoreFactory.createInstance(stateDir, actorSystem,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore::onModelContextUpdated));
         final var state = new DatastoreState(introspector, invariants, datastore, serviceType);
