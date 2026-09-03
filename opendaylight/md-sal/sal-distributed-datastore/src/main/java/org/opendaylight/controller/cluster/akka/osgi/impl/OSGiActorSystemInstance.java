@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.akka.impl.ActorSystemInstanceImpl;
 import org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.pekko.support.ActorSystemInstance;
+import org.opendaylight.controller.pekko.support.TerminationMonitor;
 import org.opendaylight.yangtools.concepts.AccessControllerCompat;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -54,5 +55,10 @@ public final class OSGiActorSystemInstance implements ActorSystemInstance {
     @Override
     public ActorSystem actorSystem() {
         return delegate.actorSystem();
+    }
+
+    @Override
+    public TerminationMonitor terminationMonitor() {
+        return delegate.terminationMonitor();
     }
 }

@@ -29,11 +29,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.pekko.support.spi.DefaultTerminationMonitor;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
 public class GossiperTest {
-
+    private static DefaultTerminationMonitor terminationMonitor;
     private static ActorSystem system;
     private static Gossiper gossiper;
 
@@ -42,13 +42,13 @@ public class GossiperTest {
     @BeforeClass
     public static void setup() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
-        system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-
+        terminationMonitor = DefaultTerminationMonitor.createIn(system);
         gossiper = createGossiper();
     }
 
     @AfterClass
     public static void teardown() {
+        terminationMonitor.close();
         TestKit.shutdownActorSystem(system);
     }
 

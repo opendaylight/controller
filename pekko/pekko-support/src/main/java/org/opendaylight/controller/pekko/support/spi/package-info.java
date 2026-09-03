@@ -6,9 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 /**
- * Support APIs for working with Pekko.
+ * Utilities for Pekko support APIs.
  *
  * @since 14.0.0
  */
 @org.osgi.annotation.bundle.Export
-package org.opendaylight.controller.pekko.support;
+package org.opendaylight.controller.pekko.support.spi;
