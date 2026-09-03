@@ -32,7 +32,11 @@ import org.opendaylight.raft.spi.RaftPolicyResolver;
 import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
+import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -411,6 +415,28 @@ public class DatastoreContext implements ClientActorConfig {
 
     public int getInitialPayloadSerializedBufferCapacity() {
         return initialPayloadSerializedBufferCapacity;
+    }
+
+    /**
+     * {@return a new {@link DataTree}}
+     */
+    public DataTree newDataTree() {
+        return dataTreeFactory.create(treeConfig());
+    }
+
+    /**
+     * {@return a new {@link DataTree} backed by an {@link EffectiveModelContext}}
+     */
+    public DataTree newDataTree(final EffectiveModelContext modelContext) {
+        return dataTreeFactory.create(treeConfig(), modelContext);
+    }
+
+    private DataTreeConfiguration treeConfig() {
+        final var config = DataTreeConfiguration.getDefault(switch (logicalStoreType) {
+            case CONFIGURATION -> TreeType.CONFIGURATION;
+            case OPERATIONAL ->  TreeType.OPERATIONAL;
+        });
+        return storeRoot.isEmpty() ? config : config.toBuilder().setRootPath(storeRoot).build();
     }
 
     public static class Builder {

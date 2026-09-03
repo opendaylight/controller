@@ -97,7 +97,6 @@ import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,18 +222,9 @@ public class Shard extends RaftActor {
         setPersistence(datastoreContext.isPersistent());
 
         LOG.info("{}: Shard created, persistent : {}", memberId(), datastoreContext.isPersistent());
-
-        ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
-                new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
-        if (builder.getDataTree() != null) {
-            store = new ShardDataTree(this, builder.getSchemaContext(), builder.getDataTree(),
-                    treeChangeListenerPublisher, name,
-                    frontendMetadata);
-        } else {
-            store = new ShardDataTree(this, builder.getSchemaContext(), builder.getTreeType(),
-                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher, name,
-                    frontendMetadata);
-        }
+        store = new ShardDataTree(this, builder.getSchemaContext(), builder.getDataTree(),
+            new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name),
+            name, frontendMetadata);
 
         recoveryObserver = switch (datastoreContext.getExportOnRecovery()) {
             case Json -> new JsonRecoveryObserver(memberId(), Path.of(datastoreContext.getRecoveryExportBaseDir()),
@@ -818,15 +808,9 @@ public class Shard extends RaftActor {
             return restoreFromSnapshot;
         }
 
-        public DataTree getDataTree() {
-            return dataTree;
-        }
-
-        public TreeType getTreeType() {
-            return switch (datastoreContext.getLogicalStoreType()) {
-                case CONFIGURATION -> TreeType.CONFIGURATION;
-                case OPERATIONAL -> TreeType.OPERATIONAL;
-            };
+        public @NonNull DataTree getDataTree() {
+            final var local = dataTree;
+            return local != null ? local : datastoreContext.newDataTree();
         }
 
         protected void verify() {

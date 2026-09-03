@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Queue;
+import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -84,13 +85,13 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -163,24 +164,12 @@ public class ShardDataTree {
         tip = dataTree;
     }
 
-    ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final TreeType treeType,
-            final YangInstanceIdentifier root,
-            final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final String logContext,
-            final ShardDataTreeMetadata<?>... metadata) {
-        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext, metadata);
-    }
-
-    private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
-        return new InMemoryDataTreeFactory().create(DataTreeConfiguration.getDefault(treeType).toBuilder()
-            .setRootPath(root)
-            .build());
-    }
-
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final TreeType treeType) {
-        this(shard, schemaContext, treeType, YangInstanceIdentifier.of(),
-                new DefaultShardDataTreeChangeListenerPublisher(""), "");
+        this(shard, schemaContext, ServiceLoader.load(DataTreeFactory.class)
+            .findFirst().orElseThrow()
+            .create(DataTreeConfiguration.getDefault(treeType)),
+            new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
 
     final String logContext() {

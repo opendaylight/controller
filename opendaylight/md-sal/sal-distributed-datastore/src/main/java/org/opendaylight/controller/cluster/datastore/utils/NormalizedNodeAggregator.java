@@ -11,14 +11,10 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Optional;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 public final class NormalizedNodeAggregator {
     private final YangInstanceIdentifier rootIdentifier;
@@ -28,7 +24,7 @@ public final class NormalizedNodeAggregator {
     private NormalizedNodeAggregator(final DataTree dataTree, final YangInstanceIdentifier rootIdentifier,
             final List<Optional<NormalizedNode>> nodes) {
         this.dataTree = requireNonNull(dataTree);
-        this.rootIdentifier = rootIdentifier;
+        this.rootIdentifier = requireNonNull(rootIdentifier);
         this.nodes = nodes;
     }
 
@@ -36,14 +32,9 @@ public final class NormalizedNodeAggregator {
      * Combine data from all the nodes in the list into a tree with root as rootIdentifier.
      */
     public static Optional<NormalizedNode> aggregate(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode>> nodes, final DataTreeFactory dataTreeFactory,
-            final EffectiveModelContext modelContext, final LogicalDatastoreType logicalDatastoreType)
+            final DataTree dataTree, final List<Optional<NormalizedNode>> nodes)
                 throws DataValidationFailedException {
-        return new NormalizedNodeAggregator(dataTreeFactory.create(
-            switch (logicalDatastoreType) {
-                case CONFIGURATION -> DataTreeConfiguration.DEFAULT_CONFIGURATION;
-                case OPERATIONAL -> DataTreeConfiguration.DEFAULT_OPERATIONAL;
-            }, modelContext), rootIdentifier, nodes).aggregate();
+        return new NormalizedNodeAggregator(dataTree, rootIdentifier, nodes).aggregate();
     }
 
     private Optional<NormalizedNode> aggregate() throws DataValidationFailedException {

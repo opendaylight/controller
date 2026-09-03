@@ -24,14 +24,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 
 /**
  * Utility methods for dealing with datastore root {@link ContainerNode} with respect to module shards.
@@ -77,12 +75,13 @@ public final class RootScatterGather {
      */
     public static @NonNull FluentFuture<Optional<NormalizedNode>> gather(final ActorUtils actorUtils,
             final Stream<FluentFuture<Optional<NormalizedNode>>> readFutures) {
+        final var context = actorUtils.getDatastoreContext();
+
         return FluentFuture.from(Futures.transform(
             Futures.allAsList(readFutures.collect(ImmutableList.toImmutableList())), input -> {
                 try {
-                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(), input,
-                        new InMemoryDataTreeFactory(), actorUtils.getSchemaContext(),
-                        actorUtils.getDatastoreContext().getLogicalStoreType());
+                    return NormalizedNodeAggregator.aggregate(context.getStoreRoot(),
+                        context.newDataTree(actorUtils.getSchemaContext()), input);
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
                 }
