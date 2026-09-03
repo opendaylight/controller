@@ -20,7 +20,7 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteOpsProviderConfigTest {
@@ -52,7 +52,7 @@ public class RemoteOpsProviderConfigTest {
     @Test
     public void testConfigCustomizations() {
 
-        AkkaConfigurationReader reader = new TestConfigReader();
+        ConfigurationReader reader = new TestConfigReader();
 
         final int expectedCapacity = 100;
         final var expectedTimeout = new FiniteDuration(10, TimeUnit.MILLISECONDS);
@@ -103,12 +103,10 @@ public class RemoteOpsProviderConfigTest {
         }
     }
 
-    public static class TestConfigReader implements AkkaConfigurationReader {
-
+    public static class TestConfigReader implements ConfigurationReader {
         @Override
         public Config read() {
             return ConfigFactory.parseResources("application.conf");
-
         }
     }
 }
