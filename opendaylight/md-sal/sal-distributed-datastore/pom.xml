@@ -54,6 +54,10 @@
     <!-- OpenDaylight -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>pekko-support</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>raft-api</artifactId>
     </dependency>
     <dependency>
