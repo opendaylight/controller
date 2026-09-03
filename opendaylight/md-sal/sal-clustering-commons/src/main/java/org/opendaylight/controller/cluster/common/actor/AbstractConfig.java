@@ -13,6 +13,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 
 public abstract class AbstractConfig implements UnifiedConfig {
 
@@ -40,7 +41,7 @@ public abstract class AbstractConfig implements UnifiedConfig {
         }
 
         @SuppressWarnings("unchecked")
-        public T withConfigReader(AkkaConfigurationReader reader) {
+        public T withConfigReader(ConfigurationReader reader) {
             fallback = reader.read().getConfig(actorSystemName);
             return (T)this;
         }

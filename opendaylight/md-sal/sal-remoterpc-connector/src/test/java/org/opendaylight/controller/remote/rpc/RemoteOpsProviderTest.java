@@ -32,7 +32,7 @@ public class RemoteOpsProviderTest {
 
     @BeforeClass
     public static void setup() {
-        moduleConfig = new RemoteOpsProviderConfig.Builder("odl-cluster-rpc")
+        moduleConfig = new RemoteOpsProviderConfig.Builder("odl-cluster-data")
                 .withConfigReader(ConfigFactory::load).build();
         final Config config = moduleConfig.get();
         system = ActorSystem.create("odl-cluster-rpc", config);
@@ -41,8 +41,10 @@ public class RemoteOpsProviderTest {
 
     @AfterClass
     public static void teardown() {
-        TestKit.shutdownActorSystem(system);
-        system = null;
+        if (system != null) {
+            TestKit.shutdownActorSystem(system);
+            system = null;
+        }
     }
 
     @Test
