@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
-import org.opendaylight.controller.cluster.ActorSystemInstance;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
 import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
