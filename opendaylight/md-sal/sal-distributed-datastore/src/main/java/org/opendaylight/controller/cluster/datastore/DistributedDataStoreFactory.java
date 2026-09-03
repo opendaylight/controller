@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import java.nio.file.Path;
-import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.apache.pekko.actor.ActorSystem;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -27,19 +27,19 @@ public final class DistributedDataStoreFactory {
 
     public static AbstractDataStore createInstance(final Path stateDir, final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
-            final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
+            final ActorSystem actorSystem, final DatastoreContextIntrospector introspector,
             final DatastoreContextPropertiesUpdater updater) {
         return createInstance(stateDir, schemaService, initialDatastoreContext, datastoreSnapshotRestore,
-            actorSystemProvider, introspector, updater, null);
+            actorSystem, introspector, updater, null);
     }
 
     // TODO: separate out settle wait so it is better controlled
     public static AbstractDataStore createInstance(final Path stateDir, final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
-            final ActorSystemProvider actorSystemProvider, final DatastoreContextIntrospector introspector,
+            final ActorSystem actorSystem, final DatastoreContextIntrospector introspector,
             final DatastoreContextPropertiesUpdater updater, final Configuration orgConfig) {
 
-        final AbstractDataStore dataStore = createInstance(stateDir, actorSystemProvider, initialDatastoreContext,
+        final AbstractDataStore dataStore = createInstance(stateDir, actorSystem, initialDatastoreContext,
             introspector, datastoreSnapshotRestore, orgConfig);
 
         updater.setListener(dataStore);
@@ -52,14 +52,12 @@ public final class DistributedDataStoreFactory {
         return dataStore;
     }
 
-    public static AbstractDataStore createInstance(final Path stateDir, final ActorSystemProvider actorSystemProvider,
+    public static AbstractDataStore createInstance(final Path stateDir, final ActorSystem actorSystem,
             final DatastoreContext initialDatastoreContext, final DatastoreContextIntrospector introspector,
             final DatastoreSnapshotRestore datastoreSnapshotRestore, final Configuration orgConfig) {
-
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
 
-        final var actorSystem = actorSystemProvider.getActorSystem();
         final var restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(datastoreName).orElse(null);
 
         final Configuration config;
