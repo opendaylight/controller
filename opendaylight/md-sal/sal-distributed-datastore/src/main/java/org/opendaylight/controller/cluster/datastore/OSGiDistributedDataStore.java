@@ -15,12 +15,15 @@ import com.google.common.util.concurrent.Futures;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.nio.file.Path;
 import java.util.Map;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeFactory;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -46,32 +49,34 @@ public final class OSGiDistributedDataStore {
      * to settle (which can take a long time).
      */
     private final class DatastoreState implements FutureCallback<Object> {
-        private final DatastoreContextIntrospector introspector;
-        private final LogicalDatastoreType datastoreType;
-        private final AbstractDataStore datastore;
-        private final String serviceType;
+        private final @NonNull DatastoreContextIntrospector introspector;
+        private final @NonNull DataTreeInvariants invariants;
+        private final @NonNull AbstractDataStore datastore;
+        private final @NonNull String serviceType;
 
         @GuardedBy("this")
         private ComponentInstance<OSGiDOMStore> component;
         @GuardedBy("this")
         private boolean stopped;
 
-        DatastoreState(final DatastoreContextIntrospector introspector, final LogicalDatastoreType datastoreType,
+        @NonNullByDefault
+        DatastoreState(final DatastoreContextIntrospector introspector, final DataTreeInvariants invariants,
                 final AbstractDataStore datastore, final String serviceType) {
             this.introspector = requireNonNull(introspector);
-            this.datastoreType = requireNonNull(datastoreType);
+            this.invariants = requireNonNull(invariants);
             this.datastore = requireNonNull(datastore);
             this.serviceType = requireNonNull(serviceType);
         }
 
         synchronized void updateProperties(final Map<String, Object> properties) {
             if (introspector.update(properties)) {
-                LOG.info("Distributed Datastore type {} updating context", datastoreType);
+                LOG.info("Distributed Datastore type {} updating context", datastoreType());
                 datastore.onDatastoreContextUpdated(introspector.newContextFactory());
             }
         }
 
         void stop() {
+            final var datastoreType = datastoreType();
             LOG.info("Distributed Datastore type {} stopping", datastoreType);
 
             synchronized (this) {
@@ -87,6 +92,7 @@ public final class OSGiDistributedDataStore {
 
         @Override
         public void onSuccess(final Object result) {
+            final var datastoreType = datastoreType();
             LOG.debug("Distributed Datastore type {} reached initial settle", datastoreType);
 
             synchronized (this) {
@@ -102,7 +108,12 @@ public final class OSGiDistributedDataStore {
 
         @Override
         public synchronized void onFailure(final Throwable cause) {
-            LOG.error("Distributed Datastore type {} failed to settle", datastoreType, cause);
+            LOG.error("Distributed Datastore type {} failed to settle", datastoreType(), cause);
+        }
+
+        @NonNullByDefault
+        private LogicalDatastoreType datastoreType() {
+            return invariants.type();
         }
     }
 
@@ -114,7 +125,9 @@ public final class OSGiDistributedDataStore {
     private DatastoreState operDatastore;
 
     @Activate
-    public OSGiDistributedDataStore(@Reference final DOMSchemaService schemaService,
+    public OSGiDistributedDataStore(
+            @Reference final DataTreeFactory dataTreeFactory,
+            @Reference final DOMSchemaService schemaService,
             @Reference final ActorSystemProvider actorSystemProvider,
             @Reference final DatastoreContextIntrospectorFactory introspectorFactory,
             @Reference final DatastoreSnapshotRestore snapshotRestore,
@@ -123,10 +136,11 @@ public final class OSGiDistributedDataStore {
             final ComponentFactory<OSGiDOMStore> datastoreFactory, final Map<String, Object> properties) {
         this.datastoreFactory = requireNonNull(datastoreFactory);
         configDatastore = createDatastore(STATE_DIR, schemaService, actorSystemProvider, snapshotRestore,
-            introspectorFactory, LogicalDatastoreType.CONFIGURATION, "distributed-config", properties, null);
+            introspectorFactory, DataTreeInvariants.ofDefault(dataTreeFactory, LogicalDatastoreType.CONFIGURATION),
+            "distributed-config", properties, null);
         operDatastore = createDatastore(STATE_DIR, schemaService, actorSystemProvider, snapshotRestore,
-            introspectorFactory, LogicalDatastoreType.OPERATIONAL, "distributed-operational", properties,
-            new ConfigurationImpl(configProvider));
+            introspectorFactory, DataTreeInvariants.ofDefault(dataTreeFactory, LogicalDatastoreType.OPERATIONAL),
+            "distributed-operational", properties, new ConfigurationImpl(configProvider));
     }
 
     @Modified
@@ -146,14 +160,15 @@ public final class OSGiDistributedDataStore {
 
     private DatastoreState createDatastore(final Path stateDir, final DOMSchemaService schemaService,
             final ActorSystemProvider actorSystemProvider, final DatastoreSnapshotRestore snapshotRestore,
-            final DatastoreContextIntrospectorFactory introspectorFactory, final LogicalDatastoreType datastoreType,
+            final DatastoreContextIntrospectorFactory introspectorFactory, final DataTreeInvariants invariants,
             final String serviceType, final Map<String, Object> properties,final Configuration config) {
+        final var datastoreType = invariants.type();
         LOG.info("Distributed Datastore type {} starting", datastoreType);
         final var introspector = introspectorFactory.newInstance(datastoreType, properties);
         final var datastore = DistributedDataStoreFactory.createInstance(stateDir, actorSystemProvider,
             introspector.getContext(), introspector, snapshotRestore, config);
         datastore.setCloseable(schemaService.registerSchemaContextListener(datastore::onModelContextUpdated));
-        final var state = new DatastoreState(introspector, datastoreType, datastore, serviceType);
+        final var state = new DatastoreState(introspector, invariants, datastore, serviceType);
 
         Futures.addCallback(datastore.initialSettleFuture(), state,
             // Note we are invoked from shard manager and therefore could block it, hence the round-trip to executor
