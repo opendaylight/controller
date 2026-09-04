@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odl-controller-testlib"
+version = "0.1.6"
+description = "Reusable PyTest helper library for ODL Controller CSIT test suites"
+requires-python = ">=3.11"
+dependencies = [
+    "allure-pytest>=2.14.3",
+    "jmespath>=1.0.1",
+    "paramiko>=4.0.0",
+    "pydantic-settings>=2.11.0",
+    "pytest>=8.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
