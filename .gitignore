@@ -47,6 +47,8 @@ __pycache__/
 *.py[cod]
 .tox/
 .pytest_cache/
+tests/controller_testlib/build/
+tests/controller_testlib/src/*.egg-info/
 
 # Node.js
 node_modules/
