@@ -10,9 +10,10 @@
  */
 module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support;
+    exports org.opendaylight.controller.pekko.support.spi;
 
+    requires transitive com.google.common;
     requires transitive org.opendaylight.controller.repackaged.pekko;
-    requires com.google.common;
     requires org.opendaylight.controller.scala3.library;
     requires org.slf4j;
 

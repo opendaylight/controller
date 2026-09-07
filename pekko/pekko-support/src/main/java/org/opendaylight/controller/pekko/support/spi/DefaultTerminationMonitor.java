@@ -46,6 +46,12 @@ public final class DefaultTerminationMonitor implements AutoCloseable, Terminati
         this.monitorActor = requireNonNull(monitorActor);
     }
 
+    /**
+     * Create a monitor in the specified actor system.
+     *
+     * @param actorSystem the actor system
+     * @return a monitor instance
+     */
     @NonNullByDefault
     public static DefaultTerminationMonitor createIn(final ActorSystem actorSystem) {
         return new DefaultTerminationMonitor(actorSystem.actorOf(Props.create(TerminationMonitorActor.class),
