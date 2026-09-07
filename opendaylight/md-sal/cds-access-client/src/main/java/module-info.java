@@ -17,6 +17,7 @@ module org.opendaylight.controller.cluster.access.client {
     requires transitive org.opendaylight.controller.repackaged.pekko;
     requires transitive org.opendaylight.raft.spi;
     requires transitive org.opendaylight.yangtools.concepts;
+    requires org.opendaylight.controller.pekko.support;
     requires org.opendaylight.controller.scala3.library;
     requires org.slf4j;
 
