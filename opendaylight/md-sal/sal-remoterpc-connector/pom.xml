@@ -136,11 +136,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <Export-package/>
-                        <Import-Package>
-                            org.opendaylight.controller.cluster;
-                            *
-                        </Import-Package>
+                        <Export-Package/>
                     </instructions>
                 </configuration>
             </plugin>
