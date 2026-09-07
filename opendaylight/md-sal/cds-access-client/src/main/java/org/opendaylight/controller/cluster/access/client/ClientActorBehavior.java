@@ -31,8 +31,8 @@ import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationExce
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.common.actor.DispatcherType;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
+import org.opendaylight.controller.pekko.support.spi.DispatcherType;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifiable;

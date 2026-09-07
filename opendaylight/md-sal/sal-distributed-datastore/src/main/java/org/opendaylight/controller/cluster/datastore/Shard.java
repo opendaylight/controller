@@ -55,7 +55,6 @@ import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestExcepti
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
-import org.opendaylight.controller.cluster.common.actor.DispatcherType;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -92,6 +91,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.NoopRecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.RecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.pekko.support.spi.DispatcherType;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;

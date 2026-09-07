@@ -5,15 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.common.actor;
+package org.opendaylight.controller.pekko.support.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.dispatch.MessageDispatcher;
 import org.eclipse.jdt.annotation.NonNull;
 
+@Beta
 public enum DispatcherType {
     Client("client-dispatcher"),
     Transaction("txn-dispatcher"),
