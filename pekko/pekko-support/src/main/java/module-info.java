@@ -10,6 +10,7 @@
  */
 module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support;
+    exports org.opendaylight.controller.pekko.support.spi;
 
     requires transitive org.opendaylight.controller.repackaged.pekko;
     requires com.google.common;
