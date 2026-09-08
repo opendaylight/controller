@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -41,7 +42,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -96,7 +96,6 @@ import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Internal shard state, similar to a DOMStore, but optimized for use in the actor system, e.g. it does not expose
@@ -107,8 +106,9 @@ import scala.concurrent.duration.FiniteDuration;
 // non-final for mocking
 @VisibleForTesting
 public class ShardDataTree {
-    private static final Timeout COMMIT_STEP_TIMEOUT = new Timeout(FiniteDuration.create(5, TimeUnit.SECONDS));
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
+    // FIXME: hard-coded timeout
+    private static final Duration COMMIT_STEP_TIMEOUT = Duration.ofSeconds(5);
 
     /**
      * Process this many transactions in a single batched run. If we exceed this limit, we need to schedule later

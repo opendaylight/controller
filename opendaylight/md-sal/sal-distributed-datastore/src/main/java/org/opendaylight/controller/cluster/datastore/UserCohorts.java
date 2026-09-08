@@ -10,17 +10,15 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
-import org.apache.pekko.dispatch.ExecutionContexts;
-import org.apache.pekko.dispatch.Futures;
-import org.apache.pekko.dispatch.Recover;
+import org.apache.pekko.dispatch.CompletionStages;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -30,8 +28,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
-import scala.jdk.javaapi.FutureConverters;
 
 /**
  * Composite cohort, which coordinates multiple user-provided cohorts as if it was only one cohort.
@@ -81,29 +77,22 @@ class UserCohorts {
         ABORTED
     }
 
-    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<>() {
-        @Override
-        public Failure recover(final Throwable error) {
-            return new Failure(error);
-        }
-    };
-
     private final @NonNull DataTreeCohortActorRegistry registry;
     private final @NonNull EffectiveModelContext modelContext;
     private final @NonNull TransactionIdentifier txId;
-    private final @NonNull Timeout timeout;
+    private final @NonNull Duration stepTimeout;
     private final @NonNull Shard shard;
 
     private @NonNull List<Success> successfulFromPrevious = List.of();
     private State state = State.IDLE;
 
     UserCohorts(final DataTreeCohortActorRegistry registry, final Shard shard, final EffectiveModelContext modelContext,
-            final TransactionIdentifier txId, final Timeout timeout) {
+            final TransactionIdentifier txId, final Duration stepTimeout) {
         this.registry = requireNonNull(registry);
         this.shard = requireNonNull(shard);
         this.modelContext = requireNonNull(modelContext);
         this.txId = requireNonNull(txId);
-        this.timeout = requireNonNull(timeout);
+        this.stepTimeout = requireNonNull(stepTimeout);
     }
 
     void reset() {
@@ -139,8 +128,7 @@ class UserCohorts {
             .map(message -> {
                 final var actor = message.getCohort();
                 LOG.trace("{}: requesting canCommit from {}", txId, actor);
-                return Patterns.ask(actor, message, timeout)
-                    .recover(EXCEPTION_TO_MESSAGE, ExecutionContexts.parasitic());
+                return Patterns.ask(actor, message, stepTimeout).exceptionally(Failure::new);
             })
             .toList();
         changeStateFrom(State.IDLE, State.CAN_COMMIT_SENT);
@@ -181,26 +169,26 @@ class UserCohorts {
         }
 
         final var message = new DataTreeCohortActor.Abort(txId);
-        return FutureConverters.asJava(Futures.sequence(successfulFromPrevious.stream()
-            .map(success -> Patterns.ask(success.getCohort(), message, timeout))
-            .toList(), ExecutionContexts.parasitic()))
+        return CompletionStages.sequence(successfulFromPrevious.stream()
+            .map(success -> Patterns.ask(success.getCohort(), message, stepTimeout))
             // FIXME: do not use executeInSelf()
-            .thenApplyAsync(ignored -> Empty.value(), shard::executeInSelf);
+            .toList(), shard::executeInSelf)
+            .thenApply(ignored -> Empty.value());
     }
 
-    private List<Future<Object>> sendMessageToSuccessful(final Object message) {
+    private List<CompletionStage<Object>> sendMessageToSuccessful(final Object message) {
         LOG.debug("{}: sendMesageToSuccessful: {}", txId, message);
         return successfulFromPrevious.stream()
-            .map(success -> Patterns.ask(success.getCohort(), message, timeout))
+            .map(success -> Patterns.ask(success.getCohort(), message, stepTimeout))
             .toList();
     }
 
-    private @NonNull CompletionStage<Empty> processResponses(final List<Future<Object>> futures,
+    private @NonNull CompletionStage<Empty> processResponses(final List<CompletionStage<Object>> futures,
             final State currentState, final State afterState) {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
         final var returnFuture = new CompletableFuture<Empty>();
 
-        FutureConverters.asJava(Futures.sequence(futures, ExecutionContexts.parasitic()))
+        CompletionStages.sequence(futures, null)
             .whenComplete((results, failure) ->
                 // FIXME: do not use executeInSelf()
                 shard.executeInSelf(() -> processResponses(failure, results, currentState, afterState, returnFuture)));
