@@ -10,13 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.errorprone.annotations.concurrent.GuardedBy;
-import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.pattern.Patterns;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RegisterCohort;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RemoveCohort;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
@@ -29,8 +25,6 @@ import scala.jdk.javaapi.FutureConverters;
 // FIXME: rename to DataTreeCohortRegistration
 final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
-    // FIXME: hard-coded
-    private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
 
     private final @NonNull DOMDataTreeCommitCohort cohort;
     // FIXME: ActorUtils is bound to a logical datastore, hence YangInstanceIdentifier should do fine here
@@ -76,28 +70,30 @@ final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
         return ret;
     }
 
+    @NonNullByDefault
     private synchronized void registerCohort(final ActorRef shard) {
         if (isClosed()) {
             return;
         }
-        cohortRegistry = shard;
-        // FIXME: tell don't ask: we already have an actor: creating another actor for Pattern.ask() is superfluous
-        // FIXME: this should live as a method in DataTreeCohortActorRegistry
-        Patterns.ask(shard, new RegisterCohort(subtree, actor), REGISTER_ASK_TIMEOUT).whenCompleteAsync(
-            (val, failure) -> {
-                if (failure != null) {
-                    LOG.error("Unable to register {} as commit cohort", cohort, failure);
-                }
-                if (isClosed()) {
-                    removeRegistration();
-                }
-            }, actorUtils.getClientDispatcher());
+        cohortRegistry = requireNonNull(shard);
+
+        // FIXME: this should be retried for as long as the registration is valid
+        // FIXME: the result should be saved
+        DataTreeCohortActorRegistry.askRegisterCohort(shard, subtree, actor).whenCompleteAsync((unused, failure) -> {
+            if (failure != null) {
+                LOG.error("Unable to register {} as commit cohort", cohort, failure);
+            }
+            if (isClosed()) {
+                removeRegistration();
+            }
+        }, actorUtils.getClientDispatcher());
     }
 
     @Override
     protected synchronized void removeRegistration() {
-        if (cohortRegistry != null) {
-            cohortRegistry.tell(new RemoveCohort(actor), ActorRef.noSender());
+        final var local = cohortRegistry;
+        if (local != null) {
+            DataTreeCohortActorRegistry.tellRemoveCohort(local, actor);
         }
     }
 }

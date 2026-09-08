@@ -10,13 +10,16 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ArrayListMultimap;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
+import org.apache.pekko.pattern.Patterns;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -39,6 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActorRegistry.class);
+    // FIXME: hard-coded
+    private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
 
     private final HashMap<ActorRef, Node<ActorRef>> cohortToNode = new HashMap<>();
 
@@ -60,6 +65,13 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
+    @NonNullByDefault
+    static CompletionStage<?> askRegisterCohort(final ActorRef registryActor, final DOMDataTreeIdentifier subtree,
+            final ActorRef cohortActor) {
+        // TODO: can we make the timeout part just a retry?
+        return Patterns.ask(registryActor, new RegisterCohort(subtree, cohortActor), REGISTER_ASK_TIMEOUT);
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
         takeLock();
@@ -75,6 +87,11 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
             releaseLock();
         }
         sender.tell(new Status.Success(null), ActorRef.noSender());
+    }
+
+    @NonNullByDefault
+    static void tellRemoveCohort(final ActorRef registryActor, final ActorRef cohortActor) {
+        registryActor.tell(new RemoveCohort(cohortActor), ActorRef.noSender());
     }
 
     private void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
@@ -102,7 +119,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
     }
 
     @NonNullByDefault
-    static final class RegisterCohort extends CohortRegistryCommand {
+    private static final class RegisterCohort extends CohortRegistryCommand {
         private final DOMDataTreeIdentifier path;
 
         RegisterCohort(final DOMDataTreeIdentifier path, final ActorRef cohort) {
@@ -116,7 +133,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
     }
 
     @NonNullByDefault
-    static final class RemoveCohort extends CohortRegistryCommand {
+    private static final class RemoveCohort extends CohortRegistryCommand {
         RemoveCohort(final ActorRef cohort) {
             super(cohort);
         }
