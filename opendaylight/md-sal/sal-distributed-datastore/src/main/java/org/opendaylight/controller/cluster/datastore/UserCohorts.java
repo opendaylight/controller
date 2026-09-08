@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
@@ -92,18 +91,18 @@ class UserCohorts {
     };
 
     private final @NonNull DataTreeCohortActorRegistry registry;
-    private final @NonNull TransactionIdentifier txId;
     private final @NonNull EffectiveModelContext modelContext;
-    private final @NonNull Executor callbackExecutor;
+    private final @NonNull TransactionIdentifier txId;
     private final @NonNull Timeout timeout;
+    private final @NonNull Shard shard;
 
     private @NonNull List<Success> successfulFromPrevious = List.of();
     private State state = State.IDLE;
 
-    UserCohorts(final DataTreeCohortActorRegistry registry, final Executor callbackExecutor,
-            final EffectiveModelContext modelContext, final TransactionIdentifier txId, final Timeout timeout) {
+    UserCohorts(final DataTreeCohortActorRegistry registry, final Shard shard, final EffectiveModelContext modelContext,
+            final TransactionIdentifier txId, final Timeout timeout) {
         this.registry = requireNonNull(registry);
-        this.callbackExecutor = requireNonNull(callbackExecutor);
+        this.shard = requireNonNull(shard);
         this.modelContext = requireNonNull(modelContext);
         this.txId = requireNonNull(txId);
         this.timeout = requireNonNull(timeout);
@@ -185,8 +184,10 @@ class UserCohorts {
         final var message = new DataTreeCohortActor.Abort(txId);
         return FutureConverters.asJava(Futures.sequence(successfulFromPrevious.stream()
             .map(success -> Patterns.ask(success.getCohort(), message, timeout))
+            // FIXME: better execution context
             .collect(Collectors.toList()), ExecutionContexts.global()))
-            .thenApplyAsync(ignored -> Empty.value(), callbackExecutor);
+            // FIXME: do not use executeInSelf()
+            .thenApplyAsync(ignored -> Empty.value(), shard::executeInSelf);
     }
 
     private List<Future<Object>> sendMessageToSuccessful(final Object message) {
@@ -201,11 +202,13 @@ class UserCohorts {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
         final var returnFuture = new CompletableFuture<Empty>();
 
+        // FIXME: better execution contexts
         Futures.sequence(futures, ExecutionContexts.global())
             .onComplete(new OnComplete<>() {
                 @Override
                 public void onComplete(final Throwable failure, final Iterable<Object> results) {
-                    callbackExecutor.execute(
+                    // FIXME: do not use executeInSelf()
+                    shard.executeInSelf(
                         () -> processResponses(failure, results, currentState, afterState, returnFuture));
                 }
             }, ExecutionContexts.global());
