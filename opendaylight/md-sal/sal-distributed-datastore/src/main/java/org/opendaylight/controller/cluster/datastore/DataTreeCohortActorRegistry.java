@@ -84,7 +84,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
     void process(final @NonNull Command message) {
         switch (message) {
             case RegisterActor command -> registerActor(command);
-            case UnregisterActor command -> removeActor(command);
+            case UnregisterActor command -> unregisterActor(command);
         }
     }
 
@@ -118,7 +118,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         registryActor.tell(new UnregisterActor(cohortActor), ActorRef.noSender());
     }
 
-    private void removeActor(final UnregisterActor command) {
+    private void unregisterActor(final UnregisterActor command) {
         final var cohortActor = command.cohortActor;
         final var node = cohortToNode.get(cohortActor);
         if (node != null) {
