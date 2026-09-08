@@ -18,6 +18,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
@@ -45,8 +46,22 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         return List.copyOf(cohortToNode.keySet());
     }
 
+    List<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
+            final DataTreeCandidate candidate, final EffectiveModelContext schema) {
+        try (var cohorts = takeSnapshot()) {
+            return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
+        }
+    }
+
+    void process(final ActorRef sender, final @NonNull CohortRegistryCommand message) {
+        switch (message) {
+            case RegisterCohort register -> registerCohort(sender, register);
+            case RemoveCohort remove -> removeCommitCohort(sender, remove);
+        }
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
+    private void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
         takeLock();
         try {
             final ActorRef cohortRef = cohort.getCohort();
@@ -62,7 +77,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         sender.tell(new Status.Success(null), ActorRef.noSender());
     }
 
-    void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
+    private void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
         final ActorRef cohort = message.getCohort();
         final Node<ActorRef> node = cohortToNode.get(cohort);
         if (node != null) {
@@ -73,20 +88,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         cohort.tell(PoisonPill.getInstance(), cohort);
     }
 
-    List<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
-            final DataTreeCandidate candidate, final EffectiveModelContext schema) {
-        try (var cohorts = takeSnapshot()) {
-            return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
-        }
-    }
-
-    void process(final ActorRef sender, final @NonNull CohortRegistryCommand message) {
-        switch (message) {
-            case RegisterCohort register -> registerCohort(sender, register);
-            case RemoveCohort remove -> removeCommitCohort(sender, remove);
-        }
-    }
-
+    @NonNullByDefault
     abstract static sealed class CohortRegistryCommand {
         private final ActorRef cohort;
 
@@ -99,6 +101,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
+    @NonNullByDefault
     static final class RegisterCohort extends CohortRegistryCommand {
         private final DOMDataTreeIdentifier path;
 
@@ -112,6 +115,7 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
+    @NonNullByDefault
     static final class RemoveCohort extends CohortRegistryCommand {
         RemoveCohort(final ActorRef cohort) {
             super(cohort);
