@@ -187,16 +187,11 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     // Non-final for testing
     public Registration registerCommitCohort(final DOMDataTreeIdentifier subtree,
             final DOMDataTreeCommitCohort cohort) {
-        YangInstanceIdentifier treeId = requireNonNull(subtree, "subtree should not be null").path();
-        requireNonNull(cohort, "listener should not be null");
-
-
-        final String shardName = actorUtils.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
-        LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, treeId, shardName);
-
-        final var cohortProxy = new DataTreeCohortRegistrationProxy<>(actorUtils, subtree, cohort);
-        cohortProxy.init(shardName);
-        return cohortProxy;
+        // FIXME: The 'Registration' part should be peftormed here: DataTreeCohortRegistrationProxy should really be
+        //        an internal interface wrapped around managing the state of the encapsulated DataTreeCohortActor
+        //        We want to index returned registrations here, so that a datastore shutdown clears all subscriptions,
+        //        catching any unclosed strays.
+        return DataTreeCohortRegistrationProxy.of(actorUtils, subtree, requireNonNull(cohort));
     }
 
     public void onModelContextUpdated(final EffectiveModelContext newModelContext) {

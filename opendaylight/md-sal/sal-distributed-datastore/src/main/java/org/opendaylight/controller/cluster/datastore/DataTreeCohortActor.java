@@ -47,6 +47,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         this.registeredPath = requireNonNull(registeredPath);
     }
 
+    static Props props(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeCohortActor.class, cohort, registeredPath);
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public ActorRef getSender() {
@@ -328,9 +332,5 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     }
 
     private interface NoopThreePhaseCommitStep extends ThreePhaseCommitStep {
-    }
-
-    static Props props(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
-        return Props.create(DataTreeCohortActor.class, cohort, registeredPath);
     }
 }
