@@ -22,9 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.jdk.javaapi.FutureConverters;
 
-// FIXME: rename to DataTreeCohortRegistration
-final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
+final class DataTreeCohortRegistration extends AbstractRegistration {
+    private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistration.class);
 
     private final @NonNull DOMDataTreeCommitCohort cohort;
     // FIXME: ActorUtils is bound to a logical datastore, hence YangInstanceIdentifier should do fine here
@@ -36,7 +35,7 @@ final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
     private ActorRef cohortRegistry;
 
     @NonNullByDefault
-    private DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
+    private DataTreeCohortRegistration(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
             final DOMDataTreeCommitCohort cohort) {
         this.subtree = requireNonNull(subtree);
         this.cohort = requireNonNull(cohort);
@@ -46,13 +45,13 @@ final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
     }
 
     @NonNullByDefault
-    static DataTreeCohortRegistrationProxy of(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
+    static DataTreeCohortRegistration of(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
             final DOMDataTreeCommitCohort cohort) {
         final var path = subtree.path();
         final var shardName = actorUtils.getShardStrategyFactory().getStrategy(path).findShard(path);
         LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, path, shardName);
 
-        final var ret = new DataTreeCohortRegistrationProxy(actorUtils, subtree, cohort);
+        final var ret = new DataTreeCohortRegistration(actorUtils, subtree, cohort);
         FutureConverters.asJava(actorUtils.findLocalShardAsync(shardName)).whenComplete((shard, cause) -> {
             switch (cause) {
                 case null -> ret.registerCohort(shard);
