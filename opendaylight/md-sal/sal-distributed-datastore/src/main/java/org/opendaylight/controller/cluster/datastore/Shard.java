@@ -56,7 +56,6 @@ import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
@@ -312,7 +311,7 @@ public class Shard extends RaftActor {
             case GetShardMBean msg -> getSender().tell(getShardMBean(), self());
             case GetShardDataTree msg -> getSender().tell(store.getDataTree(), self());
             case ServerRemoved msg -> context().parent().forward(message, context());
-            case CohortRegistryCommand msg -> store.processCohortRegistryCommand(getSender(), msg);
+            case DataTreeCohortActorRegistry.Command msg -> store.processCohortRegistryCommand(msg);
             case MakeLeaderLocal msg -> onMakeLeaderLocal();
             case ResumeNextPendingTransaction msg -> store.resumeNextPendingTransaction();
             case GetKnownClients msg -> handleGetKnownClients();
