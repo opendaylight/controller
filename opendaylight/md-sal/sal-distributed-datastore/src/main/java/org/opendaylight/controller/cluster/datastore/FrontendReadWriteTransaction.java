@@ -167,7 +167,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     /**
      * Abstract base class for callbacks towards {@link CommitCohort}.
      */
-    private abstract static sealed class AbstractCallback<T> implements FutureCallback<T>
+    private abstract static sealed class AbstractCallback<T> implements ShardDataTree.CommitCallback<T>
             permits AbstractCanCommitCallback, AbstractPreCommitCallback, DoCommitCallback {
         private final @NonNull FrontendReadWriteTransaction transaction;
         private final @NonNull RequestEnvelope envelope;

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree.CommitCallback;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
@@ -73,11 +74,11 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void canCommitSuccess() {
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).successfulCanCommit();
+            invocation.getArgument(0, CommitCohort.class).successfulCanCommit();
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
-        final FutureCallback<Empty> callback = mock();
+        final CommitCallback<Empty> callback = mock();
         cohort.canCommit(callback);
 
         verify(callback).onSuccess(Empty.value());
@@ -86,11 +87,11 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void testValidatationPropagates(final Exception cause) {
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).failedCanCommit(cause);
+            invocation.getArgument(0, CommitCohort.class).failedCanCommit(cause);
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
-        final FutureCallback<Empty> callback = mock();
+        final CommitCallback<Empty> callback = mock();
         cohort.canCommit(callback);
 
         verify(callback).onFailure(cause);
@@ -115,11 +116,11 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     private DataTreeCandidateTip preCommitSuccess() {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).successfulPreCommit(mockCandidate);
+            invocation.getArgument(0, CommitCohort.class).successfulPreCommit(mockCandidate);
             return null;
         }).when(mockShardDataTree).startPreCommit(cohort);
 
-        final FutureCallback<DataTreeCandidate> callback = mock();
+        final CommitCallback<DataTreeCandidate> callback = mock();
         cohort.preCommit(callback);
 
         verify(callback).onSuccess(mockCandidate);
@@ -133,14 +134,14 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Test
     public void testPreCommitAndCommitSuccess() {
         canCommitSuccess();
-        final DataTreeCandidateTip candidate = preCommitSuccess();
+        final var candidate = preCommitSuccess();
 
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).successfulCommit(UnsignedLong.valueOf(0), () -> { });
+            invocation.getArgument(0, CommitCohort.class).successfulCommit(UnsignedLong.valueOf(0), () -> { });
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
-        final FutureCallback<UnsignedLong> mockCommitCallback = mock();
+        final CommitCallback<UnsignedLong> mockCommitCallback = mock();
         cohort.commit(mockCommitCallback);
 
         verify(mockCommitCallback).onSuccess(any(UnsignedLong.class));
@@ -153,13 +154,13 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void testPreCommitWithIllegalArgumentEx() {
         canCommitSuccess();
 
-        final Exception cause = new IllegalArgumentException("mock");
+        final var cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).failedPreCommit(cause);
+            invocation.getArgument(0, CommitCohort.class).failedPreCommit(cause);
             return null;
         }).when(mockShardDataTree).startPreCommit(cohort);
 
-        final FutureCallback<DataTreeCandidate> callback = mock();
+        final CommitCallback<DataTreeCandidate> callback = mock();
         cohort.preCommit(callback);
 
         verify(callback).onFailure(cause);
@@ -172,10 +173,10 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void testPreCommitWithReportedFailure() {
         canCommitSuccess();
 
-        final Exception cause = new IllegalArgumentException("mock");
+        final var cause = new IllegalArgumentException("mock");
         cohort.reportFailure(cause);
 
-        final FutureCallback<DataTreeCandidate> callback = mock();
+        final CommitCallback<DataTreeCandidate> callback = mock();
         cohort.preCommit(callback);
 
         verify(callback).onFailure(cause);
@@ -187,15 +188,15 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Test
     public void testCommitWithIllegalArgumentEx() {
         canCommitSuccess();
-        final DataTreeCandidateTip candidate = preCommitSuccess();
+        final var candidate = preCommitSuccess();
 
-        final Exception cause = new IllegalArgumentException("mock");
+        final var cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.<CommitCohort>getArgument(0).failedCommit(cause);
+            invocation.getArgument(0, CommitCohort.class).failedCommit(cause);
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
-        final FutureCallback<UnsignedLong> callback = mock();
+        final CommitCallback<UnsignedLong> callback = mock();
         cohort.commit(callback);
 
         verify(callback).onFailure(cause);

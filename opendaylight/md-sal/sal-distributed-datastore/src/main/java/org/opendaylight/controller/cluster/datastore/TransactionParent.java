@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
-import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree.CommitCallback;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 // Non-sealed for mocking
@@ -53,8 +53,9 @@ abstract class TransactionParent {
         return cohort;
     }
 
-    abstract @NonNull FutureCallback<UnsignedLong> wrapCommitCallback(
-        @NonNull ReadWriteShardDataTreeTransaction transaction, @NonNull FutureCallback<UnsignedLong> callback);
+    @NonNullByDefault
+    abstract CommitCallback<UnsignedLong> wrapCommitCallback(ReadWriteShardDataTreeTransaction transaction,
+        CommitCallback<UnsignedLong> callback);
 
     @Override
     public final String toString() {
