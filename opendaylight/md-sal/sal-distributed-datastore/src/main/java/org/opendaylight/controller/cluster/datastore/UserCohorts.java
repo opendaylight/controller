@@ -14,12 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.dispatch.Futures;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.dispatch.Recover;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
@@ -141,9 +139,10 @@ class UserCohorts {
             .map(message -> {
                 final var actor = message.getCohort();
                 LOG.trace("{}: requesting canCommit from {}", txId, actor);
-                return Patterns.ask(actor, message, timeout).recover(EXCEPTION_TO_MESSAGE, ExecutionContexts.global());
+                return Patterns.ask(actor, message, timeout)
+                    .recover(EXCEPTION_TO_MESSAGE, ExecutionContexts.parasitic());
             })
-            .collect(Collectors.toList());
+            .toList();
         changeStateFrom(State.IDLE, State.CAN_COMMIT_SENT);
         return processResponses(futures, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL);
     }
@@ -184,8 +183,7 @@ class UserCohorts {
         final var message = new DataTreeCohortActor.Abort(txId);
         return FutureConverters.asJava(Futures.sequence(successfulFromPrevious.stream()
             .map(success -> Patterns.ask(success.getCohort(), message, timeout))
-            // FIXME: better execution context
-            .collect(Collectors.toList()), ExecutionContexts.global()))
+            .toList(), ExecutionContexts.parasitic()))
             // FIXME: do not use executeInSelf()
             .thenApplyAsync(ignored -> Empty.value(), shard::executeInSelf);
     }
@@ -194,7 +192,7 @@ class UserCohorts {
         LOG.debug("{}: sendMesageToSuccessful: {}", txId, message);
         return successfulFromPrevious.stream()
             .map(success -> Patterns.ask(success.getCohort(), message, timeout))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private @NonNull CompletionStage<Empty> processResponses(final List<Future<Object>> futures,
@@ -202,17 +200,10 @@ class UserCohorts {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
         final var returnFuture = new CompletableFuture<Empty>();
 
-        // FIXME: better execution contexts
-        Futures.sequence(futures, ExecutionContexts.global())
-            .onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final Iterable<Object> results) {
-                    // FIXME: do not use executeInSelf()
-                    shard.executeInSelf(
-                        () -> processResponses(failure, results, currentState, afterState, returnFuture));
-                }
-            }, ExecutionContexts.global());
-
+        FutureConverters.asJava(Futures.sequence(futures, ExecutionContexts.parasitic()))
+            .whenComplete((results, failure) ->
+                // FIXME: do not use executeInSelf()
+                shard.executeInSelf(() -> processResponses(failure, results, currentState, afterState, returnFuture)));
         return returnFuture;
     }
 
