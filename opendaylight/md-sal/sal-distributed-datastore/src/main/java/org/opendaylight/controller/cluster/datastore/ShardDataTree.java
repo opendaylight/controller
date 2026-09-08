@@ -49,7 +49,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload;
@@ -977,8 +976,9 @@ public class ShardDataTree {
         return cohortRegistry.getCohortActors();
     }
 
-    final void processCohortRegistryCommand(final ActorRef sender, final CohortRegistryCommand message) {
-        cohortRegistry.process(sender, message);
+    @NonNullByDefault
+    final void processCohortRegistryCommand(final DataTreeCohortActorRegistry.Command message) {
+        cohortRegistry.process(message);
     }
 
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")

@@ -41,6 +41,29 @@ import org.slf4j.LoggerFactory;
  * of affected cohorts based on {@link DataTreeCandidate}. This class is NOT thread-safe.
  */
 final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
+    sealed interface Command {
+        // nothing else
+    }
+
+    @NonNullByDefault
+    private record RegisterActor(
+            ActorRef replyTo,
+            DOMDataTreeIdentifier subtree,
+            ActorRef cohortActor) implements Command {
+        RegisterActor {
+            requireNonNull(replyTo);
+            requireNonNull(subtree);
+            requireNonNull(cohortActor);
+        }
+    }
+
+    @NonNullByDefault
+    private record UnregisterActor(ActorRef cohortActor) implements Command {
+        UnregisterActor {
+            requireNonNull(cohortActor);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActorRegistry.class);
     // FIXME: hard-coded
     private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
@@ -58,85 +81,51 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
         }
     }
 
-    void process(final ActorRef sender, final @NonNull CohortRegistryCommand message) {
+    void process(final @NonNull Command message) {
         switch (message) {
-            case RegisterCohort register -> registerCohort(sender, register);
-            case RemoveCohort remove -> removeCommitCohort(sender, remove);
+            case RegisterActor command -> registerActor(command);
+            case UnregisterActor command -> removeActor(command);
         }
     }
 
     @NonNullByDefault
-    static CompletionStage<?> askRegisterCohort(final ActorRef registryActor, final DOMDataTreeIdentifier subtree,
+    static CompletionStage<?> registerActor(final ActorRef registryActor, final DOMDataTreeIdentifier subtree,
             final ActorRef cohortActor) {
         // TODO: can we make the timeout part just a retry?
-        return Patterns.ask(registryActor, new RegisterCohort(subtree, cohortActor), REGISTER_ASK_TIMEOUT);
+        return Patterns.askWithReplyTo(cohortActor, replyTo -> new RegisterActor(replyTo, subtree, cohortActor),
+            REGISTER_ASK_TIMEOUT);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
+    private void registerActor(final RegisterActor command) {
         takeLock();
         try {
-            final ActorRef cohortRef = cohort.getCohort();
-            final Node<ActorRef> node = findNodeFor(cohort.getPath().path().getPathArguments());
-            addRegistration(node, cohort.getCohort());
-            cohortToNode.put(cohortRef, node);
-        } catch (final Exception e) {
-            sender.tell(new Status.Failure(e), ActorRef.noSender());
+            final var cohortActor = command.cohortActor;
+            final var node = findNodeFor(command.subtree.path().getPathArguments());
+            addRegistration(node, cohortActor);
+            cohortToNode.put(cohortActor, node);
+        } catch (Exception e) {
+            command.replyTo.tell(new Status.Failure(e), ActorRef.noSender());
             return;
         } finally {
             releaseLock();
         }
-        sender.tell(new Status.Success(null), ActorRef.noSender());
+        command.replyTo.tell(new Status.Success(null), ActorRef.noSender());
     }
 
     @NonNullByDefault
-    static void tellRemoveCohort(final ActorRef registryActor, final ActorRef cohortActor) {
-        registryActor.tell(new RemoveCohort(cohortActor), ActorRef.noSender());
+    static void unregisterActor(final ActorRef registryActor, final ActorRef cohortActor) {
+        registryActor.tell(new UnregisterActor(cohortActor), ActorRef.noSender());
     }
 
-    private void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
-        final ActorRef cohort = message.getCohort();
-        final Node<ActorRef> node = cohortToNode.get(cohort);
+    private void removeActor(final UnregisterActor command) {
+        final var cohortActor = command.cohortActor;
+        final var node = cohortToNode.get(cohortActor);
         if (node != null) {
-            removeRegistration(node, cohort);
-            cohortToNode.remove(cohort);
+            removeRegistration(node, cohortActor);
+            cohortToNode.remove(cohortActor);
         }
-        sender.tell(new Status.Success(null), ActorRef.noSender());
-        cohort.tell(PoisonPill.getInstance(), cohort);
-    }
-
-    @NonNullByDefault
-    abstract static sealed class CohortRegistryCommand {
-        private final ActorRef cohort;
-
-        CohortRegistryCommand(final ActorRef cohort) {
-            this.cohort = requireNonNull(cohort);
-        }
-
-        ActorRef getCohort() {
-            return cohort;
-        }
-    }
-
-    @NonNullByDefault
-    private static final class RegisterCohort extends CohortRegistryCommand {
-        private final DOMDataTreeIdentifier path;
-
-        RegisterCohort(final DOMDataTreeIdentifier path, final ActorRef cohort) {
-            super(cohort);
-            this.path = path;
-        }
-
-        public DOMDataTreeIdentifier getPath() {
-            return path;
-        }
-    }
-
-    @NonNullByDefault
-    private static final class RemoveCohort extends CohortRegistryCommand {
-        RemoveCohort(final ActorRef cohort) {
-            super(cohort);
-        }
+        cohortActor.tell(PoisonPill.getInstance(), cohortActor);
     }
 
     private static final class CanCommitMessageBuilder {
