@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.primitives.UnsignedLong;
-import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree.CommitCallback;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
@@ -50,8 +50,8 @@ final class SimpleTransactionParent extends TransactionParent {
     }
 
     @Override
-    FutureCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
-            final FutureCallback<UnsignedLong> callback) {
+    CommitCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
+            final CommitCallback<UnsignedLong> callback) {
         return callback;
     }
 }
