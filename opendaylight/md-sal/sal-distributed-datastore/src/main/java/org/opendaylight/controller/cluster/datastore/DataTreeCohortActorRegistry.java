@@ -120,10 +120,9 @@ final class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRe
 
     private void unregisterActor(final UnregisterActor command) {
         final var cohortActor = command.cohortActor;
-        final var node = cohortToNode.get(cohortActor);
+        final var node = cohortToNode.remove(cohortActor);
         if (node != null) {
             removeRegistration(node, cohortActor);
-            cohortToNode.remove(cohortActor);
         }
         cohortActor.tell(PoisonPill.getInstance(), cohortActor);
     }
