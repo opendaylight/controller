@@ -79,7 +79,7 @@ final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
 
         // FIXME: this should be retried for as long as the registration is valid
         // FIXME: the result should be saved
-        DataTreeCohortActorRegistry.askRegisterCohort(shard, subtree, actor).whenCompleteAsync((unused, failure) -> {
+        DataTreeCohortActorRegistry.registerActor(shard, subtree, actor).whenCompleteAsync((unused, failure) -> {
             if (failure != null) {
                 LOG.error("Unable to register {} as commit cohort", cohort, failure);
             }
@@ -93,7 +93,7 @@ final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
     protected synchronized void removeRegistration() {
         final var local = cohortRegistry;
         if (local != null) {
-            DataTreeCohortActorRegistry.tellRemoveCohort(local, actor);
+            DataTreeCohortActorRegistry.unregisterActor(local, actor);
         }
     }
 }
