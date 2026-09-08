@@ -700,7 +700,7 @@ public class ShardDataTree {
 
     @NonNullByDefault
     final UserCohorts newUserCohorts(final TransactionIdentifier txId) {
-        return new UserCohorts(cohortRegistry, shard::executeInSelf, modelContext, txId, COMMIT_STEP_TIMEOUT);
+        return new UserCohorts(cohortRegistry, shard, modelContext, txId, COMMIT_STEP_TIMEOUT);
     }
 
     final void abortTransaction(final TransactionIdentifier txId, final Runnable callback) {
