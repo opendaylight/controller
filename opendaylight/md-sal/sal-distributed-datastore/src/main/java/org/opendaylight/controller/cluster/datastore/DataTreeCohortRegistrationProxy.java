@@ -12,67 +12,81 @@ import static java.util.Objects.requireNonNull;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RegisterCohort;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RemoveCohort;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
+import org.opendaylight.yangtools.concepts.AbstractRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.jdk.javaapi.FutureConverters;
 
-final class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C> {
+// FIXME: rename to DataTreeCohortRegistration
+final class DataTreeCohortRegistrationProxy extends AbstractRegistration {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
     // FIXME: hard-coded
     private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
 
-    private final DOMDataTreeIdentifier subtree;
-    private final ActorRef actor;
-    private final ActorUtils actorUtils;
+    private final @NonNull DOMDataTreeCommitCohort cohort;
+    // FIXME: ActorUtils is bound to a logical datastore, hence YangInstanceIdentifier should do fine here
+    private final @NonNull DOMDataTreeIdentifier subtree;
+    private final @NonNull ActorUtils actorUtils;
+    private final @NonNull ActorRef actor;
 
     @GuardedBy("this")
     private ActorRef cohortRegistry;
 
-    DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
-            final C cohort) {
-        super(cohort);
+    @NonNullByDefault
+    private DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
+            final DOMDataTreeCommitCohort cohort) {
         this.subtree = requireNonNull(subtree);
+        this.cohort = requireNonNull(cohort);
         this.actorUtils = requireNonNull(actorUtils);
-        actor = actorUtils.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
+        actor = actorUtils.getActorSystem().actorOf(DataTreeCohortActor.props(cohort,
                 subtree.path()).withDispatcher(actorUtils.getNotificationDispatcherPath()));
     }
 
-    public void init(final String shardName) {
-        // FIXME: Add late binding to shard.
-        actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final ActorRef shard) {
-                if (failure instanceof LocalShardNotFoundException) {
+    @NonNullByDefault
+    static DataTreeCohortRegistrationProxy of(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
+            final DOMDataTreeCommitCohort cohort) {
+        final var path = subtree.path();
+        final var shardName = actorUtils.getShardStrategyFactory().getStrategy(path).findShard(path);
+        LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, path, shardName);
+
+        final var ret = new DataTreeCohortRegistrationProxy(actorUtils, subtree, cohort);
+        FutureConverters.asJava(actorUtils.findLocalShardAsync(shardName)).whenComplete((shard, cause) -> {
+            switch (cause) {
+                case null -> ret.registerCohort(shard);
+                case LocalShardNotFoundException ex ->
+                    // FIXME: this should be retried or reported as error, or something
                     LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} cannot be registered",
-                        shardName, getInstance(), subtree);
-                } else if (failure != null) {
+                        shardName, cohort, subtree);
+                default -> {
                     LOG.error(
                         "Failed to find local shard {} - DataTreeChangeListener {} at path {} cannot be registered",
-                        shardName, getInstance(), subtree, failure);
-                } else {
-                    performRegistration(shard);
+                        shardName, cohort, subtree, cause);
                 }
             }
-        }, actorUtils.getClientDispatcher());
+        });
+        return ret;
     }
 
-    private synchronized void performRegistration(final ActorRef shard) {
+    private synchronized void registerCohort(final ActorRef shard) {
         if (isClosed()) {
             return;
         }
         cohortRegistry = shard;
+        // FIXME: tell don't ask: we already have an actor: creating another actor for Pattern.ask() is superfluous
+        // FIXME: this should live as a method in DataTreeCohortActorRegistry
         Patterns.ask(shard, new RegisterCohort(subtree, actor), REGISTER_ASK_TIMEOUT).whenCompleteAsync(
             (val, failure) -> {
                 if (failure != null) {
-                    LOG.error("Unable to register {} as commit cohort", getInstance(), failure);
+                    LOG.error("Unable to register {} as commit cohort", cohort, failure);
                 }
                 if (isClosed()) {
                     removeRegistration();

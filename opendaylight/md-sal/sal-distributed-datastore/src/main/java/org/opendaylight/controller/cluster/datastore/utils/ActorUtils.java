@@ -292,10 +292,10 @@ public class ActorUtils {
     }
 
     /**
-     * Finds a local shard async given its shard name and return a Future from which to obtain the
-     * ActorRef.
+     * Finds a local shard async given its shard name and return a Future from which to obtain the ActorRef.
      *
      * @param shardName the name of the local shard that needs to be found
+     * @return a Future that completes on {@link #getClientDispatcher()}
      */
     public Future<ActorRef> findLocalShardAsync(final String shardName) {
         return executeOperationAsync(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout)
