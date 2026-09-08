@@ -1,0 +1,8 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: Robert Varga <nite@hq.sk>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 08 Sep 2026 05:59:06 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/125746
+Project: controller
+Branch: refs/heads/master
