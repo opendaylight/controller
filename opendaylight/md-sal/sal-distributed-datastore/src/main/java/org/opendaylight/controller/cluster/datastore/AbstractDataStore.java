@@ -191,7 +191,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         //        an internal interface wrapped around managing the state of the encapsulated DataTreeCohortActor
         //        We want to index returned registrations here, so that a datastore shutdown clears all subscriptions,
         //        catching any unclosed strays.
-        return DataTreeCohortRegistrationProxy.of(actorUtils, subtree, requireNonNull(cohort));
+        return DataTreeCohortRegistration.of(actorUtils, subtree, requireNonNull(cohort));
     }
 
     public void onModelContextUpdated(final EffectiveModelContext newModelContext) {
