@@ -232,52 +232,52 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithCoordinatedCommits() throws Exception {
-        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final var cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final var cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         NormalizedNode peopleNode = PeopleModel.create();
-        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final var cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final CommitCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final var cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         immediateCanCommit(cohort1);
-        final FutureCallback<Empty> canCommitCallback2 = coordinatedCanCommit(cohort2);
-        final FutureCallback<Empty> canCommitCallback3 = coordinatedCanCommit(cohort3);
-        final FutureCallback<Empty> canCommitCallback4 = coordinatedCanCommit(cohort4);
+        final var canCommitCallback2 = coordinatedCanCommit(cohort2);
+        final var canCommitCallback3 = coordinatedCanCommit(cohort3);
+        final var canCommitCallback4 = coordinatedCanCommit(cohort4);
 
-        final FutureCallback<DataTreeCandidate> preCommitCallback1 = coordinatedPreCommit(cohort1);
+        final var preCommitCallback1 = coordinatedPreCommit(cohort1);
         verify(preCommitCallback1).onSuccess(cohort1.getCandidate());
         verify(canCommitCallback2).onSuccess(Empty.value());
 
-        final FutureCallback<DataTreeCandidate> preCommitCallback2 = coordinatedPreCommit(cohort2);
+        final var preCommitCallback2 = coordinatedPreCommit(cohort2);
         verify(preCommitCallback2).onSuccess(cohort2.getCandidate());
         verify(canCommitCallback3).onSuccess(Empty.value());
 
-        final FutureCallback<DataTreeCandidate> preCommitCallback3 = coordinatedPreCommit(cohort3);
+        final var preCommitCallback3 = coordinatedPreCommit(cohort3);
         verify(preCommitCallback3).onSuccess(cohort3.getCandidate());
         verify(canCommitCallback4).onSuccess(Empty.value());
 
-        final FutureCallback<DataTreeCandidate> preCommitCallback4 = coordinatedPreCommit(cohort4);
+        final var preCommitCallback4 = coordinatedPreCommit(cohort4);
         verify(preCommitCallback4).onSuccess(cohort4.getCandidate());
 
-        final FutureCallback<UnsignedLong> commitCallback2 = coordinatedCommit(cohort2);
+        final var commitCallback2 = coordinatedCommit(cohort2);
         verify(mockShard, never()).submitCommand(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 anyBoolean());
         verifyNoMoreInteractions(commitCallback2);
 
-        final FutureCallback<UnsignedLong> commitCallback4 = coordinatedCommit(cohort4);
+        final var commitCallback4 = coordinatedCommit(cohort4);
         verify(mockShard, never()).submitCommand(eq(cohort4.transactionId()), any(CommitTransactionPayload.class),
                 anyBoolean());
         verifyNoMoreInteractions(commitCallback4);
 
-        final FutureCallback<UnsignedLong> commitCallback1 = coordinatedCommit(cohort1);
-        InOrder inOrder = inOrder(mockShard);
+        final var commitCallback1 = coordinatedCommit(cohort1);
+        var inOrder = inOrder(mockShard);
         inOrder.verify(mockShard).submitCommand(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
         inOrder.verify(mockShard).submitCommand(eq(cohort2.transactionId()), any(CommitTransactionPayload.class),
@@ -285,7 +285,7 @@ public class ShardDataTreeTest extends AbstractTest {
         verifyNoMoreInteractions(commitCallback1);
         verifyNoMoreInteractions(commitCallback2);
 
-        final FutureCallback<UnsignedLong> commitCallback3 = coordinatedCommit(cohort3);
+        final var commitCallback3 = coordinatedCommit(cohort3);
         inOrder = inOrder(mockShard);
         inOrder.verify(mockShard).submitCommand(eq(cohort3.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
@@ -294,13 +294,12 @@ public class ShardDataTreeTest extends AbstractTest {
         verifyNoMoreInteractions(commitCallback3);
         verifyNoMoreInteractions(commitCallback4);
 
-        final CommitCohort cohort5 = newShardDataTreeCohort(snapshot ->
+        final var cohort5 = newShardDataTreeCohort(snapshot ->
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
-        final FutureCallback<Empty> canCommitCallback5 = coordinatedCanCommit(cohort5);
+        final var canCommitCallback5 = coordinatedCanCommit(cohort5);
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
-        CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
-                cohort1.getCandidate());
+        final var mockPayload = CommitTransactionPayload.create(nextTransactionId(), cohort1.getCandidate());
         shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort2.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
@@ -321,21 +320,21 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithImmediateCommits() throws Exception {
-        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final var cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final var cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final var cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
-        final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
-        final FutureCallback<UnsignedLong> commitCallback3 = immediate3PhaseCommit(cohort3);
-        final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
+        final var commitCallback2 = immediate3PhaseCommit(cohort2);
+        final var commitCallback3 = immediate3PhaseCommit(cohort3);
+        final var commitCallback1 = immediate3PhaseCommit(cohort1);
 
-        InOrder inOrder = inOrder(mockShard);
+        var inOrder = inOrder(mockShard);
         inOrder.verify(mockShard).submitCommand(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(true));
         inOrder.verify(mockShard).submitCommand(eq(cohort2.transactionId()), any(CommitTransactionPayload.class),
@@ -344,8 +343,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 eq(false));
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
-        CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
-                cohort1.getCandidate());
+        var mockPayload = CommitTransactionPayload.create(nextTransactionId(), cohort1.getCandidate());
         shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort2.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
@@ -362,19 +360,19 @@ public class ShardDataTreeTest extends AbstractTest {
     public void testPipelinedTransactionsWithImmediateReplication() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final var cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final var cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final var cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
-        final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
-        final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
-        final FutureCallback<UnsignedLong> commitCallback3 = immediate3PhaseCommit(cohort3);
+        final var commitCallback1 = immediate3PhaseCommit(cohort1);
+        final var commitCallback2 = immediate3PhaseCommit(cohort2);
+        final var commitCallback3 = immediate3PhaseCommit(cohort3);
 
         InOrder inOrder = inOrder(commitCallback1, commitCallback2, commitCallback3);
         inOrder.verify(commitCallback1).onSuccess(any(UnsignedLong.class));
@@ -386,18 +384,18 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testAbortWithPendingCommits() throws Exception {
-        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final var cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final var cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create()));
 
-        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final var cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final CommitCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final var cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         coordinatedCanCommit(cohort2);
         immediateCanCommit(cohort1);
@@ -408,8 +406,7 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedPreCommit(cohort2);
         coordinatedPreCommit(cohort3);
 
-        @SuppressWarnings("unchecked")
-        FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
+        FutureCallback<Empty> mockAbortCallback = mock();
         doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort2.abort(mockAbortCallback);
         verify(mockAbortCallback).onSuccess(Empty.value());
@@ -419,7 +416,7 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedCommit(cohort3);
         coordinatedCommit(cohort4);
 
-        InOrder inOrder = inOrder(mockShard);
+        var inOrder = inOrder(mockShard);
         inOrder.verify(mockShard).submitCommand(eq(cohort1.transactionId()), any(CommitTransactionPayload.class),
                 eq(false));
         inOrder.verify(mockShard).submitCommand(eq(cohort3.transactionId()), any(CommitTransactionPayload.class),
@@ -428,8 +425,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 eq(false));
 
         // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
-        CommitTransactionPayload mockPayload = CommitTransactionPayload.create(nextTransactionId(),
-                cohort1.getCandidate());
+        var mockPayload = CommitTransactionPayload.create(nextTransactionId(), cohort1.getCandidate());
         shardDataTree.applyReplicatedPayload(cohort1.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort3.transactionId(), mockPayload);
         shardDataTree.applyReplicatedPayload(cohort4.transactionId(), mockPayload);
@@ -441,29 +437,28 @@ public class ShardDataTreeTest extends AbstractTest {
     public void testAbortWithFailedRebase() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final var cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final var cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
-        NormalizedNode peopleNode = PeopleModel.create();
-        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final var peopleNode = PeopleModel.create();
+        final var cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         immediateCanCommit(cohort1);
-        FutureCallback<Empty> canCommitCallback2 = coordinatedCanCommit(cohort2);
+        final var canCommitCallback2 = coordinatedCanCommit(cohort2);
 
         coordinatedPreCommit(cohort1);
         verify(canCommitCallback2).onSuccess(Empty.value());
 
-        @SuppressWarnings("unchecked")
-        FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
+        FutureCallback<Empty> mockAbortCallback = mock();
         doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort1.abort(mockAbortCallback);
         verify(mockAbortCallback).onSuccess(Empty.value());
 
-        FutureCallback<DataTreeCandidate> preCommitCallback2 = coordinatedPreCommit(cohort2);
+        final var preCommitCallback2 = coordinatedPreCommit(cohort2);
         verify(preCommitCallback2).onFailure(any(Throwable.class));
 
         immediateCanCommit(cohort3);
@@ -494,7 +489,7 @@ public class ShardDataTreeTest extends AbstractTest {
         //        merge(foo=3)
         final var dataTree = ReferenceDataTreeFactoryModule.provideDataTreeFactory()
             .create(DataTreeConfiguration.DEFAULT_OPERATIONAL, fullSchema);
-        DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        var mod = dataTree.takeSnapshot().newModification();
         mod.write(CarsModel.BASE_PATH, ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
                 .withChild(ImmutableNodes.newSystemMapBuilder()
@@ -504,14 +499,14 @@ public class ShardDataTreeTest extends AbstractTest {
                 .build());
         mod.ready();
         dataTree.validate(mod);
-        final DataTreeCandidate first = dataTree.prepare(mod);
+        final var first = dataTree.prepare(mod);
         dataTree.commit(first);
 
         mod = dataTree.takeSnapshot().newModification();
         mod.write(CarsModel.newCarPath("two"), createCar("two", Uint64.TWO));
         mod.ready();
         dataTree.validate(mod);
-        final DataTreeCandidate second = dataTree.prepare(mod);
+        final var second = dataTree.prepare(mod);
         dataTree.commit(second);
 
         mod = dataTree.takeSnapshot().newModification();
@@ -521,7 +516,7 @@ public class ShardDataTreeTest extends AbstractTest {
             .build());
         mod.ready();
         dataTree.validate(mod);
-        final DataTreeCandidate third = dataTree.prepare(mod);
+        final var third = dataTree.prepare(mod);
         dataTree.commit(third);
 
         // Apply first candidate as a snapshot

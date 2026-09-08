@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree.CommitCallback;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
@@ -44,7 +45,7 @@ final class CommitCohort {
 
     private State state = State.READY;
     private DataTreeCandidateTip candidate;
-    private FutureCallback<?> callback;
+    private CommitCallback<?> callback;
     private Exception nextFailure;
     private long lastAccess;
 
@@ -100,7 +101,7 @@ final class CommitCohort {
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
-    void canCommit(final FutureCallback<Empty> newCallback) {
+    void canCommit(final CommitCallback<Empty> newCallback) {
         if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
@@ -125,7 +126,7 @@ final class CommitCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
-    void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
+    void preCommit(final CommitCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
@@ -260,7 +261,7 @@ final class CommitCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
-    void commit(final FutureCallback<UnsignedLong> newCallback) {
+    void commit(final CommitCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
         callback = transaction.getParent().wrapCommitCallback(transaction, requireNonNull(newCallback));
         state = State.COMMIT_PENDING;
