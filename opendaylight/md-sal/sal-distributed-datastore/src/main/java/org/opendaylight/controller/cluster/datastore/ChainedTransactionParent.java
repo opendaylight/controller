@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.primitives.UnsignedLong;
-import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree.CommitCallback;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
@@ -119,9 +119,9 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    FutureCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
-            final FutureCallback<UnsignedLong> callback) {
-        return new FutureCallback<>() {
+    CommitCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
+            final CommitCallback<UnsignedLong> callback) {
+        return new CommitCallback<>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
                 if (transaction.equals(previousTx)) {

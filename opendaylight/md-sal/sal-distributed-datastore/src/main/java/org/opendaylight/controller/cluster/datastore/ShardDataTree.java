@@ -118,6 +118,14 @@ public class ShardDataTree {
      */
     private static final int MAX_TRANSACTION_BATCH = 100;
 
+    @NonNullByDefault
+    public interface CommitCallback<T> {
+
+        void onSuccess(T result);
+
+        void onFailure(Throwable cause);
+    }
+
     private final Map<LocalHistoryIdentifier, ChainedTransactionParent> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
     private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
