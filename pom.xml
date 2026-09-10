@@ -29,6 +29,7 @@
     <module>benchmark</module>
     <module>bnd-parent</module>
     <module>bundle-parent</module>
+    <module>controller-testlib</module>
     <module>jolokia</module>
     <module>pekko</module>
     <module>raft</module>

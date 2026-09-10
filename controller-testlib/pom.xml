@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!--
+ Copyright (c) 2026 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-lite</artifactId>
+        <version>14.3.7</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>controller-testlib</artifactId>
+    <version>14.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>Reusable PyTest helper library for ODL Controller CSIT test suites, packaged as a
+        jar of raw Python files for consumption by other projects (e.g. netconf, bgpcep).</description>
+
+    <!-- Overrides the inherited distributionManagement (nexus.opendaylight.org) so that
+         `mvn deploy` on this module publishes to a locally running Nexus 3 instance instead.
+         Matching <server> credentials (ids nexus-local-releases / nexus-local-snapshots) must
+         be present in ~/.m2/settings.xml. -->
+    <distributionManagement>
+        <repository>
+            <id>nexus-local-releases</id>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-local-snapshots</id>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/../tests/libraries</directory>
+                <targetPath>controller_testlib</targetPath>
+                <excludes>
+                    <exclude>**/__pycache__/**</exclude>
+                    <exclude>**/*.pyc</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- No Java sources: skip compilation entirely -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
