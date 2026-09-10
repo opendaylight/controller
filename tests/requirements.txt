@@ -1,0 +1,8 @@
+allure-pytest==2.14.3
+jmespath==1.0.1
+paramiko==4.0.0
+psutil==7.1.0
+pydantic==2.12.3
+pydantic-settings==2.11.0
+pytest==8.4.0
+requests==2.32.4
