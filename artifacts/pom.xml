@@ -31,11 +31,11 @@
                 <artifactId>repackaged-pekko</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
+            <!--dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>scala3-library</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency-->
 
             <!-- Pekko instantiation -->
             <dependency>

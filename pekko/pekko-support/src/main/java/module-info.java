@@ -14,8 +14,8 @@ module org.opendaylight.controller.pekko.support {
 
     requires transitive com.google.common;
     requires transitive org.opendaylight.controller.repackaged.pekko;
-    requires org.opendaylight.controller.scala3.library;
     requires org.slf4j;
+    requires scala.library;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;

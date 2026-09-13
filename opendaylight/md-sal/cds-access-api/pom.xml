@@ -54,8 +54,8 @@
             <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>scala3-library</artifactId>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala3-library_3</artifactId>
         </dependency>
 
         <!-- Testing dependencies -->
