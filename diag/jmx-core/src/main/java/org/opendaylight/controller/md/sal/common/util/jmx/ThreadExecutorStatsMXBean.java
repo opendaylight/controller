@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
 /**
@@ -14,54 +13,53 @@ package org.opendaylight.controller.md.sal.common.util.jmx;
  * @author Thomas Pantelis
  */
 public interface ThreadExecutorStatsMXBean {
-
     /**
-     * Returns the current thread pool size.
+     * {@return the current thread pool size}
      */
     long getCurrentThreadPoolSize();
 
     /**
-     * Returns the largest thread pool size.
+     * {@return the largest thread pool size}
      */
     long getLargestThreadPoolSize();
 
     /**
-     * Returns the maximum thread pool size.
+     * {@return the maximum thread pool size}
      */
     long getMaxThreadPoolSize();
 
     /**
-     * Returns the current queue size.
+     * {@return the current queue size}
      */
     long getCurrentQueueSize();
 
     /**
-     * Returns the largest queue size, if available.
+     * {@return the largest queue size, or {@code null} if not available}
      */
     Long getLargestQueueSize();
 
     /**
-     * Returns the maximum queue size.
+     * {@return the maximum queue size}
      */
     long getMaxQueueSize();
 
     /**
-     * Returns the active thread count.
+     * {@return the active thread count}
      */
     long getActiveThreadCount();
 
     /**
-     * Returns the completed task count.
+     * {@return the completed task count}
      */
     long getCompletedTaskCount();
 
     /**
-     * Returns the total task count.
+     * {@return the total task count}
      */
     long getTotalTaskCount();
 
     /**
-     * Returns the rejected task count, if available.
+     * {@return the rejected task count, or {@code null} if not available}
      */
     Long getRejectedTaskCount();
 }
