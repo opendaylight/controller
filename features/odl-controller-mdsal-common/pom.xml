@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-common-util</artifactId>
+            <artifactId>jmx-core</artifactId>
         </dependency>
     </dependencies>
 </project>

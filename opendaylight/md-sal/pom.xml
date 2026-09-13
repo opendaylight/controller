@@ -20,12 +20,8 @@
   </properties>
 
   <modules>
-    <!-- Common APIs & Implementation -->
-    <module>sal-common-util</module>
-
     <!-- Samples -->
     <module>samples</module>
-
     <module>sal-akka-raft-example</module>
 
     <module>sal-clustering-commons</module>
