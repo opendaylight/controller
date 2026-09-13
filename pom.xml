@@ -28,6 +28,7 @@
 
     <module>benchmark</module>
     <module>bnd-parent</module>
+    <module>binding-parent</module>
     <module>bundle-parent</module>
     <module>jolokia</module>
     <module>pekko</module>

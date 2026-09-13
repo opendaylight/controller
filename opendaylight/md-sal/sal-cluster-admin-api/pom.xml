@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>mdsal-parent</artifactId>
-    <version>14.0.0-SNAPSHOT</version>
-    <relativePath>../parent/pom.xml</relativePath>
-  </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>binding-parent</artifactId>
+        <version>14.0.0-SNAPSHOT</version>
+        <relativePath>../../../binding-parent/pom.xml</relativePath>
+    </parent>
 
-  <artifactId>sal-cluster-admin-api</artifactId>
-  <packaging>bundle</packaging>
+    <artifactId>sal-cluster-admin-api</artifactId>
+    <packaging>bundle</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>cds-access-api</artifactId>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>cds-access-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-common</artifactId>
+        </dependency>
+    </dependencies>
 </project>

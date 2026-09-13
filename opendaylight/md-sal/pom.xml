@@ -20,8 +20,6 @@
   </properties>
 
   <modules>
-    <module>parent</module>
-
     <!-- Common APIs & Implementation -->
     <module>sal-common-util</module>
 

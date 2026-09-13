@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-parent</artifactId>
+        <artifactId>binding-parent</artifactId>
         <version>14.0.0-SNAPSHOT</version>
-        <relativePath>../../../parent/pom.xml</relativePath>
+        <relativePath>../../../../../binding-parent/pom.xml</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller.samples</groupId>
@@ -19,16 +19,30 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.guicedee.services</groupId>
+            <artifactId>javax.inject</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-distributed-datastore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.samples</groupId>
+            <artifactId>clustering-it-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>mdsal-eos-binding-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>mdsal-singleton-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller.samples</groupId>
-            <artifactId>clustering-it-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
@@ -43,22 +57,8 @@
             <artifactId>mdsal-common-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-distributed-datastore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.component.annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.guicedee.services</groupId>
-            <artifactId>javax.inject</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
