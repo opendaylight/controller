@@ -9,9 +9,7 @@ package org.opendaylight.controller.md.sal.common.util.jmx;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.util.concurrent.CountingRejectedExecutionHandler;
@@ -121,18 +119,16 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
 
     @Override
     public Long getLargestQueueSize() {
-        BlockingQueue<Runnable> queue = executor.getQueue();
-        if (queue instanceof TrackingLinkedBlockingQueue) {
-            return Long.valueOf(((TrackingLinkedBlockingQueue<?>)queue).getLargestQueueSize());
-        }
-
-        return null;
+        return switch (executor.getQueue()) {
+            case TrackingLinkedBlockingQueue<?> tlbq -> tlbq.getLargestQueueSize();
+            case null, default -> null;
+        };
     }
 
     @Override
     public long getMaxQueueSize() {
-        long queueSize = executor.getQueue().size();
-        return executor.getQueue().remainingCapacity() + queueSize;
+        final var queue = executor.getQueue();
+        return (long) queue.remainingCapacity() + (long) queue.size();
     }
 
     @Override
@@ -152,21 +148,19 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
 
     @Override
     public Long getRejectedTaskCount() {
-        RejectedExecutionHandler rejectedHandler = executor.getRejectedExecutionHandler();
-        if (rejectedHandler instanceof CountingRejectedExecutionHandler creh) {
-            return Long.valueOf(creh.getRejectedTaskCount());
-        }
-        return null;
+        return switch (executor.getRejectedExecutionHandler()) {
+            case CountingRejectedExecutionHandler creh -> creh.getRejectedTaskCount();
+            case null, default -> null;
+        };
     }
 
     /**
-     * Returns a {@link ThreadExecutorStats} instance containing a snapshot of the statistic
-     * metrics.
+     * {@return a {@link ThreadExecutorStats} instance containing a snapshot of the statistic metrics}
      */
     public ThreadExecutorStats toThreadExecutorStats() {
-        return new ThreadExecutorStats(getActiveThreadCount(), getCurrentThreadPoolSize(),
-                getLargestThreadPoolSize(), getMaxThreadPoolSize(), getCurrentQueueSize(),
-                getLargestQueueSize(), getMaxQueueSize(), getCompletedTaskCount(),
-                getTotalTaskCount(), getRejectedTaskCount());
+        return new ThreadExecutorStats(getActiveThreadCount(),
+            getCurrentThreadPoolSize(), getLargestThreadPoolSize(), getMaxThreadPoolSize(),
+            getCurrentQueueSize(), getLargestQueueSize(), getMaxQueueSize(),
+            getCompletedTaskCount(), getTotalTaskCount(), getRejectedTaskCount());
     }
 }

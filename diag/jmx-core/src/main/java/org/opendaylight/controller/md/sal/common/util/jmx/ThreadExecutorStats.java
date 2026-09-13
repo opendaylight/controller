@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
 import javax.management.ConstructorParameters;
@@ -17,8 +16,8 @@ import javax.management.ConstructorParameters;
  * @author Thomas Pantelis
  * @see ThreadExecutorStatsMXBeanImpl
  */
+// FIXME: this should be a plain record, if possible
 public class ThreadExecutorStats {
-
     private final long activeThreadCount;
     private final long completedTaskCount;
     private final long currentQueueSize;
@@ -28,18 +27,18 @@ public class ThreadExecutorStats {
     private final long maxQueueSize;
     private final long currentThreadPoolSize;
 
-    // The following fields are defined as Long because they may be null if we can't a value
-    // from the underlying executor.
+    // The following fields are defined as Long because they may be null if we can't a value from the underlying
+    // executor.
     private final Long largestQueueSize;
     private final Long rejectedTaskCount;
 
     @ConstructorParameters({"activeThreadCount","currentThreadPoolSize","largestThreadPoolSize",
         "maxThreadPoolSize","currentQueueSize","largestQueueSize","maxQueueSize",
         "completedTaskCount","totalTaskCount","rejectedTaskCount"})
-    public ThreadExecutorStats(long activeThreadCount, long currentThreadPoolSize,
-            long largestThreadPoolSize, long maxThreadPoolSize, long currentQueueSize,
-            Long largestQueueSize, long maxQueueSize, long completedTaskCount,
-            long totalTaskCount, Long rejectedTaskCount) {
+    public ThreadExecutorStats(final long activeThreadCount, final long currentThreadPoolSize,
+            final long largestThreadPoolSize, final long maxThreadPoolSize, final long currentQueueSize,
+            final Long largestQueueSize, final long maxQueueSize, final long completedTaskCount,
+            final long totalTaskCount, final Long rejectedTaskCount) {
         this.activeThreadCount = activeThreadCount;
         this.currentThreadPoolSize = currentThreadPoolSize;
         this.largestQueueSize = largestQueueSize;
