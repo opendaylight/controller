@@ -61,10 +61,10 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Core API/implementation -->
+            <!-- Core JMX integration -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sal-common-util</artifactId>
+                <artifactId>jmx-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
