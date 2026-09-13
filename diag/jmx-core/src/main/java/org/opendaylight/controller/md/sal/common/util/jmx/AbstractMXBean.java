@@ -34,6 +34,11 @@ public abstract class AbstractMXBean {
 
     public static final String BASE_JMX_PREFIX = "org.opendaylight.controller:";
 
+    // FIXME: The lifecycle is quite hard core here: the MBean itself is providing register/unregister functionality.
+    //        The two concerns should be separated:
+    //        - there should be a service which encapsulates PlatformMBeanServer and BASE_JMX_PREFIX
+    //        - it should provide the ability to give out Registration which controls the life of an MBean
+    //        At the end of the day, this class should cease to be.
     private final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
     private final String beanName;
@@ -47,6 +52,7 @@ public abstract class AbstractMXBean {
      * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
      * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
+    // FIXME: related to the above: these should be arguments to the factory method
     protected AbstractMXBean(final @NonNull String beanName, final @NonNull String beanType,
             final @Nullable String beanCategory) {
         this.beanName = requireNonNull(beanName);
