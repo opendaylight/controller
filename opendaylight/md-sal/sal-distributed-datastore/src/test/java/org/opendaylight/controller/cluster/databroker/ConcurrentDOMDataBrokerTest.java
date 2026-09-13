@@ -19,9 +19,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFalseFluentFuture;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateNullFluentFuture;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
+import static org.opendaylight.mdsal.common.api.FluentFutures.immediateFalseFluentFuture;
+import static org.opendaylight.mdsal.common.api.FluentFutures.immediateNullFluentFuture;
+import static org.opendaylight.mdsal.common.api.FluentFutures.immediateTrueFluentFuture;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;

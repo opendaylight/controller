@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateFluentFuture;
-import static org.opendaylight.yangtools.util.concurrent.FluentFutures.immediateTrueFluentFuture;
+import static org.opendaylight.mdsal.common.api.FluentFutures.immediateFluentFuture;
+import static org.opendaylight.mdsal.common.api.FluentFutures.immediateTrueFluentFuture;
 
 import java.util.Optional;
 import org.junit.Before;
