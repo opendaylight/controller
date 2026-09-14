@@ -5,14 +5,15 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>bundle-parent</artifactId>
         <version>14.0.0-SNAPSHOT</version>
-        <relativePath>../../../bundle-parent/pom.xml</relativePath>
+        <relativePath>../../bundle-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>cds-dom-api</artifactId>
+    <artifactId>cds-mgmt-api</artifactId>
     <packaging>bundle</packaging>
 
     <properties>
-        <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
+        <!-- FIXME: fix these up and set maven.javadoc.failOnWarnings=true -->
+        <doclint>all,-missing</doclint>
         <odlparent.dependency.enforce>true</odlparent.dependency.enforce>
     </properties>
 
@@ -20,6 +21,10 @@
         <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>raft-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -30,7 +35,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Automatic-Module-Name>org.opendaylight.controller.cluster.dom.api</Automatic-Module-Name>
+                        <Import-Package>
+                            javax.management;resolution:=optional,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
