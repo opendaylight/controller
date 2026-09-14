@@ -130,6 +130,8 @@ public enum ABIVersion implements WritableObject {
      *
      * @return Stream Version to use for this ABI version
      */
+    // FIXME: this leaks org.opendaylight.yangtools.yang.data.codec.binfmt to users
+    @SuppressWarnings("exports")
     public abstract @NonNull NormalizedNodeStreamVersion getStreamVersion();
 
     /**

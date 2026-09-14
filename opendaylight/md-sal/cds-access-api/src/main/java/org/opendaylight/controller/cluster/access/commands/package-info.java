@@ -8,4 +8,5 @@
 /**
  * This package defines the messages used to interact with the CDS backend implementation.
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.cluster.access.commands;

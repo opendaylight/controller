@@ -21,6 +21,9 @@ module org.opendaylight.controller.cluster.access.client {
     requires org.opendaylight.controller.scala3.library;
     requires org.slf4j;
 
+    // for tests
+    requires static org.opendaylight.yangtools.yang.data.spi;
+
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
     requires static com.github.spotbugs.annotations;
