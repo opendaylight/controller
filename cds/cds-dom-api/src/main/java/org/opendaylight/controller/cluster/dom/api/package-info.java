@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 /**
- * This package defines extensions to org.opendaylight.mdsal.dom.api specific
- * to Clustered Datastore implementation.
+ * This package defines extensions to org.opendaylight.mdsal.dom.api specific to Clustered Datastore implementation.
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.cluster.dom.api;
