@@ -5,7 +5,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>binding-parent</artifactId>
         <version>14.0.0-SNAPSHOT</version>
-        <relativePath>../../../binding-parent/pom.xml</relativePath>
+        <relativePath>../../binding-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>sal-dummy-distributed-datastore</artifactId>

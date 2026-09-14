@@ -33,6 +33,7 @@
     <module>diag</module>
     <module>pekko</module>
     <module>raft</module>
+    <module>samples</module>
     <module>scripts</module>
 
     <!-- FIXME: remove Blueprint -->

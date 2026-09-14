@@ -20,10 +20,6 @@
   </properties>
 
   <modules>
-    <!-- Samples -->
-    <module>samples</module>
-    <module>sal-akka-raft-example</module>
-
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
     <module>cds-access-client</module>
@@ -35,7 +31,6 @@
 
     <!-- sal-distributed-datastore -->
     <module>sal-distributed-datastore</module>
-    <module>sal-dummy-distributed-datastore</module>
     <module>sal-cluster-admin-api</module>
     <module>sal-cluster-admin-impl</module>
     <module>sal-cluster-admin-karaf-cli</module>
