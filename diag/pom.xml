@@ -27,5 +27,6 @@
 
     <modules>
         <module>jmx-core</module>
+        <module>jolokia</module>
     </modules>
 </project>

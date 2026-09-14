@@ -31,8 +31,6 @@
     <module>binding-parent</module>
     <module>bundle-parent</module>
     <module>diag</module>
-    <!-- FIXME: move to diag -->
-    <module>jolokia</module>
     <module>pekko</module>
     <module>raft</module>
     <module>scripts</module>
