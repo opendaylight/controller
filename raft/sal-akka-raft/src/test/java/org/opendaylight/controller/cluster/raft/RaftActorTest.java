@@ -211,6 +211,8 @@ class RaftActorTest extends AbstractActorTest {
 
     @Test
     void testUpdateElectionTermPersistedWithPersistenceDisabled() {
+        TEST_LOG.info("testUpdateElectionTermPersistedWithPersistenceDisabled starting");
+
         final TestKit kit = new TestKit(getSystem());
         String persistenceId = factory.generateActorId("follower-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -220,22 +222,28 @@ class RaftActorTest extends AbstractActorTest {
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(),
                 Map.of("member1", "address"), config, new TestPersistenceProvider())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
-        ref.underlyingActor().waitForRecoveryComplete();
+        var actor = ref.underlyingActor();
+        actor.waitForRecoveryComplete();
+        TEST_LOG.debug("recovery complete");
+        var context = actor.getRaftActorContext();
+        assertEquals("electionTerm", new TermInfo(0), context.termInfo());
 
         assertThat(stateDir().resolve(persistenceId).resolve("TermInfo.properties")).isRegularFile();
 
+        TEST_LOG.debug("killing actor");
         factory.killActor(ref, kit);
+        TEST_LOG.debug("killed actor");
 
         config.setHeartBeatInterval(ONE_DAY);
         ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(), Map.of("member1", "address"),
                 config, new TestPersistenceProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 factory.generateActorId("follower-"));
 
-        MockRaftActor actor = ref.underlyingActor();
+        actor = ref.underlyingActor();
         actor.waitForRecoveryComplete();
 
-        RaftActorContext newContext = actor.getRaftActorContext();
-        assertEquals("electionTerm", new TermInfo(0), newContext.termInfo());
+        context = actor.getRaftActorContext();
+        assertEquals("electionTerm", new TermInfo(0), context.termInfo());
     }
 
     @Test
