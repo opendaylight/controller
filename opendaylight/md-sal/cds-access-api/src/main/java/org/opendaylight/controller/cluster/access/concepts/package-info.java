@@ -7,7 +7,6 @@
  */
 /**
  * This package defines basic concepts used to interact with the CDS backend implementation.
- *
- * @author Robert Varga
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.cluster.access.concepts;

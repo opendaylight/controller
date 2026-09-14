@@ -7,7 +7,6 @@
  */
 /**
  * This package contains the base definitions of the APIs exposed by the clustered data store backend.
- *
- * @author Robert Varga
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.cluster.access;
