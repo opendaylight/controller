@@ -21,7 +21,6 @@
 
   <modules>
     <module>sal-clustering-commons</module>
-    <module>cds-access-api</module>
     <module>cds-access-client</module>
     <module>cds-dom-api</module>
     <module>cds-mgmt-api</module>

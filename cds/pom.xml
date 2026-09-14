@@ -19,6 +19,7 @@
     </properties>
 
     <modules>
+        <module>cds-access-api</module>
         <module>cds-types</module>
     </modules>
 </project>
