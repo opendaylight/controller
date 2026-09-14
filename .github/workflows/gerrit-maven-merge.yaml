@@ -58,7 +58,14 @@ concurrency:
   # groups and publish to Nexus concurrently.
   # yamllint disable-line rule:line-length
   group: gerrit-maven-merge-${{ github.workflow }}-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}
-  cancel-in-progress: true
+  # A merge job is a checkpoint in time: once Maven has started, letting it
+  # finish publishes a usable SNAPSHOT sooner than restarting would, so a
+  # running job is never cancelled. GitHub still evicts superseded pending
+  # runs and keeps only the newest, so merging a series collapses to one
+  # follow-up build rather than one per patch. That eviction is safe
+  # because every run checks out the branch head rather than the commit
+  # that triggered it, so the newest pending run supersedes the others.
+  cancel-in-progress: false
 
 permissions:
   contents: read
