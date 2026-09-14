@@ -30,6 +30,7 @@
     <module>bnd-parent</module>
     <module>binding-parent</module>
     <module>bundle-parent</module>
+    <module>cds</module>
     <module>diag</module>
     <module>pekko</module>
     <module>raft</module>
