@@ -15,4 +15,5 @@ module org.opendaylight.controller.cluster.mgmt.api {
     requires static transitive java.management;
     requires static transitive org.eclipse.jdt.annotation;
     requires static transitive org.opendaylight.raft.api;
+    requires static org.osgi.annotation.bundle;
 }
