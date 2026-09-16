@@ -56,8 +56,13 @@ concurrency:
   # Scheduled runs carry no inputs, so they must fall back to the same
   # key a master merge uses, or the two triggers land in different
   # groups and publish to Nexus concurrently.
+  # The key omits github.workflow so that
+  # gerrit-maven-merge-stable.yaml, which rebuilds the stable branches
+  # on a schedule, shares these groups rather than running alongside
+  # them: job-level and workflow-level groups live in one namespace, so
+  # a branch is never published from two runs at once.
   # yamllint disable-line rule:line-length
-  group: gerrit-maven-merge-${{ github.workflow }}-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}
+  group: gerrit-maven-merge-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}
   # A merge job is a checkpoint in time: once Maven has started, letting it
   # finish publishes a usable SNAPSHOT sooner than restarting would, so a
   # running job is never cancelled. GitHub still evicts superseded pending
@@ -81,7 +86,7 @@ jobs:
         # needs: chain below is unaffected.
         if: github.event_name != 'schedule'
         # yamllint disable-line rule:line-length
-        uses: lfit/gerrit-review-action@1e3eae766b3de755a2e87aa216cedebbaf9c8292 # v1.1.3
+        uses: lfreleng-actions/gerrit-review-action@1e3eae766b3de755a2e87aa216cedebbaf9c8292 # v1.1.3
         with:
           host: ${{ vars.GERRIT_SERVER }}
           username: ${{ vars.GERRIT_SSH_USER }}
@@ -96,8 +101,13 @@ jobs:
 
   maven-merge:
     needs: prepare
+    # Pinned ahead of v0.10.3 on purpose: that tag predates PRs 896
+    # and 897, so pinning there would abort the publish with
+    # "nexus_password is required" and restart the SNAPSHOT
+    # buildNumber at 1. Re-pin to v0.10.4 once that draft release is
+    # published; it already targets this commit.
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@main
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@d687ef6c5a015053aa20048d16900ad599508b2a # main @ 2026-09-01
     # "secrets: inherit" does not cross organisations, and this workflow
     # lives in the lfit org, so the secrets have to be passed by name.
     secrets:
@@ -136,7 +146,7 @@ jobs:
         uses: im-open/workflow-conclusion@8eac7f17381a6917bc04fec3e2c92e70ebc37526 # v3.0.0
       - name: Set vote
         # yamllint disable-line rule:line-length
-        uses: lfit/gerrit-review-action@1e3eae766b3de755a2e87aa216cedebbaf9c8292 # v1.1.3
+        uses: lfreleng-actions/gerrit-review-action@1e3eae766b3de755a2e87aa216cedebbaf9c8292 # v1.1.3
         with:
           host: ${{ vars.GERRIT_SERVER }}
           username: ${{ vars.GERRIT_SSH_USER }}
