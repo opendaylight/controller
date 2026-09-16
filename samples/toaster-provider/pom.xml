@@ -3,16 +3,26 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>binding-parent</artifactId>
+        <artifactId>bundle-parent</artifactId>
         <version>14.0.0-SNAPSHOT</version>
-        <relativePath>../../binding-parent/pom.xml</relativePath>
+        <relativePath>../../bundle-parent/pom.xml</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>sample-toaster-provider</artifactId>
     <packaging>bundle</packaging>
 
+    <properties>
+        <!-- FIXME: fix these up and set maven.javadoc.failOnWarnings=true -->
+        <doclint>all,-missing</doclint>
+        <odlparent.dependency.enforce>true</odlparent.dependency.enforce>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.guicedee.services</groupId>
             <artifactId>javax.inject</artifactId>
@@ -22,6 +32,10 @@
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -36,9 +50,20 @@
             <artifactId>mdsal-binding-api</artifactId>
         </dependency>
         <dependency>
-            <!-- for AbstractDataBrokerTest -->
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>mdsal-binding-test-utils</artifactId>
+            <artifactId>mdsal-common-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>concepts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -47,7 +72,17 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.metatype.annotations</artifactId>
-            <scope>compile</scope>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>mdsal-binding-dom-adapter</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>mdsal-binding-test-utils</artifactId>
         </dependency>
     </dependencies>
 </project>
