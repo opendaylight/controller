@@ -56,8 +56,13 @@ concurrency:
   # Scheduled runs carry no inputs, so they must fall back to the same
   # key a master merge uses, or the two triggers land in different
   # groups and publish to Nexus concurrently.
+  # The key omits github.workflow so that
+  # gerrit-maven-merge-stable.yaml, which rebuilds the stable branches
+  # on a schedule, shares these groups rather than running alongside
+  # them: job-level and workflow-level groups live in one namespace, so
+  # a branch is never published from two runs at once.
   # yamllint disable-line rule:line-length
-  group: gerrit-maven-merge-${{ github.workflow }}-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}
+  group: gerrit-maven-merge-${{ github.event.inputs.GERRIT_BRANCH || 'master' }}
   # A merge job is a checkpoint in time: once Maven has started, letting it
   # finish publishes a usable SNAPSHOT sooner than restarting would, so a
   # running job is never cancelled. GitHub still evicts superseded pending

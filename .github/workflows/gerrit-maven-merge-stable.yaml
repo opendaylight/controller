@@ -1,0 +1,70 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 The Linux Foundation
+
+name: Gerrit Composed Maven Merge (stable)
+
+# The Jenkins maven-merge jobs this replaces ran @daily on every supported
+# branch, which kept SNAPSHOTs fresh against upstream dependency updates even
+# when nothing merged there. GitHub runs "schedule" only on the default
+# branch, so a cron committed to a stable branch never fires and that rebuild
+# has to be driven from master. compose-maven-merge checks out
+# inputs.GERRIT_BRANCH, so the branch being built does not have to be the
+# branch this file lives on.
+#
+# There is deliberately no workflow_dispatch trigger: Gerrit-triggered merges
+# are handled by gerrit-maven-merge.yaml. Being schedule-only also means the
+# copy of this file that a branch cut leaves behind on the new stable branch
+# cannot be triggered at all, so it needs no cleanup there. The cut does need
+# the newly created branch adding to the matrix below.
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: "49 21 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  maven-merge:
+    strategy:
+      # One branch failing must not stop the others from rebuilding.
+      fail-fast: false
+      matrix:
+        GERRIT_BRANCH:
+          - "11.0.x"
+          - "12.0.x"
+    concurrency:
+      # Shares the group gerrit-maven-merge.yaml uses, because job-level and
+      # workflow-level groups live in one namespace: a branch is then never
+      # published from two runs at once, whichever workflow drives it, while
+      # different branches still rebuild in parallel. A rebuild that has
+      # started is never cancelled: letting it finish publishes a usable
+      # SNAPSHOT sooner than restarting would.
+      group: gerrit-maven-merge-${{ matrix.GERRIT_BRANCH }}
+      cancel-in-progress: false
+    # yamllint disable-line rule:line-length
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@main
+    # "secrets: inherit" does not cross organisations, and this workflow
+    # lives in the lfit org, so the secrets have to be passed by name.
+    secrets:
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+    with:
+      GERRIT_BRANCH: ${{ matrix.GERRIT_BRANCH }}
+      JDK_VERSION: "21"
+      MVN_VERSION: "3.9.5"
+      MVN_PHASES: "clean deploy"
+      MVN_PARAMS: "-Dmerge"
+      # Mirrors the Jenkins job's mvn-goals "clean deploy -Pdocs".
+      MVN_PROFILES: "docs"
+      # Intentionally omits -DaltDeploymentRepository; maven-build-action
+      # already supplies it, and repeating it duplicates the flag.
+      # yamllint disable rule:line-length
+      MVN_OPTS: >-
+        -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        -Dmaven.repo.local=/tmp/r -Dorg.ops4j.pax.url.mvn.localRepository=/tmp/r
+        -Dkaraf.keep.unpack
+      # yamllint enable rule:line-length
+      ENV_VARS: ${{ toJSON(vars) }}
+      PUSH_NEXUS: true
