@@ -35,16 +35,20 @@
 
             <!-- Scala and its modules -->
             <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>3.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala3-library_3</artifactId>
+                <version>3.9.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.scalatestplus</groupId>
                 <artifactId>junit-4-13_3</artifactId>
                 <version>3.2.19.1</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala3-library_3</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- Configuration library -->
@@ -58,12 +62,6 @@
                 <groupId>com.typesafe</groupId>
                 <artifactId>ssl-config-core_3</artifactId>
                 <version>0.7.1</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala3-library_3</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- Pekko testkit -->
@@ -76,10 +74,6 @@
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
                         <artifactId>pekko-actor_3</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala3-library_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -96,10 +90,6 @@
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
                         <artifactId>pekko-slf4j_3</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala3-library_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
