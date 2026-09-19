@@ -7,32 +7,36 @@
  */
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.apache.pekko.dispatch.OnComplete;
+import java.util.concurrent.Executor;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.ExecutionContext;
+import scala.jdk.javaapi.FutureConverters;
 
 /**
  * Provides schema sources from {@link RemoteYangTextSourceProvider}.
  */
 @Beta
-public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSource> {
+public final class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSource> {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteSchemaProvider.class);
 
-    private final RemoteYangTextSourceProvider remoteRepo;
-    private final ExecutionContext executionContext;
+    private final @NonNull RemoteYangTextSourceProvider remoteRepo;
+    private final @NonNull Executor executor;
 
-    public RemoteSchemaProvider(final RemoteYangTextSourceProvider remoteRepo,
-            final ExecutionContext executionContext) {
-        this.remoteRepo = remoteRepo;
-        this.executionContext = executionContext;
+    @NonNullByDefault
+    public RemoteSchemaProvider(final RemoteYangTextSourceProvider remoteRepo, final Executor executor) {
+        this.remoteRepo = requireNonNull(remoteRepo);
+        this.executor  = requireNonNull(executor);
     }
 
     @Override
@@ -40,18 +44,14 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSource
         LOG.trace("Getting yang schema source for {}", sourceIdentifier.name().getLocalName());
 
         final var res = SettableFuture.<YangTextSource>create();
-        remoteRepo.getYangTextSchemaSource(sourceIdentifier).onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final YangTextSchemaSourceSerializationProxy success) {
-                if (success != null) {
-                    res.set(success.getRepresentation());
-                }
+        FutureConverters.asJava(remoteRepo.getYangTextSchemaSource(sourceIdentifier))
+            .whenCompleteAsync((success, failure) -> {
                 if (failure != null) {
                     res.setException(failure);
+                } else {
+                    res.set(success.getRepresentation());
                 }
-            }
-        }, executionContext);
-
+            }, executor);
         return res;
     }
 }
