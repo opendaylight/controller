@@ -15,8 +15,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 /**
  * Request a {@link org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener} registration be made on the shard leader.
@@ -54,14 +55,16 @@ public final class RegisterDataTreeChangeListener implements Externalizable {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeObject(dataTreeChangeListenerPath);
-        SerializationUtils.writePath(out, path);
+        try (var stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
+            stream.writeYangInstanceIdentifier(path);
+        }
         out.writeBoolean(registerOnAllInstances);
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         dataTreeChangeListenerPath = (ActorRef) in.readObject();
-        path = SerializationUtils.readPath(in);
+        path = NormalizedNodeDataInput.newDataInput(in).readYangInstanceIdentifier();
         registerOnAllInstances = in.readBoolean();
     }
 
