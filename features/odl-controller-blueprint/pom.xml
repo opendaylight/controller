@@ -11,9 +11,9 @@
 
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>single-feature-parent</artifactId>
+        <artifactId>feature-parent</artifactId>
         <version>14.0.0-SNAPSHOT</version>
-        <relativePath>../single-feature-parent/pom.xml</relativePath>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>odl-controller-blueprint</artifactId>
@@ -50,8 +50,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>blueprint</artifactId>
-            <!-- Note: aligned with feature.xml content -->
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

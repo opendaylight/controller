@@ -25,6 +25,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Blueprint extension for MD-SAL -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blueprint</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Repackaged Apache Pekko and Scala 3 -->
             <dependency>
                 <groupId>${project.groupId}</groupId>

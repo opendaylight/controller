@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-blueprint">
+    <repository>mvn:org.opendaylight.mdsal/odl-mdsal-binding-api/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.mdsal/odl-mdsal-binding-runtime/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.mdsal/odl-mdsal-dom-api/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.yangtools/odl-yangtools-codec/{{versionAsInProject}}/xml/features</repository>
+    <feature name="odl-controller-blueprint">
+        <feature>aries-blueprint</feature>
+        <feature version="{{semVerRange}}">odl-mdsal-binding-api</feature>
+        <feature version="{{semVerRange}}">odl-mdsal-binding-runtime</feature>
+        <feature version="{{semVerRange}}">odl-mdsal-dom-api</feature>
+        <feature version="{{semVerRange}}">odl-yangtools-codec</feature>
+        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{versionAsInProject}}</bundle>
+    </feature>
+</features>
