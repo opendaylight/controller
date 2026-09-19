@@ -19,7 +19,6 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 public final class ExecuteRpc extends AbstractExecute<QName, @Nullable ContainerNode> {
@@ -57,7 +56,7 @@ public final class ExecuteRpc extends AbstractExecute<QName, @Nullable Container
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            try (NormalizedNodeDataOutput stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
+            try (var stream = NormalizedNodeStreamVersion.current().newDataOutput(out)) {
                 stream.writeQName(executeRpc.getType());
                 stream.writeOptionalNormalizedNode(executeRpc.getInput());
             }
@@ -65,10 +64,10 @@ public final class ExecuteRpc extends AbstractExecute<QName, @Nullable Container
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            final NormalizedNodeDataInput stream = NormalizedNodeDataInput.newDataInput(in);
-            final QName type = stream.readQName();
-            final ContainerNode input = RpcResponse.unmaskContainer(stream.readOptionalNormalizedNode());
-            executeRpc = new ExecuteRpc(type, input);
+            final var stream = NormalizedNodeDataInput.newDataInput(in);
+            final var type = stream.readQName();
+            executeRpc = new ExecuteRpc(type,
+                RpcResponse.unmaskContainer(stream.readOptionalNormalizedNode().orElse(null)));
         }
 
         private Object readResolve() {

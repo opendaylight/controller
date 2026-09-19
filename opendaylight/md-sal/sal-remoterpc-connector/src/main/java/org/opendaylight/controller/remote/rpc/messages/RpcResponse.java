@@ -12,13 +12,14 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
+import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 
 public class RpcResponse extends AbstractResponse<ContainerNode> {
+    @java.io.Serial
     private static final long serialVersionUID = -4211279498688989245L;
 
     public RpcResponse(final @Nullable ContainerNode output) {
@@ -30,19 +31,32 @@ public class RpcResponse extends AbstractResponse<ContainerNode> {
         return new Proxy(this);
     }
 
-    static @Nullable ContainerNode unmaskContainer(final Optional<NormalizedNode> optNode)
+    static final @Nullable ContainerNode unmaskContainer(final @Nullable NormalizedNode node)
             throws InvalidObjectException {
-        if (optNode.isEmpty()) {
-            return null;
+        return switch (node) {
+            case null -> null;
+            case ContainerNode container -> container;
+            default ->  throw new InvalidObjectException("Unexpected data " + node.contract().getSimpleName());
+        };
+    }
+
+    static final @Nullable ContainerNode readContainerNode(final ObjectInput in) throws IOException {
+        return in.readBoolean() ? unmaskContainer(NormalizedNodeDataInput.newDataInput(in).readNormalizedNode()) : null;
+    }
+
+    static final void writeOutput(final ObjectOutput out, final @Nullable ContainerNode output) throws IOException {
+        if (output != null) {
+            out.writeBoolean(true);
+            try (var stream = NormalizedNodeStreamVersion.POTASSIUM.newDataOutput(out)) {
+                stream.writeNormalizedNode(output);
+            }
+        } else {
+            out.writeBoolean(false);
         }
-        final var node = optNode.orElseThrow();
-        if (node instanceof ContainerNode container) {
-            return container;
-        }
-        throw new InvalidObjectException("Unexpected data " + node.contract().getSimpleName());
     }
 
     private static class Proxy implements Externalizable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private RpcResponse rpcResponse;
@@ -59,12 +73,12 @@ public class RpcResponse extends AbstractResponse<ContainerNode> {
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            SerializationUtils.writeNormalizedNode(out, rpcResponse.getOutput());
+            writeOutput(out, rpcResponse.getOutput());
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
-            rpcResponse = new RpcResponse(unmaskContainer(SerializationUtils.readNormalizedNode(in)));
+            rpcResponse = new RpcResponse(readContainerNode(in));
         }
 
         private Object readResolve() {

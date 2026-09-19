@@ -11,7 +11,6 @@
 module org.opendaylight.controller.cluster.commons {
     exports org.opendaylight.controller.cluster.common.actor;
     exports org.opendaylight.controller.cluster.datastore.node.utils;
-    exports org.opendaylight.controller.cluster.datastore.node.utils.stream;
     exports org.opendaylight.controller.cluster.datastore.node.utils.transformer;
     exports org.opendaylight.controller.cluster.datastore.util;
     exports org.opendaylight.controller.cluster.messaging;
@@ -28,7 +27,7 @@ module org.opendaylight.controller.cluster.commons {
     requires transitive org.opendaylight.controller.scala3.library;
     requires transitive org.opendaylight.raft.spi;
     requires transitive org.opendaylight.yangtools.yang.data.api;
-    requires transitive org.opendaylight.yangtools.yang.data.codec.binfmt;
+    requires transitive org.opendaylight.yangtools.yang.data.tree.api;
     requires transitive org.opendaylight.yangtools.yang.data.util;
     requires transitive org.opendaylight.yangtools.yang.repo.api;
     requires transitive org.opendaylight.yangtools.yang.repo.spi;
