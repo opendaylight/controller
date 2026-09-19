@@ -18,7 +18,6 @@ import java.io.ObjectOutput;
 import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 
@@ -61,15 +60,14 @@ public class ActionResponse extends AbstractResponse<ContainerNode> {
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(actionResponse.getErrors());
-            SerializationUtils.writeNormalizedNode(out, actionResponse.getOutput());
+            RpcResponse.writeOutput(out, actionResponse.getOutput());
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             @SuppressWarnings("unchecked")
             final var errors = (ImmutableList<RpcError>) in.readObject();
-            final var output = SerializationUtils.readNormalizedNode(in);
-            actionResponse = new ActionResponse(output.map(ContainerNode.class::cast).orElse(null), errors);
+            actionResponse = new ActionResponse(RpcResponse.readContainerNode(in), errors);
         }
 
         private Object readResolve() {
