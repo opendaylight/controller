@@ -23,6 +23,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-distributed-datastore</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-eos-binding</artifactId>
             <type>xml</type>
@@ -37,15 +43,7 @@
 
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-distributed-datastore</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
+            <artifactId>sal-remoterpc-connector</artifactId>
         </dependency>
     </dependencies>
 </project>
