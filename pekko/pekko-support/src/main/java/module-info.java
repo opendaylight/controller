@@ -13,6 +13,9 @@ module org.opendaylight.controller.pekko.support {
     exports org.opendaylight.controller.pekko.support.dagger;
     exports org.opendaylight.controller.pekko.support.osgi;
     exports org.opendaylight.controller.pekko.support.spi;
+    // FIXME: hide this package and open it to Pekko only
+    exports org.opendaylight.controller.pekko.support.dispatch;
+
     opens org.opendaylight.controller.pekko.support.actor to org.opendaylight.controller.repackaged.pekko;
 
     provides org.opendaylight.controller.pekko.support.dagger.ActorSystemCreator
