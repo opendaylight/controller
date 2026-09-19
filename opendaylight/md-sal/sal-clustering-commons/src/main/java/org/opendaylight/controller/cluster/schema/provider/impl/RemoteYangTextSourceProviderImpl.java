@@ -12,18 +12,17 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
-import scala.concurrent.Promise;
 
 /**
  *  Remote schema provider implementation backed by local schema provider.
@@ -42,36 +41,36 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
     }
 
     @Override
-    public Future<Set<SourceIdentifier>> getProvidedSources() {
-        return org.apache.pekko.dispatch.Futures.successful(providedSources);
+    public CompletionStage<Set<SourceIdentifier>> getProvidedSources() {
+        return CompletableFuture.completedStage(providedSources);
     }
 
     @Override
-    public Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(final SourceIdentifier identifier) {
+    public CompletionStage<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(
+            final SourceIdentifier identifier) {
         LOG.trace("Sending yang schema source for {}", identifier);
 
-        final Promise<YangTextSchemaSourceSerializationProxy> promise = org.apache.pekko.dispatch.Futures.promise();
-        ListenableFuture<YangTextSource> future =
-                repository.getSchemaSource(identifier, YangTextSource.class);
-
-        Futures.addCallback(future, new FutureCallback<YangTextSource>() {
+        final var future = new CompletableFuture<YangTextSchemaSourceSerializationProxy>();
+        Futures.addCallback(repository.getSchemaSource(identifier, YangTextSource.class), new FutureCallback<>() {
             @Override
             public void onSuccess(final YangTextSource result) {
+                final YangTextSchemaSourceSerializationProxy proxy;
                 try {
-                    promise.success(new YangTextSchemaSourceSerializationProxy(result));
+                    proxy = new YangTextSchemaSourceSerializationProxy(result);
                 } catch (IOException e) {
                     LOG.warn("Unable to read schema source for {}", result.sourceId(), e);
-                    promise.failure(e);
+                    future.completeExceptionally(e);
+                    return;
                 }
+                future.complete(proxy);
             }
 
             @Override
             public void onFailure(final Throwable failure) {
                 LOG.warn("Unable to retrieve schema source from provider", failure);
-                promise.failure(failure);
+                future.completeExceptionally(failure);
             }
         }, MoreExecutors.directExecutor());
-
-        return promise.future();
+        return future.minimalCompletionStage();
     }
 }

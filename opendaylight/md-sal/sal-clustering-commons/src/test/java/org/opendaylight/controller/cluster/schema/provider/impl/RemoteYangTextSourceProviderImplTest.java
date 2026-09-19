@@ -10,13 +10,12 @@ package org.opendaylight.controller.cluster.schema.provider.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.Futures;
-import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,18 +26,16 @@ import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.spi.source.DelegatedYangTextSource;
-import scala.concurrent.Await;
-import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RemoteYangTextSourceProviderImplTest {
     private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
 
+    private final Set<SourceIdentifier> providedSources = Set.of(ID);
     @Mock
     private SchemaRepository mockedLocalRepository;
 
     private RemoteYangTextSourceProviderImpl remoteRepository;
-    private final Set<SourceIdentifier> providedSources = Collections.singleton(ID);
 
     @Before
     public void setUp() {
@@ -52,9 +49,8 @@ public class RemoteYangTextSourceProviderImplTest {
         doReturn(Futures.immediateFuture(schemaSource)).when(mockedLocalRepository)
             .getSchemaSource(ID, YangTextSource.class);
 
-        var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
-        assertTrue(retrievedSourceFuture.isCompleted());
-        var resultSchemaSource = Await.result(retrievedSourceFuture, FiniteDuration.Zero()).getRepresentation();
+        var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID).toCompletableFuture();
+        var resultSchemaSource = Futures.getDone(retrievedSourceFuture).getRepresentation();
         assertEquals(resultSchemaSource.sourceId(), schemaSource.sourceId());
         assertEquals(resultSchemaSource.read(), schemaSource.read());
     }
@@ -66,17 +62,13 @@ public class RemoteYangTextSourceProviderImplTest {
         doReturn(Futures.immediateFailedFuture(exception)).when(mockedLocalRepository)
             .getSchemaSource(ID, YangTextSource.class);
 
-        var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
-        assertTrue(retrievedSourceFuture.isCompleted());
-
-        final var ex = assertThrows(SchemaSourceException.class,
-            () -> Await.result(retrievedSourceFuture, FiniteDuration.Zero()));
-        assertSame(ex, exception);
+        var retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID).toCompletableFuture();
+        final var ee = assertThrows(ExecutionException.class, () -> Futures.getDone(retrievedSourceFuture));
+        assertSame(exception, ee.getCause());
     }
 
     @Test
     public void testGetProvidedSources() throws Exception {
-        var remoteProvidedSources = Await.result(remoteRepository.getProvidedSources(), FiniteDuration.Zero());
-        assertEquals(providedSources, remoteProvidedSources);
+        assertEquals(providedSources, Futures.getDone(remoteRepository.getProvidedSources().toCompletableFuture()));
     }
 }

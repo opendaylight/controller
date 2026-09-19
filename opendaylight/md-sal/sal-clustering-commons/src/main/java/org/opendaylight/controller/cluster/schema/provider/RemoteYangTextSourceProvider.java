@@ -9,18 +9,19 @@ package org.opendaylight.controller.cluster.schema.provider;
 
 import com.google.common.annotations.Beta;
 import java.util.Set;
-import org.eclipse.jdt.annotation.NonNull;
+import java.util.concurrent.CompletionStage;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.schema.provider.impl.YangTextSchemaSourceSerializationProxy;
 import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
-import scala.concurrent.Future;
 
 /**
  * A remote yang text source provider provides serializable yang text sources.
  */
 @Beta
+@NonNullByDefault
 public interface RemoteYangTextSourceProvider {
 
-    Future<Set<SourceIdentifier>> getProvidedSources();
+    CompletionStage<Set<SourceIdentifier>> getProvidedSources();
 
-    Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(@NonNull SourceIdentifier identifier);
+    CompletionStage<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(SourceIdentifier identifier);
 }

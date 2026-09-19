@@ -21,7 +21,6 @@ import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.jdk.javaapi.FutureConverters;
 
 /**
  * Provides schema sources from {@link RemoteYangTextSourceProvider}.
@@ -44,14 +43,13 @@ public final class RemoteSchemaProvider implements SchemaSourceProvider<YangText
         LOG.trace("Getting yang schema source for {}", sourceIdentifier.name().getLocalName());
 
         final var res = SettableFuture.<YangTextSource>create();
-        FutureConverters.asJava(remoteRepo.getYangTextSchemaSource(sourceIdentifier))
-            .whenCompleteAsync((success, failure) -> {
-                if (failure != null) {
-                    res.setException(failure);
-                } else {
-                    res.set(success.getRepresentation());
-                }
-            }, executor);
+        remoteRepo.getYangTextSchemaSource(sourceIdentifier).whenCompleteAsync((success, failure) -> {
+            if (failure != null) {
+                res.setException(failure);
+            } else {
+                res.set(success.getRepresentation());
+            }
+        }, executor);
         return res;
     }
 }

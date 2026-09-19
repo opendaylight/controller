@@ -17,9 +17,8 @@ import static org.mockito.Mockito.mock;
 import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import org.apache.pekko.dispatch.ExecutionContexts;
-import org.apache.pekko.dispatch.Futures;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
@@ -36,14 +35,13 @@ public class RemoteSchemaProviderTest {
     @Before
     public void setUp() {
         mockedRemoteSchemaRepository = mock(RemoteYangTextSourceProvider.class);
-        remoteSchemaProvider = new RemoteSchemaProvider(mockedRemoteSchemaRepository,
-                ExecutionContexts.fromExecutor(MoreExecutors.directExecutor()));
+        remoteSchemaProvider = new RemoteSchemaProvider(mockedRemoteSchemaRepository, MoreExecutors.directExecutor());
     }
 
     @Test
     public void getExistingYangTextSchemaSource() throws IOException, InterruptedException, ExecutionException {
         final var schemaSource = new DelegatedYangTextSource(ID, CharSource.wrap("Test"));
-        doReturn(Futures.successful(new YangTextSchemaSourceSerializationProxy(schemaSource)))
+        doReturn(CompletableFuture.completedStage(new YangTextSchemaSourceSerializationProxy(schemaSource)))
             .when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
         final var providedSource = remoteSchemaProvider.getSource(ID).get();
@@ -54,7 +52,8 @@ public class RemoteSchemaProviderTest {
     @Test
     public void getNonExistingSchemaSource() throws InterruptedException {
         final var exception = new SchemaSourceException(ID, "Source not provided");
-        doReturn(Futures.failed(exception)).when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
+        doReturn(CompletableFuture.failedStage(exception))
+            .when(mockedRemoteSchemaRepository).getYangTextSchemaSource(ID);
 
         final var sourceFuture = remoteSchemaProvider.getSource(ID);
         assertTrue(sourceFuture.isDone());
