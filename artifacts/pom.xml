@@ -332,13 +332,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>odl-mdsal-clustering-commons</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>odl-controller-mdsal-common</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
@@ -361,6 +354,13 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-raft-api</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-raft-pekko</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>

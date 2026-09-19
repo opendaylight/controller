@@ -6,8 +6,8 @@
   ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
   ~ and is available at http://www.eclipse.org/legal/epl-v10.html
   -->
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
-    <feature name="odl-mdsal-clustering-commons" version="${project.version}">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+    <feature name="odl-raft-pekko" version="${project.version}">
         <feature version="[15,16)">odl-apache-commons-lang3</feature>
         <feature version="[15,16)">odl-dropwizard-metrics</feature>
         <feature version="[15,16)">odl-netty-4</feature>

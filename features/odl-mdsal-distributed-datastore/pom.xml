@@ -22,20 +22,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-apache-commons-text</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-mdsal-common</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>odl-yangtools-codec</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-raft-pekko</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-eos-dom</artifactId>
+            <artifactId>odl-mdsal-binding-dom-adapter</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -47,22 +47,23 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-binding-dom-adapter</artifactId>
+            <artifactId>odl-mdsal-eos-dom</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-clustering-commons</artifactId>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-apache-commons-text</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-mdsal-common</artifactId>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>odl-yangtools-codec</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
+
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>cds-access-api</artifactId>

@@ -15,10 +15,10 @@
         <relativePath>../single-feature-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>odl-mdsal-clustering-commons</artifactId>
+    <artifactId>odl-raft-pekko</artifactId>
     <packaging>feature</packaging>
-    <name>OpenDaylight :: Controller :: Clustering Commons</name>
-    <description>Common Clustering utilities</description>
+    <name>OpenDaylight :: Controller :: RAFT over Pekko Cluster</name>
+    <description>RAFT implementation for Pekko Cluster</description>
 
     <dependencies>
         <dependency>

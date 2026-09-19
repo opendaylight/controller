@@ -37,6 +37,12 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-blueprint</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-pekko</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
@@ -49,7 +55,27 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-raft-pekko</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-raft-spi</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+
+        <!-- to be cleaned up -->
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-controller-mdsal-common</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-jolokia</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -61,31 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-clustering-commons</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-mdsal-common</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-distributed-datastore</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-blueprint</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-jolokia</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

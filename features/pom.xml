@@ -45,8 +45,10 @@
         <!-- Combined Scala/Pekko feature -->
         <module>odl-pekko</module>
 
+        <!-- RAFT API and Pekko-based implementation -->
         <module>odl-lz4</module>
         <module>odl-raft-api</module>
+        <module>odl-raft-pekko</module>
         <module>odl-raft-spi</module>
 
         <!-- Single features, to be cleaned up -->
@@ -54,7 +56,6 @@
         <module>odl-controller-mdsal-common</module>
         <module>odl-jolokia</module>
         <module>odl-mdsal-broker</module>
-        <module>odl-mdsal-clustering-commons</module>
         <module>odl-mdsal-distributed-datastore</module>
     </modules>
 </project>
