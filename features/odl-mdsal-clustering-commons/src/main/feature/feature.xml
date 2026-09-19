@@ -12,9 +12,7 @@
         <feature version="[15,16)">odl-dropwizard-metrics</feature>
         <feature version="[15,16)">odl-netty-4</feature>
         <feature version="[15,16)">odl-servlet-api</feature>
-        <feature version="[16,17)">odl-yangtools-binding-spec</feature>
         <feature version="[16,17)">odl-yangtools-codec</feature>
-        <feature version="[16,17)">odl-yangtools-data</feature>
         <configfile finalname="configuration/initial/pekko.conf">
             mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/pekkoconf
         </configfile>
