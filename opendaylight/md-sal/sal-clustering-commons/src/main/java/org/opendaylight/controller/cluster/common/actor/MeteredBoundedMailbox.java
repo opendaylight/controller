@@ -20,10 +20,20 @@ import org.apache.pekko.dispatch.ProducesMessageQueue;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Option;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MeteredBoundedMailbox implements MailboxType,
         ProducesMessageQueue<MeteredBoundedMailbox.MeteredMessageQueue> {
+    public static class MeteredMessageQueue extends BoundedDequeBasedMailbox.MessageQueue {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        public MeteredMessageQueue(final int capacity, final FiniteDuration pushTimeOut) {
+            super(capacity, pushTimeOut);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
     private static final String QUEUE_SIZE = "q-size";
 
@@ -31,29 +41,19 @@ public class MeteredBoundedMailbox implements MailboxType,
     private final FiniteDuration pushTimeOut;
 
     public MeteredBoundedMailbox(final ActorSystem.Settings settings, final Config config) {
-
-        CommonConfig commonConfig = new CommonConfig(settings.config());
-        this.capacity = commonConfig.getMailBoxCapacity();
-        this.pushTimeOut = commonConfig.getMailBoxPushTimeout();
+        var commonConfig = new CommonConfig(settings.config());
+        capacity = commonConfig.getMailBoxCapacity();
+        pushTimeOut = commonConfig.getMailBoxPushTimeout();
     }
 
-
     @Override
-    public MeteredMessageQueue create(final scala.Option<ActorRef> owner, final scala.Option<ActorSystem> system) {
-        final MeteredMessageQueue queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
-        monitorQueueSize(owner, queue);
+    public MeteredMessageQueue create(final Option<ActorRef> owner, final Option<ActorSystem> system) {
+        final var queue = new MeteredMessageQueue(capacity, pushTimeOut);
+        registerMetric(owner, QUEUE_SIZE, (Gauge<Integer>) queue::size);
         return queue;
     }
 
-    private static void monitorQueueSize(final scala.Option<ActorRef> owner, final MeteredMessageQueue monitoredQueue) {
-        registerMetric(owner, QUEUE_SIZE, getQueueSizeGuage(monitoredQueue));
-    }
-
-    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue) {
-        return monitoredQueue::size;
-    }
-
-    static <T extends Metric> void registerMetric(final scala.Option<ActorRef> owner, final String metricName,
+    static <T extends Metric> void registerMetric(final Option<ActorRef> owner, final String metricName,
             final T metric) {
         if (owner.isEmpty()) {
            // there's no actor to monitor
@@ -63,8 +63,7 @@ public class MeteredBoundedMailbox implements MailboxType,
         String actorName = owner.get().path().toStringWithoutAddress();
         String fullName = MetricRegistry.name(actorName, metricName);
 
-        MetricRegistry registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
-
+        var registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
         if (registry.getMetrics().containsKey(fullName)) {
             // already registered
             return;
@@ -75,14 +74,6 @@ public class MeteredBoundedMailbox implements MailboxType,
         } catch (IllegalArgumentException e) {
             // already registered - shouldn't happen here since we check above...
             LOG.debug("Unable to register '{}' in metrics registry", fullName);
-        }
-    }
-
-    public static class MeteredMessageQueue extends BoundedDequeBasedMailbox.MessageQueue {
-        private static final long serialVersionUID = 1L;
-
-        public MeteredMessageQueue(final int capacity, final FiniteDuration pushTimeOut) {
-            super(capacity, pushTimeOut);
         }
     }
 }
