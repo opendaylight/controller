@@ -16,8 +16,6 @@ module org.opendaylight.controller.cluster.commons {
     exports org.opendaylight.controller.cluster.datastore.util;
     exports org.opendaylight.controller.cluster.messaging;
     exports org.opendaylight.controller.cluster.reporting;
-    exports org.opendaylight.controller.cluster.schema.provider;
-    exports org.opendaylight.controller.cluster.schema.provider.impl;
 
     opens org.opendaylight.controller.cluster.common.actor to org.opendaylight.controller.repackaged.pekko;
 
@@ -30,8 +28,6 @@ module org.opendaylight.controller.cluster.commons {
     requires transitive org.opendaylight.yangtools.yang.data.api;
     requires transitive org.opendaylight.yangtools.yang.data.codec.binfmt;
     requires transitive org.opendaylight.yangtools.yang.data.util;
-    requires transitive org.opendaylight.yangtools.yang.repo.api;
-    requires transitive org.opendaylight.yangtools.yang.repo.spi;
     requires transitive typesafe.config;
     requires com.codahale.metrics.jmx;
     requires org.opendaylight.yangtools.yang.data.impl;
