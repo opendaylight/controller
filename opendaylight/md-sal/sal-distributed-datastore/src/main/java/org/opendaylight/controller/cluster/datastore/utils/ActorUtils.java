@@ -56,6 +56,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance;
 import org.opendaylight.controller.pekko.support.spi.DispatcherType;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -117,7 +118,7 @@ public class ActorUtils {
     public static final String COMMIT = "commit";
 
     private final AskTimeoutCounter askTimeoutCounter = new AskTimeoutCounter();
-    private final @NonNull ActorSystem actorSystem;
+    private final @NonNull ActorSystemInstance actorSystemInstance;
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
@@ -137,16 +138,16 @@ public class ActorUtils {
     private final ShardStrategyFactory shardStrategyFactory;
 
     @VisibleForTesting
-    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
+    public ActorUtils(final ActorSystemInstance actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,
                 DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
     }
 
-    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
+    public ActorUtils(final ActorSystemInstance actorSystemInstance, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration,
             final DatastoreContext datastoreContext, final PrimaryShardInfoFutureCache primaryShardInfoCache) {
-        this.actorSystem = requireNonNull(actorSystem);
+        this.actorSystemInstance = requireNonNull(actorSystemInstance);
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
@@ -176,7 +177,11 @@ public class ActorUtils {
     }
 
     public @NonNull ActorSystem getActorSystem() {
-        return actorSystem;
+        return actorSystemInstance.actorSystem();
+    }
+
+    public @NonNull ActorSystemInstance getActorSystemInstance() {
+        return actorSystemInstance;
     }
 
     public ActorRef getShardManager() {
@@ -184,11 +189,11 @@ public class ActorUtils {
     }
 
     public ActorSelection actorSelection(final String actorPath) {
-        return actorSystem.actorSelection(actorPath);
+        return getActorSystem().actorSelection(actorPath);
     }
 
     public ActorSelection actorSelection(final ActorPath actorPath) {
-        return actorSystem.actorSelection(actorPath);
+        return getActorSystem().actorSelection(actorPath);
     }
 
     public void setSchemaContext(final EffectiveModelContext schemaContext) {
@@ -266,7 +271,7 @@ public class ActorUtils {
 
     private PrimaryShardInfo onPrimaryShardFound(final String shardName, final String primaryActorPath,
             final short primaryVersion, final ReadOnlyDataTree localShardDataTree) {
-        final var actorSelection = actorSystem.actorSelection(primaryActorPath);
+        final var actorSelection = actorSelection(primaryActorPath);
         final var info = localShardDataTree == null ? new PrimaryShardInfo(actorSelection, primaryVersion) :
             new PrimaryShardInfo(actorSelection, primaryVersion, localShardDataTree);
         primaryShardInfoCache.putSuccessful(shardName, info);
@@ -431,11 +436,11 @@ public class ActorUtils {
      * @return the dispatcher
      */
     public ExecutionContextExecutor getClientDispatcher() {
-        return DispatcherType.Client.dispatcherIn(actorSystem);
+        return DispatcherType.Client.dispatcherIn(getActorSystem());
     }
 
     public String getNotificationDispatcherPath() {
-        return DispatcherType.Notification.dispatcherPathIn(actorSystem);
+        return DispatcherType.Notification.dispatcherPathIn(getActorSystem());
     }
 
     public Configuration getConfiguration() {

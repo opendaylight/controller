@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,6 +35,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCr
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
+import org.opendaylight.controller.pekko.support.ActorSystemInstance;
 import org.opendaylight.controller.pekko.support.spi.DispatcherType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker.CommitCohortExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -71,9 +71,9 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Testing overrides")
-    protected AbstractDataStore(final Path stateDir, final ActorSystem actorSystem, final ClusterWrapper cluster,
-            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
-            final DatastoreSnapshot restoreFromSnapshot) {
+    protected AbstractDataStore(final Path stateDir, final ActorSystemInstance actorSystemInstance,
+            final ClusterWrapper cluster, final Configuration configuration,
+            final DatastoreContextFactory datastoreContextFactory, final DatastoreSnapshot restoreFromSnapshot) {
         requireNonNull(actorSystem, "actorSystem should not be null");
         requireNonNull(cluster, "cluster should not be null");
         requireNonNull(configuration, "configuration should not be null");
@@ -94,9 +94,9 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
             .restoreFromSnapshot(restoreFromSnapshot)
             .distributedDataStore(this);
 
-        actorUtils = new ActorUtils(actorSystem,
-            createShardManager(stateDir, actorSystem, creator, shardDispatcher, shardManagerId), cluster, configuration,
-            baseDatastoreContext, primaryShardInfoCache);
+        actorUtils = new ActorUtils(actorSystemInstance,
+            createShardManager(stateDir, actorSystemInstance, creator, shardDispatcher, shardManagerId), cluster,
+            configuration, baseDatastoreContext, primaryShardInfoCache);
 
         final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
             datastoreContextFactory.getBaseDatastoreContext().getDataStoreName(), actorUtils);
@@ -294,7 +294,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static ActorRef createShardManager(final Path stateDir, final ActorSystem actorSystem,
+    private static ActorRef createShardManager(final Path stateDir, final ActorSystemInstance actorSystemInstance,
             final AbstractShardManagerCreator<?> creator, final String shardDispatcher,
             final ShardManagerIdentifier shardManagerId) {
         Exception lastException = null;
