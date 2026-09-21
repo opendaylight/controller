@@ -10,7 +10,6 @@ package org.opendaylight.controller.pekko.support.dagger;
 import dagger.Module;
 import dagger.Provides;
 import jakarta.inject.Singleton;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.pekko.support.impl.FileAkkaConfigurationReader;
 import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
@@ -23,14 +22,14 @@ import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
 @SuppressWarnings("exports")
 public interface ConfigurationReaderModule {
     /**
-     * Return a {@link ConfigurationReader} backed by specified file.
+     * Return a {@link ConfigurationReader} backed by {@code configuration/factory/pekko.conf} and
+     * {@code configuration/initial/pekko.conf} files.
      *
-     * @param file the file
      * @return a {@link ConfigurationReader}
      */
     @Provides
     @Singleton
-    static ConfigurationReader provideConfigurationReader(final Path file) {
+    static ConfigurationReader provideConfigurationReader() {
         return new FileAkkaConfigurationReader();
     }
 }
