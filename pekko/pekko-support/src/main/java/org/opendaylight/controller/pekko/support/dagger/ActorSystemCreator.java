@@ -19,7 +19,6 @@ import org.opendaylight.controller.pekko.support.spi.ConfigurationReader;
  *
  * @since 14.0.0
  */
-// FIXME: this really should be a .dagger thing
 @Beta
 @NonNullByDefault
 public interface ActorSystemCreator {
