@@ -8,13 +8,12 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
+import org.opendaylight.controller.pekko.support.WatchedActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// FIXME: audit all users and route them through ActorSystemInstance.watchedActorOf()
-public abstract class AbstractUntypedActor extends AbstractActor implements ExecuteInSelfActor {
+public abstract class AbstractUntypedActor extends WatchedActor implements ExecuteInSelfActor {
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
     @SuppressFBWarnings(value = "SLF4J_LOGGER_SHOULD_BE_PRIVATE", justification = "Class identity is required")
@@ -22,11 +21,6 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
 
     protected AbstractUntypedActor() {
         LOG.debug("Actor created {}", self());
-    }
-
-    @Override
-    public final ActorContext getContext() {
-        return super.getContext();
     }
 
     @Override

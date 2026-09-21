@@ -40,6 +40,13 @@ public final class TerminationMonitor extends UntypedAbstractActor {
         return actorRef;
     }
 
+    public static void watchActor(final ActorContext actorContext) {
+        final var actorRef = actorContext.self();
+        final var monitorActor = actorContext.system().actorSelection("user/" + ADDRESS);
+        LOG.debug("Requesting monitoring of {} from {}", actorRef, monitorActor);
+        monitorActor.tell(new WatchActor(actorRef), ActorRef.noSender());
+    }
+
     @Override
     public void onReceive(final Object message) {
         switch (message) {
