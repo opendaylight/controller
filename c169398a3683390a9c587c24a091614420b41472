@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e14da190_4aa1f217",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-09-22T14:27:23Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 96,
+        "startChar": 106,
+        "endLine": 97,
+        "endChar": 27
+      },
+      "revId": "c169398a3683390a9c587c24a091614420b41472",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "efea1865_642f2a82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-09-22T14:27:23Z",
+      "side": 1,
+      "message": "that we can do a bit more for the cost of looking at lastOpen and potentially updating it.",
+      "range": {
+        "startLine": 97,
+        "startChar": 88,
+        "endLine": 97,
+        "endChar": 92
+      },
+      "revId": "c169398a3683390a9c587c24a091614420b41472",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8f606c1c_26714334",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-09-22T14:27:23Z",
+      "side": 1,
+      "message": "means",
+      "range": {
+        "startLine": 101,
+        "startChar": 33,
+        "endLine": 101,
+        "endChar": 38
+      },
+      "revId": "c169398a3683390a9c587c24a091614420b41472",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
