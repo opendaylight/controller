@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>diag-aggregator</artifactId>
-    <version>14.0.0</version>
+    <version>14.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>

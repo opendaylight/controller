@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>14.0.0</version>
+        <version>14.0.1-SNAPSHOT</version>
         <relativePath>../../../binding-parent/pom.xml</relativePath>
     </parent>
 
