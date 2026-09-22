@@ -72,8 +72,8 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private final CursorAwareDataTreeModification modification;
 
     private Supplier<? extends RuntimeException> closedException;
-
     private CursorAwareDataTreeModification sealedModification;
+    private DataTreeSnapshot snapshot;
 
     /**
      * Recorded failure from previous operations. Normally we would want to propagate the error directly to the
@@ -89,27 +89,32 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
             final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
-
-        if (snapshot instanceof FailedDataTreeModification failed) {
-            recordedFailure = failed.cause();
-            modification = failed;
-        } else {
-            CursorAwareDataTreeModification mod;
-            try {
-                mod = (CursorAwareDataTreeModification) snapshot.newModification();
-            } catch (Exception e) {
-                LOG.debug("Failed to instantiate modification for {}", identifier, e);
-                recordedFailure = e;
-                mod = new FailedDataTreeModification(snapshot.modelContext(), e);
+        this.snapshot = switch (snapshot) {
+            case FailedDataTreeModification failed -> {
+                recordedFailure = failed.cause();
+                modification = failed;
+                yield null;
             }
-            modification = mod;
-        }
+            default -> {
+                CursorAwareDataTreeModification mod;
+                try {
+                    mod = (CursorAwareDataTreeModification) snapshot.newModification();
+                } catch (Exception e) {
+                    LOG.debug("Failed to instantiate modification for {}", identifier, e);
+                    recordedFailure = e;
+                    mod = new FailedDataTreeModification(snapshot.modelContext(), e);
+                }
+                modification = mod;
+                yield snapshot;
+            }
+        };
     }
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
         super(parent, identifier, true);
         // This is DONE transaction, this should never be touched
         modification = null;
+        snapshot = null;
     }
 
     @Override
@@ -211,6 +216,11 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         checkState(sealedModification == null, "Transaction %s is already sealed", this);
         final var mod = getModification();
         mod.ready();
+
+        // FIXME:
+        if (snapshot == null) {
+            // FIXME: the snapshot has gone away, meaning we need to rebase, but for that we need a DataTree...
+        }
         sealedModification = mod;
     }
 
@@ -392,6 +402,15 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             throw closedException.get();
         }
         return verifyNotNull(modification, "Transaction %s is DONE", getIdentifier());
+    }
+
+    void onSnapshotCommitted(final CursorAwareDataTreeSnapshot committed) {
+        if (committed.equals(snapshot)) {
+            if (sealedModification != null) {
+                throw new VerifyException("Transaction %s is already sealed".formatted(getIdentifier()));
+            }
+            snapshot = null;
+        }
     }
 
     private void sendRebased(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
