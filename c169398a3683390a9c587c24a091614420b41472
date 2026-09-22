@@ -47,6 +47,54 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b522829_6dea5100",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-09-22T16:21:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e14da190_4aa1f217",
+      "range": {
+        "startLine": 96,
+        "startChar": 106,
+        "endLine": 97,
+        "endChar": 27
+      },
+      "revId": "c169398a3683390a9c587c24a091614420b41472",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f975bd14_241f8d15",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-09-22T16:21:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "efea1865_642f2a82",
+      "range": {
+        "startLine": 97,
+        "startChar": 88,
+        "endLine": 97,
+        "endChar": 92
+      },
+      "revId": "c169398a3683390a9c587c24a091614420b41472",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8f606c1c_26714334",
