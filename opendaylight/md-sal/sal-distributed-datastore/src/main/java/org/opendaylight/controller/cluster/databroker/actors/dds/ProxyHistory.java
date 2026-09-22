@@ -11,6 +11,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
@@ -74,26 +76,75 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     private static final class Local extends AbstractLocal {
-        private static final VarHandle VH;
+        private static final VarHandle LAST_SEALED_VH;
 
         static {
             try {
-                VH = MethodHandles.lookup()
+                LAST_SEALED_VH = MethodHandles.lookup()
                     .findVarHandle(Local.class, "lastSealed", LocalReadWriteProxyTransaction.class);
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new ExceptionInInitializerError(e);
             }
         }
 
+        private final Ticker ticker;
+
         // Tracks the last open and last sealed transaction. We need to track both in case the user ends up aborting
         // the open one and attempts to create a new transaction again.
         private LocalReadWriteProxyTransaction lastOpen;
 
+        // FIXME: State transitions between lastOpen and lastSealed release a snapshot hierachy only when the
+        //        only when we observe lastSealed to have completed: but do not realize that
         private volatile LocalReadWriteProxyTransaction lastSealed;
+
+        // FIXME: 'nextRebase' which is a ticker time when a seal() operation must perform a replay on top of tree
+        //        What to rebase needs some more thought.
+        //
+        //        Our primary focus is the case of ping-pong transaction chain under load. In that we observe:
+        //          1. tx0 open, sealed and sent
+        //          2. tx1 open
+        //          3. tx0 completed
+        //          4. tx1 sealed and sent
+        //          5. tx2 open
+        //          6. tx1 completed
+        //          7. tx2 sealed and sent
+        //        and therefore we never clear lastSealed.
+        //
+        //        That works great for having the backend perform an explicit rebase as part of making commit history
+        //        linear.
+        //
+        //        Unfortunately that also retains references to observed state that is now garbage and we are
+        //        potentially a final hold up.
+        //
+        //        We would like to improve hard limit on for how long we retain such references in terms of, in this
+        //        particular case only
+        //        - the number of transactions that are allowed be committed
+        //        - the time since those references were cleared
+        //
+        //        In order to clean the references, we essentially need to:
+        //        - take a snapshot of the data tree
+        //        - replay the modification on top of the snapshot
+        //        - record any failure as a failure to seal
+        //
+        //        Most critical here is making sure we do not interfere with other possible flows as little as possible.
+        //
+        //        The optimization we want to do relies on observing that tx2 is being logically sealed and the
+        //        transaction which provided the snapshot is the last committed state of this history: we can play
+        //        pretend that tx2 was open after tx1 was committed by replaying the DataTreeModification on top of
+        //        current DataTree snapshots.
+        private long lastRebase;
 
         Local(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
                 final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree) {
+            this(parent, connection, identifier, dataTree, Ticker.systemTicker());
+        }
+
+        // TODO: we should be getting the ticker from either parent or connection
+        @VisibleForTesting
+        Local(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
+                final LocalHistoryIdentifier identifier, final ReadOnlyDataTree dataTree, final Ticker ticker) {
             super(parent, connection, identifier, dataTree);
+            this.ticker = requireNonNull(ticker);
         }
 
         @Override
@@ -107,18 +158,25 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                         : new LocalReadWriteProxyTransaction(this, txId);
             }
 
-            // onTransactionCompleted() runs concurrently
-            final var localSealed = lastSealed;
-            final var baseSnapshot = localSealed != null ? localSealed.getSnapshot() : takeSnapshot();
-
+            final var snapshot = newSnapshot();
             if (snapshotOnly) {
-                return new LocalReadOnlyProxyTransaction(this, txId, baseSnapshot);
+                return new LocalReadOnlyProxyTransaction(this, txId, snapshot);
             }
 
-            final var ret = new LocalReadWriteProxyTransaction(this, txId, baseSnapshot);
+            final var ret = new LocalReadWriteProxyTransaction(this, txId, snapshot);
             lastOpen = ret;
             LOG.debug("Proxy {} open transaction {}", this, ret);
             return ret;
+        }
+
+        // onTransactionCompleted() runs concurrently
+        private DataTreeSnapshot newSnapshot() {
+            final var localSealed = lastSealed;
+            if (localSealed == null) {
+                lastRebase = ticker.read();
+                return takeSnapshot();
+            }
+            return localSealed.getSnapshot();
         }
 
         @Override
@@ -140,7 +198,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                     // no-op
                 }
                 case LocalReadWriteProxyTransaction rw -> {
-                    if (VH.compareAndSet(this, rw, null)) {
+                    if (LAST_SEALED_VH.compareAndSet(this, rw, null)) {
                         LOG.debug("Completed last sealed transaction {}", tx);
                     }
                 }
@@ -151,6 +209,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void onTransactionSealed(final AbstractProxyTransaction tx) {
             checkState(tx.equals(lastOpen));
+            // FIXME: so here we should be looking at the trail in lastSealed
             lastSealed = lastOpen;
             lastOpen = null;
         }
