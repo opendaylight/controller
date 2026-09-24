@@ -1,0 +1,10 @@
+Code-Review+1: Yaroslav Lastivka <yaroslav.lastivka@pantheon.tech>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: ODL GitHub Actions <releng+odl-github-actions@linuxfoundation.org>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Code-Review+1: Matej Sramcik <matej.sramcik@pantheon.tech>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Thu, 24 Sep 2026 13:18:09 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/124407
+Project: controller
+Branch: refs/heads/master
