@@ -21,7 +21,8 @@
   <description>OpenDaylight Blueprint Extension</description>
 
   <properties>
-    <odlparent.dependency.enforce>false</odlparent.dependency.enforce>
+    <!-- FIXME: fix these up and set maven.javadoc.failOnWarnings=true -->
+    <doclint>all,-missing</doclint>
   </properties>
 
   <dependencies>
