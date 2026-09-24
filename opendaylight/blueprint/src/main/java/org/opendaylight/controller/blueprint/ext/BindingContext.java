@@ -9,6 +9,7 @@ package org.opendaylight.controller.blueprint.ext;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.net.URISyntaxException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
@@ -76,13 +77,22 @@ abstract sealed class BindingContext {
                 final BindingClass<T> bindingClass, final String listKeyValue)
                     throws InstantiationException, IllegalAccessException, IllegalArgumentException,
                            InvocationTargetException, NoSuchMethodException, SecurityException {
+            final var keyClass = findKeyClass(bindingClass.clazz());
             // We assume the YANG list key type is string.
             @SuppressWarnings("unchecked")
-            final var keyInstance = (K) bindingClass.clazz().getMethod("key").getReturnType()
-                .getConstructor(String.class).newInstance(listKeyValue);
+            final var keyInstance = (K) keyClass.getConstructor(String.class).newInstance(listKeyValue);
 
             return new ListBindingContext(bindingClass,
                 DataObjectIdentifier.builder(bindingClass.clazz(), keyInstance).build(), listKeyValue);
+        }
+
+        private static @NonNull Class<?> findKeyClass(final Class<? extends EntryObject<?, ?, ?>> clazz) {
+            for (var iface : clazz.getGenericInterfaces()) {
+                if (iface instanceof ParameterizedType param && param.getRawType().equals(EntryObject.class)) {
+                    return Class.class.cast(param.getActualTypeArguments()[2]);
+                }
+            }
+            throw new IllegalStateException("Cannot find key type in " + clazz);
         }
 
         @Override
