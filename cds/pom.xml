@@ -10,7 +10,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>cds-aggregator</artifactId>
-    <version>14.0.1</version>
+    <version>14.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
