@@ -49,7 +49,7 @@ class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTest<Local
         when(snapshot.newModification()).thenReturn(modification);
         when(modification.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
         when(modification.readNode(PATH_3)).thenReturn(Optional.empty());
-        return new LocalReadWriteProxyTransaction(parent, TestUtils.TRANSACTION_ID, snapshot);
+        return LocalReadWriteProxyTransaction.of(parent, TestUtils.TRANSACTION_ID, snapshot);
     }
 
     @Test
