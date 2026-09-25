@@ -19,6 +19,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
@@ -59,10 +60,66 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This class is not thread-safe as usual with transactions. Since it does not interact with the backend until the
  * transaction is submitted, at which point this class gets out of the picture, this is not a cause for concern.
- *
- * @author Robert Varga
  */
-final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
+abstract sealed class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
+    @NonNullByDefault
+    private static final class Done extends LocalReadWriteProxyTransaction {
+        Done(final ProxyHistory parent, final TransactionIdentifier identifier) {
+            super(parent, identifier);
+        }
+
+        @Override
+        long ancestors() {
+            return 0;
+        }
+
+        @Override
+        LocalReadWriteProxyTransaction deriveTransaction(final TransactionIdentifier identifier) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @NonNullByDefault
+    private static final class First extends LocalReadWriteProxyTransaction {
+        First(final ProxyHistory parent, final TransactionIdentifier identifier, final DataTreeSnapshot snapshot) {
+            super(parent, identifier, snapshot);
+        }
+
+        First(final ProxyHistory parent, final TransactionIdentifier identifier) {
+            super(parent, identifier);
+        }
+
+        @Override
+        long ancestors() {
+            return 0;
+        }
+
+        @Override
+        Next deriveTransaction(final TransactionIdentifier identifier) {
+            return new Next(this, identifier, 1);
+        }
+    }
+
+    @NonNullByDefault
+    private static final class Next extends LocalReadWriteProxyTransaction {
+        private final int ancestors;
+
+        Next(final LocalReadWriteProxyTransaction prev, final TransactionIdentifier identifier, final int ancestors) {
+            super(prev.parent, identifier, prev.getSnapshot());
+            this.ancestors = ancestors;
+        }
+
+        @Override
+        long ancestors() {
+            return Integer.toUnsignedLong(ancestors);
+        }
+
+        @Override
+        Next deriveTransaction(final TransactionIdentifier identifier) {
+            return new Next(this, identifier, ancestors + 1);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(LocalReadWriteProxyTransaction.class);
 
     /**
@@ -85,8 +142,9 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
      */
     private Exception recordedFailure;
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
-    LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
+    private LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
             final DataTreeSnapshot snapshot) {
         super(parent, identifier, false);
 
@@ -106,31 +164,43 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         }
     }
 
-    LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+    @NonNullByDefault
+    private LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
         super(parent, identifier, true);
         // This is DONE transaction, this should never be touched
         modification = null;
     }
 
+    @NonNullByDefault
+    static LocalReadWriteProxyTransaction done(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        return new Done(parent, identifier);
+    }
+
+    @NonNullByDefault
+    static LocalReadWriteProxyTransaction of(final ProxyHistory parent, final TransactionIdentifier identifier,
+            final DataTreeSnapshot snapshot) {
+        return new First(parent, identifier, snapshot);
+    }
+
     @Override
-    boolean isSnapshotOnly() {
+    final boolean isSnapshotOnly() {
         return false;
     }
 
     @Override
-    CursorAwareDataTreeSnapshot readOnlyView() {
+    final CursorAwareDataTreeSnapshot readOnlyView() {
         return getModification();
     }
 
     @Override
-    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+    final FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
         final var ex = recordedFailure;
         return ex == null ? super.doExists(path)
             : FluentFutures.immediateFailedFluentFuture(ReadFailedException.MAPPER.apply(ex));
     }
 
     @Override
-    FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
+    final FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
         final var ex = recordedFailure;
         return ex == null ? super.doRead(path)
             : FluentFutures.immediateFailedFluentFuture(ReadFailedException.MAPPER.apply(ex));
@@ -138,7 +208,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void doDelete(final YangInstanceIdentifier path) {
+    final void doDelete(final YangInstanceIdentifier path) {
         final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring delete of {}", getIdentifier(), path);
@@ -156,7 +226,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
+    final void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
         final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring merge to {}", getIdentifier(), path);
@@ -174,7 +244,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
+    final void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
         final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring write to {}", getIdentifier(), path);
@@ -199,7 +269,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
+    final CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
         final var mod = getModification();
         final var ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(), localActor(), mod,
             recordedFailure, coordinated);
@@ -215,19 +285,19 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    boolean sealOnly() {
+    final boolean sealOnly() {
         sealModification();
         return super.sealOnly();
     }
 
     @Override
-    boolean sealAndSend(final OptionalLong enqueuedTicks) {
+    final boolean sealAndSend(final OptionalLong enqueuedTicks) {
         sealModification();
         return super.sealAndSend(enqueuedTicks);
     }
 
     @Override
-    ModifyTransactionRequest flushState() {
+    final ModifyTransactionRequest flushState() {
         final var builder = ModifyTransactionRequest.builder(getIdentifier(), localActor()).setSequence(0);
 
         sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
@@ -250,19 +320,22 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         return builder.build();
     }
 
-    CursorAwareDataTreeSnapshot getSnapshot() {
-        checkState(sealedModification != null, "Proxy %s is not sealed yet", getIdentifier());
-        return sealedModification;
+    final @NonNull CursorAwareDataTreeSnapshot getSnapshot() {
+        final var local = sealedModification;
+        if (local == null) {
+            throw new IllegalStateException("Proxy %s is not sealed yet".formatted(getIdentifier()));
+        }
+        return local;
     }
 
     @Override
-    void applyForwardedModifyTransactionRequest(final ModifyTransactionRequest request,
+    final void applyForwardedModifyTransactionRequest(final ModifyTransactionRequest request,
             final Consumer<Response<?, ?>> callback) {
         commonModifyTransactionRequest(request, callback, this::sendRequest);
     }
 
     @Override
-    void replayModifyTransactionRequest(final ModifyTransactionRequest request,
+    final void replayModifyTransactionRequest(final ModifyTransactionRequest request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         commonModifyTransactionRequest(request, callback, (req, cb) -> enqueueRequest(req, cb, enqueuedTicks));
     }
@@ -297,7 +370,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
+    final void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof CommitLocalTransactionRequest req) {
             enqueueRequest(rebaseCommit(req), callback, now);
@@ -307,7 +380,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+    final void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         LOG.debug("Applying replayed request {}", request);
         switch (request) {
@@ -323,7 +396,8 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void handleForwardedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    final void handleForwardedRemoteRequest(final TransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) {
         LOG.debug("Applying forwarded request {}", request);
         switch (request) {
             case TransactionPreCommitRequest req ->
@@ -336,7 +410,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    Response<?, ?> handleExistsRequest(final DataTreeSnapshot snapshot, final ExistsTransactionRequest request) {
+    final Response<?, ?> handleExistsRequest(final DataTreeSnapshot snapshot, final ExistsTransactionRequest request) {
         final var ex = recordedFailure;
         return ex == null ? super.handleExistsRequest(snapshot, request)
             : request.toRequestFailure(
@@ -344,7 +418,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    Response<?, ?> handleReadRequest(final DataTreeSnapshot snapshot, final ReadTransactionRequest request) {
+    final Response<?, ?> handleReadRequest(final DataTreeSnapshot snapshot, final ReadTransactionRequest request) {
         final var ex = recordedFailure;
         return ex == null ? super.handleReadRequest(snapshot, request)
             : request.toRequestFailure(
@@ -352,7 +426,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
+    final void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
         switch (request) {
             case CommitLocalTransactionRequest req -> verifyLocalReadWrite(successor).sendRebased(req, callback);
@@ -374,17 +448,25 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void sendAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
+    final void sendAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
         super.sendAbort(request, callback);
         closedException = this::abortedException;
     }
 
     @Override
-    void enqueueAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback,
+    final void enqueueAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         super.enqueueAbort(request, callback, enqueuedTicks);
         closedException = this::abortedException;
     }
+
+    /**
+     * {@return the number of ancestor transactions}
+     */
+    abstract long ancestors();
+
+    @NonNullByDefault
+    abstract LocalReadWriteProxyTransaction deriveTransaction(TransactionIdentifier identifier);
 
     @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Replay of recorded failure")
     private @NonNull CursorAwareDataTreeModification getModification() {

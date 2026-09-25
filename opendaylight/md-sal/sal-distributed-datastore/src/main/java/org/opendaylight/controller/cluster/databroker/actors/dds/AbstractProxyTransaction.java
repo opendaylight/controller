@@ -220,9 +220,10 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         }
     }
 
+    final @NonNull ProxyHistory parent;
+
     // Touched from client actor thread only
     private final ArrayDeque<Object> successfulRequests = new ArrayDeque<>();
-    private final ProxyHistory parent;
 
     // Accessed from user thread only, which may not access this object concurrently
     private long sequence;

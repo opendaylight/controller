@@ -61,7 +61,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             this.dataTree = requireNonNull(dataTree);
         }
 
-        final DataTreeSnapshot takeSnapshot() {
+        final @NonNull DataTreeSnapshot takeSnapshot() {
             return dataTree.takeSnapshot();
         }
     }
@@ -104,18 +104,18 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             if (isDone) {
                 // Done transactions do not register on our radar on should not have any state associated.
                 return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId)
-                        : new LocalReadWriteProxyTransaction(this, txId);
+                        : LocalReadWriteProxyTransaction.done(this, txId);
             }
 
             // onTransactionCompleted() runs concurrently
             final var localSealed = lastSealed;
-            final var baseSnapshot = localSealed != null ? localSealed.getSnapshot() : takeSnapshot();
-
             if (snapshotOnly) {
-                return new LocalReadOnlyProxyTransaction(this, txId, baseSnapshot);
+                return new LocalReadOnlyProxyTransaction(this, txId,
+                    localSealed != null ? localSealed.getSnapshot() : takeSnapshot());
             }
 
-            final var ret = new LocalReadWriteProxyTransaction(this, txId, baseSnapshot);
+            final var ret = localSealed != null ? localSealed.deriveTransaction(txId)
+                : LocalReadWriteProxyTransaction.of(this, txId, takeSnapshot());
             lastOpen = ret;
             LOG.debug("Proxy {} open transaction {}", this, ret);
             return ret;
@@ -167,7 +167,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
             final var snapshot = takeSnapshot();
             return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot)
-                : new LocalReadWriteProxyTransaction(this, txId, snapshot);
+                : LocalReadWriteProxyTransaction.of(this, txId, snapshot);
         }
 
         @Override
