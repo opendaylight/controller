@@ -285,14 +285,14 @@ abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransaction> 
         final var clientContextProbe = new TestProbe(system, "clientContext2");
         final var context =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        final var backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(),
-                "default", UnsignedLong.ZERO, Optional.empty(), 3);
+        final var backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.current(), "default",
+            UnsignedLong.ZERO, Optional.empty(), 3);
         final var connection = AccessClientUtil.createConnectedConnection(context, 0L, backend);
         final var history = mock(AbstractClientHistory.class);
         final var parent = ProxyHistory.createClient(history, connection, HISTORY_ID);
         final var snapshot = mock(DataTreeSnapshot.class);
         when(snapshot.newModification()).thenReturn(mock(CursorAwareDataTreeModification.class));
-        final var tx = new LocalReadWriteProxyTransaction(parent, TestUtils.TRANSACTION_ID, snapshot);
+        final var tx = LocalReadWriteProxyTransaction.of(parent, TestUtils.TRANSACTION_ID, snapshot);
         return new TransactionTester<>(tx, connection, backendProbe);
     }
 
