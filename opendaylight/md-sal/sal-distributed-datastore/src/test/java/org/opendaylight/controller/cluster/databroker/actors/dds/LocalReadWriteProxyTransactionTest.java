@@ -22,7 +22,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import com.google.common.base.Ticker;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -39,14 +39,13 @@ import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModifica
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
-public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTest<LocalReadWriteProxyTransaction> {
+class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTest<LocalReadWriteProxyTransaction> {
     @Mock
     private CursorAwareDataTreeModification modification;
 
     @Override
-    protected LocalReadWriteProxyTransaction createTransaction(final ProxyHistory parent,
-                                                               final TransactionIdentifier id,
-                                                               final DataTreeSnapshot snapshot) {
+    LocalReadWriteProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
+            final DataTreeSnapshot snapshot) {
         when(snapshot.newModification()).thenReturn(modification);
         when(modification.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
         when(modification.readNode(PATH_3)).thenReturn(Optional.empty());
@@ -54,25 +53,25 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testIsSnapshotOnly() {
+    void testIsSnapshotOnly() {
         assertFalse(transaction.isSnapshotOnly());
     }
 
     @Test
-    public void testReadOnlyView() {
+    void testReadOnlyView() {
         assertEquals(modification, transaction.readOnlyView());
     }
 
     @Test
     @Override
-    public void testDelete() {
+    void testDelete() {
         transaction.delete(PATH_1);
         verify(modification).delete(PATH_1);
     }
 
     @Test
     @Override
-    public void testDirectCommit() throws Exception {
+    void testDirectCommit() throws Exception {
         transaction.seal();
         final var result = transaction.directCommit();
         final var tester = getTester();
@@ -83,40 +82,40 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     @Override
-    public void testCanCommit() {
+    void testCanCommit() {
         testRequestResponse(transaction::canCommit, CommitLocalTransactionRequest.class,
-                TransactionCanCommitSuccess::new);
+            TransactionCanCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testPreCommit() {
+    void testPreCommit() {
         testRequestResponse(transaction::preCommit, TransactionPreCommitRequest.class,
-                TransactionPreCommitSuccess::new);
+            TransactionPreCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testDoCommit() {
+    void testDoCommit() {
         testRequestResponse(transaction::doCommit, TransactionDoCommitRequest.class, TransactionCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testMerge() {
+    void testMerge() {
         transaction.merge(PATH_1, DATA_1);
         verify(modification).merge(PATH_1, DATA_1);
     }
 
     @Test
     @Override
-    public void testWrite() {
+    void testWrite() {
         transaction.write(PATH_1, DATA_1);
         verify(modification).write(PATH_1, DATA_1);
     }
 
     @Test
-    public void testCommitRequest() {
+    void testCommitRequest() {
         transaction.doWrite(PATH_1, DATA_1);
         final var request = transaction.commitRequest(true);
         assertTrue(request.isCoordinated());
@@ -124,7 +123,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testModifyAfterCommitRequest() throws Exception {
+    void testModifyAfterCommitRequest() throws Exception {
         transaction.doWrite(PATH_1, DATA_1);
         final boolean coordinated = true;
         transaction.commitRequest(coordinated);
@@ -132,14 +131,14 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testSealOnly() throws Exception {
+    void testSealOnly() throws Exception {
         assertOperationThrowsException(() -> transaction.getSnapshot(), IllegalStateException.class);
         transaction.sealOnly();
         assertEquals(modification, transaction.getSnapshot());
     }
 
     @Test
-    public void testFlushState() {
+    void testFlushState() {
         final var transactionTester = createRemoteProxyTransactionTester();
         final var successor = transactionTester.getTransaction();
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
@@ -155,47 +154,47 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testApplyModifyTransactionRequestCoordinated() {
+    void testApplyModifyTransactionRequestCoordinated() {
         applyModifyTransactionRequest(true);
     }
 
     @Test
-    public void testApplyModifyTransactionRequestSimple() {
+    void testApplyModifyTransactionRequestSimple() {
         applyModifyTransactionRequest(false);
     }
 
     @Test
-    public void testApplyModifyTransactionRequestAbort() {
+    void testApplyModifyTransactionRequestAbort() {
         final var probe = createProbe();
         final var request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
             .setSequence(0L)
             .setAbort()
             .build();
-        final Consumer<Response<?, ?>> callback = createCallbackMock();
+        final Consumer<Response<?, ?>> callback = mock();
         transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
     @Test
-    public void testHandleForwardedRemotePreCommitRequest() {
+    void testHandleForwardedRemotePreCommitRequest() {
         final var probe = createProbe();
         testHandleForwardedRemoteRequest(new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
-    public void testHandleForwardedRemoteDoCommitRequest() {
+    void testHandleForwardedRemoteDoCommitRequest() {
         final var probe = createProbe();
         testHandleForwardedRemoteRequest(new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
-    public void testHandleForwardedRemoteAbortRequest() {
+    void testHandleForwardedRemoteAbortRequest() {
         final var probe = createProbe();
         testHandleForwardedRemoteRequest(new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
-    public void testForwardToLocalCommit() {
+    void testForwardToLocalCommit() {
         final var probe = createProbe();
         final var mod = mock(DataTreeModification.class);
         final var request = new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), mod, null, false);
@@ -203,9 +202,9 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testSendAbort() throws Exception {
+    void testSendAbort() throws Exception {
         final var probe = createProbe();
-        transaction.sendAbort(new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref()), createCallbackMock());
+        transaction.sendAbort(new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref()), mock());
         assertOperationThrowsException(() -> transaction.delete(PATH_1), IllegalStateException.class);
     }
 
@@ -218,7 +217,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
             .setSequence(0L)
             .setCommit(coordinated)
             .build();
-        final Consumer<Response<?, ?>> callback = createCallbackMock();
+        final Consumer<Response<?, ?>> callback = mock();
         transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         verify(modification).write(PATH_1, DATA_1);
         verify(modification).merge(PATH_2, DATA_2);
@@ -227,5 +226,4 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         assertEquals(modification, commitRequest.getModification());
         assertEquals(coordinated, commitRequest.isCoordinated());
     }
-
 }

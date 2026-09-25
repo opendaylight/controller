@@ -7,28 +7,28 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
 import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import java.util.Optional;
-import org.apache.pekko.testkit.TestProbe;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
-public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest<LocalReadOnlyProxyTransaction> {
+class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest<LocalReadOnlyProxyTransaction> {
     private DataTreeSnapshot snapshot;
 
     @Override
     @SuppressWarnings("checkstyle:hiddenField")
-    protected LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
+    LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
             final DataTreeSnapshot snapshot) {
         when(snapshot.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
         when(snapshot.readNode(PATH_3)).thenReturn(Optional.empty());
@@ -37,98 +37,98 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     }
 
     @Test
-    public void testIsSnapshotOnly() {
+    void testIsSnapshotOnly() {
         assertTrue(transaction.isSnapshotOnly());
     }
 
     @Test
-    public void testReadOnlyView() {
-        assertEquals(snapshot, transaction.readOnlyView());
+    void testReadOnlyView() {
+        assertSame(snapshot, transaction.readOnlyView());
     }
 
     @Test
     @Override
-    public void testDirectCommit() {
+    void testDirectCommit() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.directCommit());
     }
 
     @Test
     @Override
-    public void testCanCommit() {
+    void testCanCommit() {
         assertThrows(UnsupportedOperationException.class,
             () -> transaction.canCommit(new VotingFuture<>(new Object(), 1)));
     }
 
     @Test
     @Override
-    public void testPreCommit() {
+    void testPreCommit() {
         assertThrows(UnsupportedOperationException.class,
             () -> transaction.preCommit(new VotingFuture<>(new Object(), 1)));
     }
 
     @Test
     @Override
-    public void testDoCommit() {
+    void testDoCommit() {
         assertThrows(UnsupportedOperationException.class,
             () -> transaction.doCommit(new VotingFuture<>(new Object(), 1)));
     }
 
     @Test
     @Override
-    public void testDelete() {
+    void testDelete() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.delete(PATH_1));
     }
 
     @Override
-    public void testMerge() {
+    void testMerge() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.merge(PATH_1, DATA_1));
     }
 
     @Test
     @Override
-    public void testWrite() {
+    void testWrite() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.write(PATH_1, DATA_1));
     }
 
     @Test
-    public void testDoDelete() {
+    void testDoDelete() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.doDelete(PATH_1));
     }
 
     @Test
-    public void testDoMerge() {
+    void testDoMerge() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.doMerge(PATH_1, DATA_1));
     }
 
     @Test
-    public void testDoWrite() {
+    void testDoWrite() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.doWrite(PATH_1, DATA_1));
     }
 
     @Test
-    public void testCommitRequest() {
+    void testCommitRequest() {
         assertThrows(UnsupportedOperationException.class, () -> transaction.commitRequest(true));
     }
 
     @Test
-    public void testApplyModifyTransactionRequest() {
-        final TestProbe probe = createProbe();
-        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+    void testApplyModifyTransactionRequest() {
+        final var probe = createProbe();
+        final var request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
             .setSequence(0)
             .setAbort()
             .build();
-        transaction.replayModifyTransactionRequest(request, createCallbackMock(), Ticker.systemTicker().read());
+        transaction.replayModifyTransactionRequest(request, mock(), Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
     @Test
-    public void testApplyModifyTransactionRequestNotAbort() throws Exception {
-        final TestProbe probe = createProbe();
-        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+    void testApplyModifyTransactionRequestNotAbort() throws Exception {
+        final var probe = createProbe();
+        final var request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
             .setSequence(0)
             .setReady()
             .build();
-        assertOperationThrowsException(() -> transaction.replayModifyTransactionRequest(request, createCallbackMock(),
+        assertOperationThrowsException(() -> transaction.replayModifyTransactionRequest(request, mock(),
             Ticker.systemTicker().read()), VerifyException.class);
     }
 }
