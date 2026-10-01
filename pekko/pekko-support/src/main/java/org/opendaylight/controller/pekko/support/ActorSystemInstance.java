@@ -24,11 +24,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Thomas Pantelis
  */
 @NonNullByDefault
-public sealed interface ActorSystemInstance {
+public interface ActorSystemInstance {
     /**
      * An {@link ActorSystemInstance} exposing the ability to be shut down.
      */
-    non-sealed interface WithShutdown extends ActorSystemInstance, AutoCloseable {
+    interface WithShutdown extends ActorSystemInstance, AutoCloseable {
         /**
          * Shut this instance down. This method is idempotent.
          *
