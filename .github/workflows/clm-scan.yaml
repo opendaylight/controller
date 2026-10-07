@@ -20,6 +20,13 @@ on:
 permissions:
   contents: read
 
+env:
+  NEXUS_IQ_SERVER: https://nexus-iq.wl.linuxfoundation.org
+  # Must match the JJB gerrit-maven-clm application id, which is built from
+  # nexus-iq-namespace + project-name (see jjb/releng-templates-java.yaml).
+  NEXUS_IQ_NAMESPACE: odl-
+  NEXUS_IQ_STAGE: release
+
 jobs:
   clm-scan:
     runs-on: ubuntu-24.04
@@ -44,17 +51,39 @@ jobs:
         with:
           maven-version: "3.9.5"
 
-      - name: Dependency Tree
-        run: mvn dependency:tree
-
-      - name: CLM Scan
+      - name: Maven build and CLM module index
         env:
-          CLM_PASSWORD: ${{ secrets.CLM_PASSWORD }}
-          CLM_USER: ${{ secrets.CLM_USER }}
+          MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
         run: |
-          if [[ -z "${CLM_PASSWORD}" || -z "${CLM_USER}" ]]; then
-            echo "CLM credentials not configured, skipping scan"
-            exit 0
-          fi
-          mvn clean install -DskipTests \
+          # yamllint disable rule:line-length
+          mvn clean install dependency:tree com.sonatype.clm:clm-maven-plugin:2.41.0-02:index \
+            -DskipTests \
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+      - name: Obtain Nexus IQ application ID
+        env:
+          GERRIT_PROJECT: ${{ github.event.repository.name }}
+        run: |
+          REPO_DASHED="${GERRIT_PROJECT//\//-}"
+          echo "APPLICATION_ID=${NEXUS_IQ_NAMESPACE}${REPO_DASHED}" >> "$GITHUB_ENV"
+
+      - name: Nexus IQ policy evaluation
+        # yamllint disable-line rule:line-length
+        uses: sonatype-nexus-community/iq-github-action@8d2038fbbcb37dc613c28d160843dd0981a7fce8 # v2.1.0
+        with:
+          serverUrl: ${{ env.NEXUS_IQ_SERVER }}
+          username: ${{ secrets.CLM_USER }}
+          password: ${{ secrets.CLM_PASSWORD }}
+          applicationId: ${{ env.APPLICATION_ID }}
+          stage: ${{ env.NEXUS_IQ_STAGE }}
+          target: "/"
+          writePolicyEvaluationJson: "true"
+
+      - name: Upload policy evaluation report
+        if: ${{ always() }}
+        # yamllint disable-line rule:line-length
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonatype-lifecycle-policy-eval
+          path: sonatype-lifecycle-policy-eval.json
+          if-no-files-found: warn
