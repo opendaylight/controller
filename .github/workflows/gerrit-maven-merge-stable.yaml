@@ -43,13 +43,8 @@ jobs:
       # SNAPSHOT sooner than restarting would.
       group: gerrit-maven-merge-${{ matrix.GERRIT_BRANCH }}
       cancel-in-progress: false
-    # Pinned ahead of v0.10.3 on purpose: that tag predates PRs 896
-    # and 897, so pinning there would abort the publish with
-    # "nexus_password is required" and restart the SNAPSHOT
-    # buildNumber at 1. Re-pin to v0.10.4 once that draft release is
-    # published; it already targets this commit.
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@d687ef6c5a015053aa20048d16900ad599508b2a # main @ 2026-09-01
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@fb907909b12bbaf262de6b24fcafd181cabe6b24  # v0.10.4
     # "secrets: inherit" does not cross organisations, and this workflow
     # lives in the lfit org, so the secrets have to be passed by name.
     secrets:
