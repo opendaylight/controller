@@ -12,59 +12,93 @@ name: Gerrit Composed Maven Merge (stable)
 # inputs.GERRIT_BRANCH, so the branch being built does not have to be the
 # branch this file lives on.
 #
-# There is deliberately no workflow_dispatch trigger: Gerrit-triggered merges
-# are handled by gerrit-maven-merge.yaml. Being schedule-only also means the
-# copy of this file that a branch cut leaves behind on the new stable branch
-# cannot be triggered at all, so it needs no cleanup there. The cut does need
-# the newly created branch adding to the matrix below.
+# Gerrit-triggered merges are handled by gerrit-maven-merge.yaml; this file
+# covers the scheduled rebuild, plus workflow_dispatch for refreshing the
+# branches ahead of the next cron. A branch cut leaves a copy of this file on
+# the new stable branch; that copy never fires on schedule, and dispatching it
+# would only rebuild the branches named here, so it needs no cleanup there.
+# The cut does need a new job block adding below.
+#
+# One job per branch rather than a matrix: GitHub evaluates job-level
+# "concurrency" before expanding the matrix, so matrix.GERRIT_BRANCH is empty
+# there and every leg lands in the same group. With cancel-in-progress false
+# that built one branch and cancelled the rest within seconds, leaving each
+# branch rebuilt roughly one night in N instead of nightly.
+#
+# The notes below apply to every job in this file.
+#
+# Shares the group gerrit-maven-merge.yaml uses, because job-level and
+# workflow-level groups live in one namespace: a branch is then never
+# published from two runs at once, whichever workflow drives it, while
+# different branches still rebuild in parallel. A rebuild that has
+# started is never cancelled: letting it finish publishes a usable
+# SNAPSHOT sooner than restarting would.
+#
+# Pinned ahead of v0.10.3 on purpose: that tag predates PRs 896
+# and 897, so pinning there would abort the publish with
+# "nexus_password is required" and restart the SNAPSHOT
+# buildNumber at 1. Re-pin to v0.10.4 once that draft release is
+# published; it already targets this commit.
+#
+# "secrets: inherit" does not cross organisations, and this workflow
+# lives in the lfit org, so the secrets have to be passed by name.
+#
+# Intentionally omits -DaltDeploymentRepository; maven-build-action
+# already supplies it, and repeating it duplicates the flag.
+#
 # yamllint disable-line rule:truthy
 on:
   schedule:
     - cron: "49 21 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  maven-merge:
-    strategy:
-      # One branch failing must not stop the others from rebuilding.
-      fail-fast: false
-      matrix:
-        GERRIT_BRANCH:
-          - "11.0.x"
-          - "12.0.x"
+  merge-11-0-x:
     concurrency:
-      # Shares the group gerrit-maven-merge.yaml uses, because job-level and
-      # workflow-level groups live in one namespace: a branch is then never
-      # published from two runs at once, whichever workflow drives it, while
-      # different branches still rebuild in parallel. A rebuild that has
-      # started is never cancelled: letting it finish publishes a usable
-      # SNAPSHOT sooner than restarting would.
-      group: gerrit-maven-merge-${{ matrix.GERRIT_BRANCH }}
+      group: gerrit-maven-merge-11.0.x
       cancel-in-progress: false
-    # Pinned ahead of v0.10.3 on purpose: that tag predates PRs 896
-    # and 897, so pinning there would abort the publish with
-    # "nexus_password is required" and restart the SNAPSHOT
-    # buildNumber at 1. Re-pin to v0.10.4 once that draft release is
-    # published; it already targets this commit.
     # yamllint disable-line rule:line-length
     uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@d687ef6c5a015053aa20048d16900ad599508b2a # main @ 2026-09-01
-    # "secrets: inherit" does not cross organisations, and this workflow
-    # lives in the lfit org, so the secrets have to be passed by name.
     secrets:
       NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
     with:
-      GERRIT_BRANCH: ${{ matrix.GERRIT_BRANCH }}
+      GERRIT_BRANCH: "11.0.x"
       JDK_VERSION: "21"
       MVN_VERSION: "3.9.5"
       MVN_PHASES: "clean deploy"
       MVN_PARAMS: "-Dmerge"
       # Mirrors the Jenkins job's mvn-goals "clean deploy -Pdocs".
       MVN_PROFILES: "docs"
-      # Intentionally omits -DaltDeploymentRepository; maven-build-action
-      # already supplies it, and repeating it duplicates the flag.
+      # yamllint disable rule:line-length
+      MVN_OPTS: >-
+        -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        -Dmaven.repo.local=/tmp/r -Dorg.ops4j.pax.url.mvn.localRepository=/tmp/r
+        -Dkaraf.keep.unpack
+      # yamllint enable rule:line-length
+      ENV_VARS: ${{ toJSON(vars) }}
+      PUSH_NEXUS: true
+
+  merge-12-0-x:
+    concurrency:
+      group: gerrit-maven-merge-12.0.x
+      cancel-in-progress: false
+    # yamllint disable-line rule:line-length
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@d687ef6c5a015053aa20048d16900ad599508b2a # main @ 2026-09-01
+    secrets:
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+    with:
+      GERRIT_BRANCH: "12.0.x"
+      JDK_VERSION: "21"
+      MVN_VERSION: "3.9.5"
+      MVN_PHASES: "clean deploy"
+      MVN_PARAMS: "-Dmerge"
+      # Mirrors the Jenkins job's mvn-goals "clean deploy -Pdocs".
+      MVN_PROFILES: "docs"
       # yamllint disable rule:line-length
       MVN_OPTS: >-
         -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
