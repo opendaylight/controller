@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Convert GitHub PR to Gerrit Change
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/github2gerrit-action@df12d7f11e4765687efefd034d10116b1d8d0f4d # v2.4.0
+        uses: lfreleng-actions/github2gerrit-action@6cdadc0d954315c37bbe50cf0edac88eb01df041 # v2.4.2
         with:
           GERRIT_SSH_PRIVKEY_G2G: ${{ secrets.GERRIT_SSH_PRIVKEY_G2G }}
           GERRIT_KNOWN_HOSTS: ${{ vars.GERRIT_KNOWN_HOSTS }}
