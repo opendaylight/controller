@@ -13,6 +13,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "CI(actions)"
     cooldown:
       default-days: 7
     groups:
