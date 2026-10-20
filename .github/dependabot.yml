@@ -21,3 +21,42 @@ updates:
       actions-deps:
         patterns:
           - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "11.0.x"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "CI(actions)"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "12.0.x"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "CI(actions)"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "13.0.x"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "CI(actions)"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
