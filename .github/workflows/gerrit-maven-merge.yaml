@@ -102,7 +102,7 @@ jobs:
   maven-merge:
     needs: prepare
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@fb907909b12bbaf262de6b24fcafd181cabe6b24 # v0.10.4
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@e3bb02dd0d2e5027cde63732fe00f591d6ecec03 # v0.11.0
     # "secrets: inherit" does not cross organisations, and this workflow
     # lives in the lfit org, so the secrets have to be passed by name.
     secrets:
