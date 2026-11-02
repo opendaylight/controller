@@ -77,7 +77,7 @@ permissions:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Clear votes
@@ -133,7 +133,7 @@ jobs:
     # A scheduled rebuild has no change to vote on.
     if: ${{ always() && github.event_name != 'schedule' }}
     needs: [prepare, maven-merge]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Get conclusion
