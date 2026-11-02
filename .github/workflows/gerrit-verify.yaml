@@ -52,7 +52,7 @@ concurrency:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Clear votes
         # yamllint disable-line rule:line-length
@@ -146,7 +146,7 @@ jobs:
     if: ${{ always() }}
     # yamllint enable rule:line-length
     needs: [prepare, maven-verify, pre-commit-linting, tox-verify]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get conclusion
         # yamllint disable-line rule:line-length
