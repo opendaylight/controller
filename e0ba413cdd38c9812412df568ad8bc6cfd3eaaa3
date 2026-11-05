@@ -16,6 +16,24 @@
       "message": "needs an update to Lz4SupportTest",
       "revId": "e0ba413cdd38c9812412df568ad8bc6cfd3eaaa3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73b375d6_da3c5d03",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2026-11-05T09:57:52Z",
+      "side": 1,
+      "message": "changed sizes are probably related to https://github.com/lz4/lz4/pull/1925",
+      "parentUuid": "d5bf4d84_57eafe86",
+      "revId": "e0ba413cdd38c9812412df568ad8bc6cfd3eaaa3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
