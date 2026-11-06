@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "442bc2f1_5266641c",
+        "filename": "raft/raft-spi/src/test/java/org/opendaylight/raft/spi/Lz4SupportTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-11-06T08:48:05Z",
+      "side": 1,
+      "message": "this is the only value which has increased..",
+      "revId": "1c63bd5922641852e59da8343201aa45e41a06fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}

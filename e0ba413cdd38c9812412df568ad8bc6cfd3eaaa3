@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc83d96d_eff599ef",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-11-06T08:48:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c72c85e3_84c31e9c",
+      "revId": "e0ba413cdd38c9812412df568ad8bc6cfd3eaaa3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d5bf4d84_57eafe86",
@@ -67,6 +85,24 @@
       "side": 1,
       "message": "[ERROR] Failures: \n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c3532\u003e but was: \u003c3530\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c30912\u003e but was: \u003c30876\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c304811\u003e but was: \u003c304450\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c3046519\u003e but was: \u003c3042798\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c2564\u003e but was: \u003c2562\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c23566\u003e but was: \u003c23560\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c231290\u003e but was: \u003c231199\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c2308784\u003e but was: \u003c2307861\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c2564\u003e but was: \u003c2562\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c21623\u003e but was: \u003c21619\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c212684\u003e but was: \u003c212665\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c2124599\u003e but was: \u003c2124376\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c6433\u003e but was: \u003c6432\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c59759\u003e but was: \u003c59763\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c594188\u003e but was: \u003c594185\u003e\n  [ERROR]   Lz4SupportTest.testCompressionWorks:55 expected: \u003c5940241\u003e but was: \u003c5940218\u003e",
       "parentUuid": "73b375d6_da3c5d03",
+      "revId": "e0ba413cdd38c9812412df568ad8bc6cfd3eaaa3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0fbd117_d0b9f0fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2026-11-06T08:48:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9add686b_b09730c8",
       "revId": "e0ba413cdd38c9812412df568ad8bc6cfd3eaaa3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
