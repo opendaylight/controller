@@ -493,32 +493,40 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        // Precludes startReconnect() from interfering with the fast path
+        // Precludes startReconnect() from interfering with the fast-path decision below. Note we only need the state
+        // transition itself to be atomic with regard to startReconnect() -- actually sending the request is handled
+        // by the connection's own replay/queue mechanism, so it must not happen while holding this monitor, as
+        // startReconnect() is invoked by ProxyHistory while holding its own lock and then synchronizes on this same
+        // monitor, which would otherwise form a lock-order inversion with sendRequest() below (which needs
+        // ProxyHistory's lock via skipTransactions()).
+        final boolean fastPath;
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final SettableFuture<Boolean> ret = SettableFuture.create();
-                sendRequest(verifyNotNull(commitRequest(false)), t -> {
-                    if (t instanceof TransactionCommitSuccess) {
+            fastPath = STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED);
+        }
+
+        if (fastPath) {
+            final SettableFuture<Boolean> ret = SettableFuture.create();
+            sendRequest(verifyNotNull(commitRequest(false)), t -> {
+                if (t instanceof TransactionCommitSuccess) {
+                    ret.set(Boolean.TRUE);
+                } else if (t instanceof RequestFailure) {
+                    final Throwable cause = ((RequestFailure<?, ?>) t).getCause().unwrap();
+                    if (cause instanceof ClosedTransactionException) {
+                        // This is okay, as it indicates the transaction has been completed. It can happen
+                        // when we lose connectivity with the backend after it has received the request.
                         ret.set(Boolean.TRUE);
-                    } else if (t instanceof RequestFailure) {
-                        final Throwable cause = ((RequestFailure<?, ?>) t).getCause().unwrap();
-                        if (cause instanceof ClosedTransactionException) {
-                            // This is okay, as it indicates the transaction has been completed. It can happen
-                            // when we lose connectivity with the backend after it has received the request.
-                            ret.set(Boolean.TRUE);
-                        } else {
-                            ret.setException(cause);
-                        }
                     } else {
-                        ret.setException(unhandledResponseException(t));
+                        ret.setException(cause);
                     }
+                } else {
+                    ret.setException(unhandledResponseException(t));
+                }
 
-                    // This is a terminal request, hence we do not need to record it
-                    onCommitCompleted("directCommit");
-                });
+                // This is a terminal request, hence we do not need to record it
+                onCommitCompleted("directCommit");
+            });
 
-                return ret;
-            }
+            return ret;
         }
 
         // We have had some interference with successor injection, wait for it to complete and defer to the successor.
@@ -529,23 +537,27 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        // Precludes startReconnect() from interfering with the fast path
+        // Precludes startReconnect() from interfering with the fast-path decision below. See directCommit() for why
+        // sendRequest() must happen after we release this monitor rather than inside the synchronized block.
+        final boolean fastPath;
         synchronized (this) {
-            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final var req = verifyNotNull(commitRequest(true));
+            fastPath = STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED);
+        }
 
-                sendRequest(req, t -> {
-                    switch (t) {
-                        case TransactionCanCommitSuccess success -> ret.voteYes();
-                        case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                        default -> ret.voteNo(unhandledResponseException(t));
-                    }
-                    recordSuccessfulRequest(req);
-                    LOG.debug("Transaction {} canCommit completed", this);
-                });
+        if (fastPath) {
+            final var req = verifyNotNull(commitRequest(true));
 
-                return;
-            }
+            sendRequest(req, t -> {
+                switch (t) {
+                    case TransactionCanCommitSuccess success -> ret.voteYes();
+                    case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                    default -> ret.voteNo(unhandledResponseException(t));
+                }
+                recordSuccessfulRequest(req);
+                LOG.debug("Transaction {} canCommit completed", this);
+            });
+
+            return;
         }
 
         // We have had some interference with successor injection, wait for it to complete and defer to the successor.
