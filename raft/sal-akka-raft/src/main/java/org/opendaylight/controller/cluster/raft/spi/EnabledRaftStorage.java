@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import com.google.common.base.VerifyException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
@@ -25,6 +26,9 @@ import org.slf4j.LoggerFactory;
 public final class EnabledRaftStorage extends RaftStorage {
     private static final Logger LOG = LoggerFactory.getLogger(EnabledRaftStorage.class);
     private static final AtomicLong WRITER_COUNTER = new AtomicLong();
+    // Writer threads normally drain quickly; this bounds preStop() against a writer stuck delivering a completion
+    // back into an actor that is itself blocked waiting for this join (e.g. under a synchronous test dispatcher).
+    private static final Duration WRITER_STOP_TIMEOUT = Duration.ofSeconds(10);
 
     private final boolean mapped;
 
@@ -143,7 +147,14 @@ public final class EnabledRaftStorage extends RaftStorage {
         LOG.debug("{}: terminating thread {}", memberId(), thread);
         var journal = task.processAndTerminate();
         try {
-            thread.join();
+            thread.join(WRITER_STOP_TIMEOUT);
+            if (thread.isAlive()) {
+                LOG.warn("{}: writer {} did not terminate within {}, forcing cancellation", memberId(), thread,
+                    WRITER_STOP_TIMEOUT);
+                thread.interrupt();
+                task.cancelAndTerminate();
+                return;
+            }
             LOG.debug("{}: terminated thread {}", memberId(), thread);
         } catch (InterruptedException e) {
             LOG.warn("{}: interrupted while waiting for writer to complete, forcing cancellation", memberId(), e);
