@@ -23,7 +23,6 @@ import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
@@ -209,12 +208,13 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProxyTransaction.class);
     private static final VarHandle SEALED_VH;
-    private static final AtomicReferenceFieldUpdater<AbstractProxyTransaction, State> STATE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractProxyTransaction.class, State.class, "state");
+    private static final VarHandle STATE_VH;
 
     static {
+        final var lookup = MethodHandles.lookup();
         try {
-            SEALED_VH = MethodHandles.lookup().findVarHandle(AbstractProxyTransaction.class, "sealed", boolean.class);
+            SEALED_VH = lookup.findVarHandle(AbstractProxyTransaction.class, "sealed", boolean.class);
+            STATE_VH = lookup.findVarHandle(AbstractProxyTransaction.class, "state", State.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -385,7 +385,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     private boolean sealState() {
         parent.onTransactionSealed(this);
         // Transition internal state to sealed and detect presence of a successor
-        return STATE_UPDATER.compareAndSet(this, SingletonState.OPEN, SingletonState.SEALED);
+        return STATE_VH.compareAndSet(this, SingletonState.OPEN, SingletonState.SEALED);
     }
 
     /**
@@ -499,7 +499,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // ProxyHistory's lock via skipTransactions()).
         final boolean fastPath;
         synchronized (this) {
-            fastPath = STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
+            fastPath = STATE_VH.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
         }
 
         if (fastPath) {
@@ -539,7 +539,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // sendRequest() must happen after we release this monitor rather than inside the synchronized block.
         final boolean fastPath;
         synchronized (this) {
-            fastPath = STATE_UPDATER.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
+            fastPath = STATE_VH.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
         }
 
         if (fastPath) {
@@ -635,7 +635,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         switch (state) {
             case SuccessorState successor -> successor.setDone();
             case SingletonState singleton -> {
-                if (!STATE_UPDATER.compareAndSet(this, singleton, SingletonState.DONE)) {
+                if (!STATE_VH.compareAndSet(this, singleton, SingletonState.DONE)) {
                     LOG.warn("{}: moved from state {} while we were purging it", this, singleton);
                 }
             }
@@ -658,7 +658,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // At this point canCommit/directCommit are blocked, we assert a new successor state, retrieving the previous
         // state. This method is called with the queue still unlocked.
         final var nextState = new SuccessorState();
-        final var prevState = STATE_UPDATER.getAndSet(this, nextState);
+        final var prevState = (State) STATE_VH.getAndSet(this, nextState);
 
         LOG.debug("Start reconnect of proxy {} previous state {}", this, prevState);
         if (prevState instanceof SuccessorState successor) {
