@@ -16,6 +16,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -317,6 +318,10 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         parent.enqueueRequest(request, callback, enqueuedTicks);
     }
 
+    // This method must not be invoked while holding this object's monitor because doing so would cause lock-order
+    // inversion:
+    //  - this thread is taking them in order "this", "parent.lock" via ProxyHistory.skipTransactions()
+    //  - another thread, running ProxyHistory.startReconnect(), takes them in order "parent.lock", "this"
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         LOG.debug("Transaction proxy {} sending request {} callback {}", this, request, callback);
         parent.sendRequest(request, callback);
@@ -343,7 +348,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      */
     private void sealSuccessor() {
         // Slow path: wait for the successor to complete
-        final var successor = awaitSuccessor();
+        final var successor = getSuccessorState().await();
 
         // At this point the successor has completed transition and is possibly visible by the user thread, which is
         // still stuck here. The successor has not seen final part of our state, nor the fact it is sealed.
@@ -410,11 +415,14 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     }
 
     private SuccessorState getSuccessorState() {
-        final var local = state;
-        if (local instanceof SuccessorState successor) {
+        return verifySuccessor(state);
+    }
+
+    private static @NonNull SuccessorState verifySuccessor(final State state) {
+        if (state instanceof SuccessorState successor) {
             return successor;
         }
-        throw new VerifyException("State " + local + " has unexpected class");
+        throw new VerifyException("Unexpected state " + state);
     }
 
     private void checkReadWrite() {
@@ -491,79 +499,56 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        // Precludes startReconnect() from interfering with the fast-path decision below. Note we only need the state
-        // transition itself to be atomic with regard to startReconnect() -- actually sending the request is handled
-        // by the connection's own replay/queue mechanism, so it must not happen while holding this monitor, as
-        // startReconnect() is invoked by ProxyHistory while holding its own lock and then synchronizes on this same
-        // monitor, which would otherwise form a lock-order inversion with sendRequest() below (which needs
-        // ProxyHistory's lock via skipTransactions()).
-        final boolean fastPath;
-        synchronized (this) {
-            fastPath = STATE_VH.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
+        final var successor = setFlushed();
+        if (successor != null) {
+            LOG.debug("Awaiting successor for directCommit of proxy {}", this);
+            return successor.await().directCommit();
         }
 
-        if (fastPath) {
-            final var ret = SettableFuture.<Boolean>create();
-            sendRequest(verifyNotNull(commitRequest(false)), resp -> {
-                switch (resp) {
-                    case TransactionCommitSuccess unused -> ret.set(Boolean.TRUE);
-                    case RequestFailure<?, ?> failure -> {
-                        final var cause = failure.getCause().unwrap();
-                        if (cause instanceof ClosedTransactionException) {
-                            // This is okay, as it indicates the transaction has been completed. It can happen when
-                            // we lose connectivity with the backend after it has received the request.
-                            ret.set(Boolean.TRUE);
-                        } else {
-                            ret.setException(cause);
-                        }
+        final var ret = SettableFuture.<Boolean>create();
+        sendRequest(verifyNotNull(commitRequest(false)), resp -> {
+            switch (resp) {
+                case TransactionCommitSuccess unused -> ret.set(Boolean.TRUE);
+                case RequestFailure<?, ?> failure -> {
+                    final var cause = failure.getCause().unwrap();
+                    if (cause instanceof ClosedTransactionException) {
+                        // This is okay, as it indicates the transaction has been completed. It can happen when
+                        // we lose connectivity with the backend after it has received the request.
+                        ret.set(Boolean.TRUE);
+                    } else {
+                        ret.setException(cause);
                     }
-                    default -> ret.setException(unhandledResponseException(resp));
                 }
+                default -> ret.setException(unhandledResponseException(resp));
+            }
 
-                // This is a terminal request, hence we do not need to record it
-                onCommitCompleted("directCommit");
-            });
-
-            return ret;
-        }
-
-        // We have had some interference with successor injection, wait for it to complete and defer to the successor.
-        return awaitSuccessor().directCommit();
+            // This is a terminal request, hence we do not need to record it
+            onCommitCompleted("directCommit");
+        });
+        return ret;
     }
 
     final void canCommit(final VotingFuture<?> ret) {
         checkReadWrite();
         checkSealed();
 
-        // Precludes startReconnect() from interfering with the fast-path decision below. See directCommit() for why
-        // sendRequest() must happen after we release this monitor rather than inside the synchronized block.
-        final boolean fastPath;
-        synchronized (this) {
-            fastPath = STATE_VH.compareAndSet(this, SingletonState.SEALED, SingletonState.FLUSHED);
-        }
-
-        if (fastPath) {
-            final var req = verifyNotNull(commitRequest(true));
-
-            sendRequest(req, resp -> {
-                switch (resp) {
-                    case TransactionCanCommitSuccess unused -> ret.voteYes();
-                    case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
-                    default -> ret.voteNo(unhandledResponseException(resp));
-                }
-                recordSuccessfulRequest(req);
-                LOG.debug("Transaction {} canCommit completed", this);
-            });
-
+        final var successor = setFlushed();
+        if (successor != null) {
+            LOG.debug("Awaiting successor for canCommit of proxy {}", this);
+            successor.await().canCommit(ret);
             return;
         }
 
-        // We have had some interference with successor injection, wait for it to complete and defer to the successor.
-        awaitSuccessor().canCommit(ret);
-    }
-
-    private AbstractProxyTransaction awaitSuccessor() {
-        return getSuccessorState().await();
+        final var req = verifyNotNull(commitRequest(true));
+        sendRequest(req, resp -> {
+            switch (resp) {
+                case TransactionCanCommitSuccess unused -> ret.voteYes();
+                case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                default -> ret.voteNo(unhandledResponseException(resp));
+            }
+            recordSuccessfulRequest(req);
+            LOG.debug("Transaction {} canCommit completed", this);
+        });
     }
 
     final void preCommit(final VotingFuture<?> ret) {
@@ -653,10 +638,25 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         }, enqueuedTicks);
     }
 
+    /**
+     * Atomic transition from SEALED to FLUSHED, while preventing {@link #startReconnect()} from happening. This method
+     * is the linearization point of both {@link #canCommit(VotingFuture)} and {@link #directCommit()}.
+     *
+     * @return {@code null} on success or the {@link SuccessorState}
+     */
+    @CheckReturnValue
+    private @Nullable SuccessorState setFlushed() {
+        final State witness;
+        synchronized (this) {
+            witness = (State) STATE_VH.compareAndExchange(this, SingletonState.SEALED, SingletonState.FLUSHED);
+        }
+        return SingletonState.SEALED == witness ? null : verifySuccessor(witness);
+    }
+
     // Called with the connection unlocked
     final synchronized void startReconnect() {
-        // At this point canCommit/directCommit are blocked, we assert a new successor state, retrieving the previous
-        // state. This method is called with the queue still unlocked.
+        // At this point canCommit/directCommit are blocked from updating state via setFlushed(), we assert a new
+        // successor state, retrieving the previous state. This method is called with the queue still unlocked.
         final var nextState = new SuccessorState();
         final var prevState = (State) STATE_VH.getAndSet(this, nextState);
 
