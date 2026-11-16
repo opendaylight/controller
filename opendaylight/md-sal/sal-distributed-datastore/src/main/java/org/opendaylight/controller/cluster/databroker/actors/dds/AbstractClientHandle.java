@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
@@ -134,7 +133,9 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
 
     private State<T> getState() {
         final var local = state;
-        checkState(local != null, "Transaction %s is closed", transactionId);
+        if (local == null) {
+            throw new IllegalStateException("Transaction " + transactionId + " is closed");
+        }
         return local;
     }
 
