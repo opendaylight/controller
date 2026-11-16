@@ -12,9 +12,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,9 +40,15 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHandle.class);
-    @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<AbstractClientHandle, State> STATE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractClientHandle.class, State.class, "state");
+    private static final VarHandle STATE_VH;
+
+    static {
+        try {
+            STATE_VH = MethodHandles.lookup().findVarHandle(AbstractClientHandle.class, "state", State.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     private final @NonNull TransactionIdentifier transactionId;
     private final @NonNull AbstractClientHistory parent;
@@ -101,9 +108,9 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      */
     final @Nullable Map<Long, T> ensureClosed() {
         // volatile read and a conditional CAS. This ends up being better in the typical case when we are invoked more
-        // than once (see ClientBackedTransaction) than performing a STATE_UPDATER.getAndSet().
+        // than once (see ClientBackedTransaction) than performing a STATE_VH.getAndSet().
         final var local = state;
-        return local != null && STATE_UPDATER.compareAndSet(this, local, null) ? local : null;
+        return local != null && STATE_VH.compareAndSet(this, local, null) ? local : null;
     }
 
     final T ensureProxy(final YangInstanceIdentifier path) {
