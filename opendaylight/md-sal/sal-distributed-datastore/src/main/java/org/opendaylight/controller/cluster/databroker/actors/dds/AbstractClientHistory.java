@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
@@ -50,12 +49,13 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHistory.class);
     private static final VarHandle NEXT_TX_VH;
-    private static final AtomicReferenceFieldUpdater<AbstractClientHistory, State> STATE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
+    private static final VarHandle STATE_VH;
 
     static {
+        final var lookup = MethodHandles.lookup();
         try {
-            NEXT_TX_VH = MethodHandles.lookup().findVarHandle(AbstractClientHistory.class, "nextTx", long.class);
+            NEXT_TX_VH = lookup.findVarHandle(AbstractClientHistory.class, "nextTx", long.class);
+            STATE_VH = lookup.findVarHandle(AbstractClientHistory.class, "state", State.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -91,9 +91,10 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     }
 
     final void updateState(final State expected, final State next) {
-        if (!STATE_UPDATER.compareAndSet(this, expected, next)) {
+        final var witness = (State) STATE_VH.compareAndExchange(this, expected, next);
+        if (witness != expected) {
             throw new IllegalStateException(
-                "Race condition detected, state changed from %s to %s".formatted(expected, state));
+                "Race condition detected, state changed from %s to %s".formatted(expected, witness));
         }
         LOG.debug("Client history {} changed state from {} to {}", this, expected, next);
     }
@@ -140,7 +141,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     @Override
     final void localAbort(final Throwable cause) {
-        final var oldState = STATE_UPDATER.getAndSet(this, State.CLOSED);
+        final var oldState = (State) STATE_VH.getAndSet(this, State.CLOSED);
         if (oldState != State.CLOSED) {
             LOG.debug("Force-closing history {}", getIdentifier(), cause);
 
