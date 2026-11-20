@@ -60,7 +60,7 @@ jobs:
     permissions:
       contents: read
     # yamllint disable-line rule:line-length
-    uses: lfreleng-actions/security-workflows/.github/workflows/sonarqube-cloud.yaml@b9d7b83b5696ab8388bcc11c3fe931563861e258 # v0.10.0
+    uses: lfreleng-actions/security-workflows/.github/workflows/sonarqube-cloud.yaml@6edd9018efda10b7a429d0bb4658b5aa4bb2cd3f # v0.10.1
     with:
       # Gerrit dispatches carry a refspec and check out the change;
       # the weekly schedule leaves it empty and takes the branch.
